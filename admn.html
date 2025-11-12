@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="fr" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VARICOM - Administration</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #1a3a6c;
+            --secondary-color: #e63946;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .admin-container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            margin: 0 auto;
+            max-width: 1200px;
+            overflow: hidden;
+        }
+        
+        .admin-header {
+            background: linear-gradient(135deg, var(--primary-color), #2a4d7a);
+            color: white;
+            padding: 25px;
+        }
+        
+        .upload-section {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            border-radius: 10px;
+            padding: 25px;
+            margin: 20px;
+        }
+        
+        .upload-area {
+            border: 3px dashed rgba(255,255,255,0.5);
+            border-radius: 10px;
+            padding: 40px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            background: rgba(255,255,255,0.1);
+        }
+        
+        .upload-area:hover {
+            background: rgba(255,255,255,0.2);
+            border-color: white;
+        }
+        
+        .sync-status {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            padding: 12px 20px;
+            border-radius: 8px;
+            display: none;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        
+        .sync-success { background: linear-gradient(135deg, #28a745, #20c997); color: white; }
+        .sync-warning { background: linear-gradient(135deg, #ffc107, #fd7e14); color: black; }
+        .sync-error { background: linear-gradient(135deg, #dc3545, #c82333); color: white; }
+    </style>
+</head>
+<body>
+    <div id="syncStatus" class="sync-status"></div>
+
+    <div class="admin-container">
+        <!-- En-tête Administrateur -->
+        <div class="admin-header text-center">
+            <h1><i class="fas fa-user-shield me-3"></i>PANEL ADMINISTRATEUR VARICOM</h1>
+            <p class="lead mb-0">Solution 100% Gratuite - GitHub Gist</p>
+        </div>
+
+        <div class="row">
+            <!-- Section Upload Excel -->
+            <div class="col-md-12">
+                <div class="upload-section">
+                    <h4><i class="fas fa-file-excel me-2"></i>Importation Produits Excel</h4>
+                    
+                    <div class="upload-area" id="excelUploadArea">
+                        <i class="fas fa-file-excel" style="font-size: 64px; margin-bottom: 20px;"></i>
+                        <h4>Glissez votre fichier Excel ici</h4>
+                        <p class="mb-3">Formats supportés: .xlsx, .xls</p>
+                        <button class="btn btn-light btn-lg" onclick="document.getElementById('excelFile').click()">
+                            <i class="fas fa-upload me-2"></i>Choisir un Fichier
+                        </button>
+                        <input type="file" id="excelFile" accept=".xlsx, .xls" style="display: none;" 
+                               onchange="handleExcelUpload(this.files[0])">
+                    </div>
+
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <h6><i class="fas fa-info-circle me-2"></i>Format Requis:</h6>
+                            <div class="bg-light rounded p-3 text-dark small">
+                                <strong>Colonnes (dans n'importe quel ordre):</strong><br>
+                                • Réf. Art / Ref / Référence<br>
+                                • Designation / Désignation / Produit<br>
+                                • Famille / Catégorie<br>
+                                • Prix / Price<br>
+                                <strong>Important:</strong> La première ligne doit contenir les en-têtes
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Aperçu et Actions -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card m-4">
+                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i class="fas fa-table me-2"></i>Aperçu des Produits
+                            <span class="badge bg-light text-dark ms-2" id="previewCount">0</span>
+                        </h5>
+                        <div>
+                            <button class="btn btn-light btn-sm me-2" onclick="uploadToGitHubGist()">
+                                <i class="fab fa-github me-1"></i>Publier sur GitHub
+                            </button>
+                            <button class="btn btn-success btn-sm" onclick="generateClientLink()">
+                                <i class="fas fa-link me-1"></i>Lien Client
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div id="previewContent" class="text-center text-muted py-5">
+                            <i class="fas fa-table fa-3x mb-3"></i>
+                            <p>Aucune donnée importée</p>
+                        </div>
+                        <div class="text-end mt-3" id="uploadButton" style="display: none;">
+                            <button class="btn btn-success btn-lg me-2" onclick="uploadToGitHubGist()">
+                                <i class="fab fa-github me-2"></i>Publier en Ligne
+                            </button>
+                            <button class="btn btn-outline-secondary" onclick="clearPreview()">
+                                <i class="fas fa-times me-2"></i>Effacer
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Instructions -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card m-4">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Instructions</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6>Étape 1: Créer un Token GitHub</h6>
+                                <ol class="small">
+                                    <li>Allez sur <a href="https://github.com/settings/tokens" target="_blank">GitHub Settings → Tokens</a></li>
+                                    <li>Cliquez sur "Generate new token"</li>
+                                    <li>Donnez un nom (ex: "VARICOM")</li>
+                                    <li>Cochez "gist"</li>
+                                    <li>Copiez le token généré</li>
+                                </ol>
+                            </div>
+                            <div class="col-md-6">
+                                <h6>Étape 2: Configurer</h6>
+                                <ol class="small">
+                                    <li>Importez votre fichier Excel</li>
+                                    <li>Collez votre token GitHub ci-dessous</li>
+                                    <li>Cliquez sur "Publier sur GitHub"</li>
+                                    <li>Partagez le lien client généré</li>
+                                </ol>
+                                <div class="mt-3">
+                                    <label class="form-label">Token GitHub:</label>
+                                    <input type="password" class="form-control" id="githubToken" 
+                                           placeholder="ghp_xxxxxxxxxxxxxxxxxxxx">
+                                    <small class="form-text text-muted">
+                                        Ce token est stocké localement et n'est pas envoyé à nos serveurs
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentProducts = [];
+        let gistUrl = '';
+
+        document.addEventListener('DOMContentLoaded', function() {
+            loadToken();
+            setupEventListeners();
+        });
+
+        function loadToken() {
+            const savedToken = localStorage.getItem('varicom_github_token');
+            if (savedToken) {
+                document.getElementById('githubToken').value = savedToken;
+            }
+        }
+
+        function setupEventListeners() {
+            const uploadArea = document.getElementById('excelUploadArea');
+            
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.style.background = 'rgba(255,255,255,0.3)';
+                uploadArea.style.borderColor = 'white';
+            });
+
+            uploadArea.addEventListener('dragleave', () => {
+                uploadArea.style.background = 'rgba(255,255,255,0.1)';
+                uploadArea.style.borderColor = 'rgba(255,255,255,0.5)';
+            });
+
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.style.background = 'rgba(255,255,255,0.1)';
+                uploadArea.style.borderColor = 'rgba(255,255,255,0.5)';
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    handleExcelUpload(files[0]);
+                }
+            });
+
+            // Sauvegarder le token automatiquement
+            document.getElementById('githubToken').addEventListener('input', function() {
+                localStorage.setItem('varicom_github_token', this.value);
+            });
+        }
+
+        function handleExcelUpload(file) {
+            if (!file) return;
+
+            const fileName = file.name.toLowerCase();
+            if (!fileName.endsWith('.xlsx') && !fileName.endsWith('.xls')) {
+                showSyncStatus('Veuillez sélectionner un fichier Excel (.xlsx ou .xls)', 'error');
+                return;
+            }
+
+            showSyncStatus('Lecture du fichier Excel en cours...', 'warning');
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    
+                    const firstSheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[firstSheetName];
+                    const jsonData = XLSX.utils.sheet_to_json(worksheet);
+
+                    processExcelData(jsonData);
+                    
+                } catch (error) {
+                    console.error('Erreur:', error);
+                    showSyncStatus('Erreur lors de la lecture du fichier Excel', 'error');
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function processExcelData(excelData) {
+            currentProducts = [];
+            let skippedRows = 0;
+
+            excelData.forEach((row, index) => {
+                const keys = Object.keys(row);
+                let ref = '', designation = '', famille = '', prix = 0;
+
+                keys.forEach(key => {
+                    const keyLower = key.toLowerCase();
+                    const value = row[key];
+
+                    if (keyLower.includes('réf') || keyLower.includes('ref') || keyLower.includes('reference')) {
+                        ref = value || '';
+                    } else if (keyLower.includes('designation') || keyLower.includes('désignation') || keyLower.includes('produit') || keyLower.includes('product')) {
+                        designation = value || '';
+                    } else if (keyLower.includes('famille') || keyLower.includes('catégorie') || keyLower.includes('category')) {
+                        famille = value || 'Général';
+                    } else if (keyLower.includes('prix') || keyLower.includes('price')) {
+                        let priceValue = value;
+                        if (typeof priceValue === 'string') {
+                            priceValue = priceValue.replace(/[^\d,.-]/g, '').replace(',', '.');
+                        }
+                        prix = parseFloat(priceValue) || 0;
+                    }
+                });
+
+                if (ref && designation && prix > 0) {
+                    currentProducts.push({
+                        id: currentProducts.length + 1,
+                        ref: ref.toString().trim(),
+                        designation: designation.toString().trim(),
+                        famille: famille.toString().trim(),
+                        prix: prix
+                    });
+                } else {
+                    skippedRows++;
+                }
+            });
+
+            if (currentProducts.length === 0) {
+                showSyncStatus('Aucune donnée valide trouvée dans le fichier', 'error');
+                return;
+            }
+
+            showSyncStatus(`${currentProducts.length} produits importés avec succès`, 'success');
+            showPreview();
+        }
+
+        function showPreview() {
+            const previewContent = document.getElementById('previewContent');
+            const uploadButton = document.getElementById('uploadButton');
+            const previewCount = document.getElementById('previewCount');
+
+            previewCount.textContent = currentProducts.length;
+
+            let html = `
+                <div class="alert alert-success">
+                    <i class="fas fa-check-circle me-2"></i>
+                    ${currentProducts.length} produits importés avec succès
+                </div>
+                <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+                    <table class="table table-striped table-hover">
+                        <thead class="table-dark sticky-top">
+                            <tr>
+                                <th>Référence</th>
+                                <th>Désignation</th>
+                                <th>Catégorie</th>
+                                <th>Prix (DA)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+
+            currentProducts.slice(0, 50).forEach(product => {
+                html += `
+                    <tr>
+                        <td><strong>${product.ref}</strong></td>
+                        <td>${product.designation}</td>
+                        <td><span class="badge bg-info">${product.famille}</span></td>
+                        <td><strong>${formatPrice(product.prix)}</strong></td>
+                    </tr>
+                `;
+            });
+
+            if (currentProducts.length > 50) {
+                html += `
+                    <tr>
+                        <td colspan="4" class="text-center text-muted fst-italic">
+                            ... et ${currentProducts.length - 50} autres produits
+                        </td>
+                    </tr>
+                `;
+            }
+
+            html += `
+                        </tbody>
+                    </table>
+                </div>
+            `;
+
+            previewContent.innerHTML = html;
+            uploadButton.style.display = 'block';
+        }
+
+        async function uploadToGitHubGist() {
+            if (currentProducts.length === 0) {
+                showSyncStatus('Aucune donnée à publier', 'error');
+                return;
+            }
+
+            const token = document.getElementById('githubToken').value.trim();
+            if (!token) {
+                showSyncStatus('Veuillez entrer votre token GitHub', 'error');
+                return;
+            }
+
+            showSyncStatus('Publication sur GitHub Gist en cours...', 'warning');
+
+            try {
+                // Préparer les données
+                const productsData = {
+                    products: currentProducts,
+                    lastUpdate: new Date().toISOString(),
+                    totalProducts: currentProducts.length
+                };
+
+                // Créer ou mettre à jour le Gist
+                const gistData = {
+                    description: "Catalogue Produits VARICOM",
+                    public: true,
+                    files: {
+                        "produits.json": {
+                            content: JSON.stringify(productsData, null, 2)
+                        }
+                    }
+                };
+
+                let response;
+                const existingGistId = localStorage.getItem('varicom_gist_id');
+                
+                if (existingGistId) {
+                    // Mettre à jour le Gist existant
+                    response = await fetch(`https://api.github.com/gists/${existingGistId}`, {
+                        method: 'PATCH',
+                        headers: {
+                            'Authorization': `token ${token}`,
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(gistData)
+                    });
+                } else {
+                    // Créer un nouveau Gist
+                    response = await fetch('https://api.github.com/gists', {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `token ${token}`,
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(gistData)
+                    });
+                }
+
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.message || 'Erreur GitHub API');
+                }
+
+                const result = await response.json();
+                
+                // Sauvegarder l'ID du Gist
+                localStorage.setItem('varicom_gist_id', result.id);
+                gistUrl = result.html_url;
+
+                showSyncStatus('✅ Données publiées sur GitHub avec succès!', 'success');
+                
+                // Générer le lien client automatiquement
+                setTimeout(() => {
+                    generateClientLink();
+                }, 1000);
+
+            } catch (error) {
+                console.error('Erreur:', error);
+                showSyncStatus('❌ Erreur publication: ' + error.message, 'error');
+            }
+        }
+
+        function generateClientLink() {
+            if (!gistUrl) {
+                // Si pas de Gist, créer un lien avec les données encodées
+                const dataStr = JSON.stringify(currentProducts);
+                const compressed = btoa(unescape(encodeURIComponent(dataStr)));
+                const clientUrl = `${window.location.origin}${window.location.pathname.replace('admin.html', 'index.html')}?data=${compressed}`;
+                
+                navigator.clipboard.writeText(clientUrl).then(() => {
+                    showSyncStatus('Lien client copié! Partagez-le.', 'success');
+                    alert(`Lien client:\n\n${clientUrl}`);
+                });
+                return;
+            }
+
+            // Utiliser le Gist
+            const gistId = gistUrl.split('/').pop();
+            const clientUrl = `${window.location.origin}${window.location.pathname.replace('admin.html', 'index.html')}?gist=${gistId}`;
+            
+            navigator.clipboard.writeText(clientUrl).then(() => {
+                showSyncStatus('Lien client copié! Partagez-le.', 'success');
+                
+                setTimeout(() => {
+                    alert(`🎉 Catalogue en ligne!\n\nLien client:\n${clientUrl}\n\nCe lien a été copié dans votre presse-papiers.`);
+                }, 500);
+            }).catch(() => {
+                prompt('Copiez ce lien et partagez-le avec vos clients:', clientUrl);
+            });
+        }
+
+        function clearPreview() {
+            currentProducts = [];
+            document.getElementById('previewContent').innerHTML = `
+                <i class="fas fa-table fa-3x mb-3"></i>
+                <p>Aucune donnée importée</p>
+            `;
+            document.getElementById('uploadButton').style.display = 'none';
+            document.getElementById('previewCount').textContent = '0';
+        }
+
+        function formatPrice(price) {
+            return new Intl.NumberFormat('fr-FR', {minimumFractionDigits: 2}).format(price) + ' DA';
+        }
+
+        function showSyncStatus(message, type) {
+            const syncStatus = document.getElementById('syncStatus');
+            syncStatus.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check' : 'exclamation'}-circle me-2"></i>
+                ${message}
+            `;
+            syncStatus.className = `sync-status sync-${type}`;
+            syncStatus.style.display = 'block';
+            setTimeout(() => syncStatus.style.display = 'none', 5000);
+        }
+    </script>
+</body>
+</html>
