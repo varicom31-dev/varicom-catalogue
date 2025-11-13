@@ -301,7 +301,17 @@
                 } else if (dataParam) {
                     // Données encodées dans l'URL
                     const jsonData = decodeURIComponent(escape(atob(dataParam)));
-                    products = JSON.parse(jsonData);
+                    const parsedData = JSON.parse(jsonData);
+                    
+                    // التعامل مع كلتا الهيكليتين
+                    if (parsedData.products && Array.isArray(parsedData.products)) {
+                        products = parsedData.products;
+                    } else if (Array.isArray(parsedData)) {
+                        products = parsedData;
+                    } else {
+                        throw new Error('Format de données non reconnu');
+                    }
+                    
                     processProducts();
                 } else {
                     // Aucune source de données
@@ -312,7 +322,7 @@
                 showSyncStatus('Catalogue chargé avec succès', 'success');
             } catch (error) {
                 console.error('Erreur:', error);
-                showSyncStatus('Erreur lors du chargement des données', 'error');
+                showSyncStatus('Erreur lors du chargement des données: ' + error.message, 'error');
                 showNoDataMessage();
             }
         }
@@ -332,25 +342,51 @@
                     throw new Error('Fichier produits non trouvé dans le Gist');
                 }
                 
+                // تحليل البيانات بنفس الهيكل الذي يرسله Admin
                 const productsContent = JSON.parse(productsFile.content);
-                products = productsContent.products || [];
+                
+                // التأكد من أن البيانات في الهيكل الصحيح
+                if (productsContent.products && Array.isArray(productsContent.products)) {
+                    products = productsContent.products;
+                } else if (Array.isArray(productsContent)) {
+                    // إذا كانت البيانات مصفوفة مباشرة (للتوافق مع الإصدارات القديمة)
+                    products = productsContent;
+                } else {
+                    throw new Error('Format de données non reconnu');
+                }
                 
                 processProducts();
                 updateLastSyncTime(productsContent.lastUpdate);
                 
             } catch (error) {
+                console.error('Erreur détaillée:', error);
                 throw new Error('Impossible de charger depuis GitHub: ' + error.message);
             }
         }
 
+        function validateProductData(product) {
+            return product && 
+                   product.id && 
+                   product.ref && 
+                   product.designation && 
+                   product.prix > 0;
+        }
+
         function processProducts() {
             categories = [];
+            let validProducts = [];
             
+            // تصفية المنتجات الصالحة فقط
             products.forEach(product => {
-                if (product.famille && !categories.includes(product.famille)) {
-                    categories.push(product.famille);
+                if (validateProductData(product)) {
+                    validProducts.push(product);
+                    if (product.famille && !categories.includes(product.famille)) {
+                        categories.push(product.famille);
+                    }
                 }
             });
+            
+            products = validProducts;
             
             if (products.length === 0) {
                 showNoDataMessage();
@@ -392,7 +428,7 @@
         function updateLastSyncTime(timestamp) {
             const time = timestamp ? new Date(timestamp) : new Date();
             document.getElementById('lastUpdate').textContent = time.toLocaleTimeString();
-            document.getElementById('lastSyncTime').textContent = time.toLocaleTimeString();
+            document.getElementById('lastSyncTime').textContent = 'MAJ: ' + time.toLocaleTimeString();
         }
 
         function updateStats() {
