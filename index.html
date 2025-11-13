@@ -110,6 +110,15 @@
             border-color: var(--primary-color);
             box-shadow: 0 0 0 0.2rem rgba(26, 58, 108, 0.25);
         }
+
+        .auto-refresh-badge {
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .auto-refresh-badge:hover {
+            transform: scale(1.05);
+        }
     </style>
 </head>
 <body>
@@ -131,9 +140,9 @@
                 <div class="col-md-6 text-md-end">
                     <div class="company-info">
                         <div class="mb-2"><i class="fas fa-envelope me-2"></i>contact@varicom-dz.com</div>
-                        <div class="badge bg-light text-dark fs-6 p-2">
+                        <div class="badge bg-light text-dark fs-6 p-2 auto-refresh-badge" onclick="refreshData()" title="Cliquer pour actualiser">
                             <i class="fas fa-sync-alt me-1"></i>
-                            <span id="lastSyncTime">Actualisé</span>
+                            <span id="lastSyncTime">Actualiser</span>
                         </div>
                     </div>
                 </div>
@@ -204,17 +213,21 @@
                         <div class="card">
                             <div class="card-body py-3">
                                 <div class="row text-center">
-                                    <div class="col-md-4">
+                                    <div class="col-md-3">
                                         <div class="h4 text-primary mb-1" id="totalProducts">0</div>
                                         <small class="text-muted">Produits</small>
                                     </div>
-                                    <div class="col-md-4">
+                                    <div class="col-md-3">
                                         <div class="h4 text-success mb-1" id="totalCategories">0</div>
                                         <small class="text-muted">Catégories</small>
                                     </div>
-                                    <div class="col-md-4">
+                                    <div class="col-md-3">
                                         <div class="h4 text-warning mb-1" id="cartTotal">0</div>
                                         <small class="text-muted">Panier Total</small>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <div class="h4 text-info mb-1" id="lastUpdate">--:--</div>
+                                        <small class="text-muted">Dernière MAJ</small>
                                     </div>
                                 </div>
                             </div>
@@ -244,8 +257,475 @@
     </div>
 
     <script>
-        // كود JavaScript سيأتي في الجزء التالي
-        console.log("VARICOM Client Loaded");
+        let products = [];
+        let filteredProducts = [];
+        let categories = [];
+        let cart = JSON.parse(localStorage.getItem('varicom_cart')) || [];
+        let autoRefreshInterval;
+
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeApp();
+        });
+
+        function initializeApp() {
+            setupEventListeners();
+            loadProducts();
+            updateCartDisplay();
+            startAutoRefresh();
+        }
+
+        function setupEventListeners() {
+            document.getElementById('searchInput').addEventListener('input', filterProducts);
+            document.getElementById('categoryFilter').addEventListener('change', filterProducts);
+            
+            document.getElementById('categorySearch').addEventListener('input', function(e) {
+                const searchTerm = e.target.value.toLowerCase();
+                document.querySelectorAll('.category-item').forEach(item => {
+                    const text = item.textContent.toLowerCase();
+                    item.style.display = text.includes(searchTerm) ? 'block' : 'none';
+                });
+            });
+        }
+
+        async function loadProducts() {
+            showSyncStatus('Chargement des données...', 'warning');
+
+            const urlParams = new URLSearchParams(window.location.search);
+            const gistId = urlParams.get('gist');
+            const dataParam = urlParams.get('data');
+
+            try {
+                if (gistId) {
+                    // Charger depuis GitHub Gist
+                    await loadFromGitHubGist(gistId);
+                } else if (dataParam) {
+                    // Données encodées dans l'URL
+                    const jsonData = decodeURIComponent(escape(atob(dataParam)));
+                    const parsedData = JSON.parse(jsonData);
+                    
+                    // التعامل مع كلتا الهيكليتين
+                    if (parsedData.products && Array.isArray(parsedData.products)) {
+                        products = parsedData.products;
+                    } else if (Array.isArray(parsedData)) {
+                        products = parsedData;
+                    } else {
+                        throw new Error('Format de données non reconnu');
+                    }
+                    
+                    processProducts();
+                } else {
+                    // Aucune source de données
+                    showNoDataMessage();
+                    return;
+                }
+                
+                showSyncStatus('Catalogue chargé avec succès', 'success');
+            } catch (error) {
+                console.error('Erreur:', error);
+                showSyncStatus('Erreur lors du chargement des données: ' + error.message, 'error');
+                showNoDataMessage();
+            }
+        }
+
+        async function loadFromGitHubGist(gistId) {
+            try {
+                const response = await fetch(`https://api.github.com/gists/${gistId}`);
+                
+                if (!response.ok) {
+                    throw new Error(`Erreur HTTP: ${response.status}`);
+                }
+                
+                const gistData = await response.json();
+                const productsFile = gistData.files['produits.json'];
+                
+                if (!productsFile) {
+                    throw new Error('Fichier produits non trouvé dans le Gist');
+                }
+                
+                // تحليل البيانات بنفس الهيكل الذي يرسله Admin
+                const productsContent = JSON.parse(productsFile.content);
+                
+                // التأكد من أن البيانات في الهيكل الصحيح
+                if (productsContent.products && Array.isArray(productsContent.products)) {
+                    products = productsContent.products;
+                } else if (Array.isArray(productsContent)) {
+                    // إذا كانت البيانات مصفوفة مباشرة (للتوافق مع الإصدارات القديمة)
+                    products = productsContent;
+                } else {
+                    throw new Error('Format de données non reconnu');
+                }
+                
+                processProducts();
+                updateLastSyncTime(productsContent.lastUpdate);
+                
+            } catch (error) {
+                console.error('Erreur détaillée:', error);
+                throw new Error('Impossible de charger depuis GitHub: ' + error.message);
+            }
+        }
+
+        function validateProductData(product) {
+            return product && 
+                   product.id && 
+                   product.ref && 
+                   product.designation && 
+                   product.prix > 0;
+        }
+
+        function processProducts() {
+            categories = [];
+            let validProducts = [];
+            
+            // تصفية المنتجات الصالحة فقط
+            products.forEach(product => {
+                if (validateProductData(product)) {
+                    validProducts.push(product);
+                    if (product.famille && !categories.includes(product.famille)) {
+                        categories.push(product.famille);
+                    }
+                }
+            });
+            
+            products = validProducts;
+            
+            if (products.length === 0) {
+                showNoDataMessage();
+                return;
+            }
+            
+            updateCategoriesDisplay();
+            updateCategoryFilter();
+            filterProducts();
+            updateStats();
+        }
+
+        function showNoDataMessage() {
+            document.getElementById('productsContainer').innerHTML = `
+                <div class="text-center py-5 text-muted">
+                    <i class="fas fa-exclamation-triangle fa-2x mb-3"></i>
+                    <h5>Aucun produit disponible</h5>
+                    <p class="mb-3">Le catalogue n'a pas encore été configuré</p>
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Contactez l'administrateur pour obtenir le lien du catalogue.
+                    </div>
+                </div>
+            `;
+        }
+
+        function refreshData() {
+            loadProducts();
+            showSyncStatus('Données actualisées', 'success');
+        }
+
+        function startAutoRefresh() {
+            // Actualiser automatiquement toutes les 2 minutes
+            autoRefreshInterval = setInterval(() => {
+                loadProducts();
+            }, 120000);
+        }
+
+        function updateLastSyncTime(timestamp) {
+            const time = timestamp ? new Date(timestamp) : new Date();
+            document.getElementById('lastUpdate').textContent = time.toLocaleTimeString();
+            document.getElementById('lastSyncTime').textContent = 'MAJ: ' + time.toLocaleTimeString();
+        }
+
+        function updateStats() {
+            document.getElementById('totalProducts').textContent = products.length;
+            document.getElementById('totalCategories').textContent = categories.length;
+            
+            const cartTotal = cart.reduce((total, item) => total + (item.prix * item.quantity), 0);
+            document.getElementById('cartTotal').textContent = formatPrice(cartTotal);
+        }
+
+        function updateCategoriesDisplay() {
+            const categoriesList = document.getElementById('categoriesList');
+            categoriesList.innerHTML = `
+                <div class="category-item active" data-category="">
+                    <i class="fas fa-th-large me-2"></i>Toutes les catégories
+                </div>
+            `;
+            
+            categories.forEach(category => {
+                const categoryItem = document.createElement('div');
+                categoryItem.className = 'category-item';
+                categoryItem.innerHTML = `<i class="fas fa-tag me-2"></i>${category}`;
+                categoryItem.setAttribute('data-category', category);
+                categoryItem.addEventListener('click', function() {
+                    document.querySelectorAll('.category-item').forEach(item => item.classList.remove('active'));
+                    this.classList.add('active');
+                    document.getElementById('categoryFilter').value = category;
+                    filterProducts();
+                });
+                categoriesList.appendChild(categoryItem);
+            });
+        }
+
+        function updateCategoryFilter() {
+            const categoryFilter = document.getElementById('categoryFilter');
+            categoryFilter.innerHTML = '<option value="">Toutes les catégories</option>';
+            
+            categories.forEach(category => {
+                const option = document.createElement('option');
+                option.value = category;
+                option.textContent = category;
+                categoryFilter.appendChild(option);
+            });
+        }
+
+        function filterProducts() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            const selectedCategory = document.getElementById('categoryFilter').value;
+
+            filteredProducts = products.filter(product => {
+                const matchesSearch = 
+                    product.ref.toLowerCase().includes(searchTerm) ||
+                    product.designation.toLowerCase().includes(searchTerm) ||
+                    product.famille.toLowerCase().includes(searchTerm);
+                
+                const matchesCategory = !selectedCategory || product.famille === selectedCategory;
+                
+                return matchesSearch && matchesCategory;
+            });
+
+            displayProducts();
+            updateProductCount();
+        }
+
+        function displayProducts() {
+            const container = document.getElementById('productsContainer');
+            
+            if (filteredProducts.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-5 text-muted">
+                        <i class="fas fa-search fa-2x mb-3"></i>
+                        <h5>Aucun produit trouvé</h5>
+                        <p>Essayez de modifier vos critères de recherche</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '<div class="row g-4">';
+            
+            filteredProducts.forEach(product => {
+                const isInCart = cart.some(item => item.id === product.id);
+                
+                html += `
+                    <div class="col-xl-4 col-lg-6 col-md-6">
+                        <div class="card product-card h-100">
+                            <div class="card-body d-flex flex-column">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <span class="badge bg-secondary">${product.ref}</span>
+                                    <span class="badge bg-info">${product.famille}</span>
+                                </div>
+                                <h6 class="card-title flex-grow-1">${product.designation}</h6>
+                                <div class="mt-auto">
+                                    <div class="d-flex justify-content-between align-items-center mt-3">
+                                        <h5 class="text-primary mb-0">${formatPrice(product.prix)}</h5>
+                                        <button class="btn ${isInCart ? 'btn-warning' : 'btn-primary'}" 
+                                                onclick="toggleCart(${product.id})">
+                                            <i class="fas ${isInCart ? 'fa-shopping-cart' : 'fa-cart-plus'} me-1"></i>
+                                            ${isInCart ? 'Dans panier' : 'Ajouter'}
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            html += '</div>';
+            container.innerHTML = html;
+        }
+
+        function updateProductCount() {
+            document.getElementById('productCount').textContent = 
+                `${filteredProducts.length} produit${filteredProducts.length !== 1 ? 's' : ''}`;
+        }
+
+        function toggleCart(productId) {
+            const product = products.find(p => p.id === productId);
+            if (!product) return;
+
+            const existingIndex = cart.findIndex(item => item.id === productId);
+            
+            if (existingIndex > -1) {
+                cart.splice(existingIndex, 1);
+                showSyncStatus('Produit retiré du panier', 'warning');
+            } else {
+                cart.push({
+                    id: product.id,
+                    ref: product.ref,
+                    designation: product.designation,
+                    prix: product.prix,
+                    quantity: 1
+                });
+                showSyncStatus('Produit ajouté au panier!', 'success');
+            }
+
+            localStorage.setItem('varicom_cart', JSON.stringify(cart));
+            displayProducts();
+            updateCartDisplay();
+            updateStats();
+        }
+
+        function updateCartDisplay() {
+            const cartItems = document.getElementById('cartItems');
+            const emptyMessage = document.getElementById('emptyCartMessage');
+            const cartActions = document.getElementById('cartActions');
+
+            if (cart.length === 0) {
+                cartItems.style.display = 'none';
+                emptyMessage.style.display = 'block';
+                cartActions.style.display = 'none';
+                return;
+            }
+
+            cartItems.style.display = 'block';
+            emptyMessage.style.display = 'none';
+            cartActions.style.display = 'block';
+            
+            let cartHTML = '';
+            let total = 0;
+
+            cart.forEach((item, index) => {
+                const itemTotal = item.prix * item.quantity;
+                total += itemTotal;
+                cartHTML += `
+                    <div class="cart-item mb-3 pb-3 border-bottom">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div class="flex-grow-1">
+                                <h6 class="mb-1">${item.designation}</h6>
+                                <small class="text-muted">Ref: ${item.ref}</small>
+                                <div class="mt-2">
+                                    <button class="btn btn-outline-secondary btn-sm" onclick="updateQuantity(${index}, -1)">
+                                        <i class="fas fa-minus"></i>
+                                    </button>
+                                    <span class="mx-2 fw-bold">${item.quantity}</span>
+                                    <button class="btn btn-outline-secondary btn-sm" onclick="updateQuantity(${index}, 1)">
+                                        <i class="fas fa-plus"></i>
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="text-end">
+                                <div class="fw-bold">${formatPrice(itemTotal)}</div>
+                                <small class="text-muted">${formatPrice(item.prix)}/unité</small>
+                                <div class="mt-1">
+                                    <button class="btn btn-outline-danger btn-sm" onclick="removeFromCart(${index})">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            cartHTML += `
+                <div class="border-top pt-3">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Total:</h5>
+                        <h4 class="text-primary mb-0">${formatPrice(total)}</h4>
+                    </div>
+                </div>
+            `;
+            
+            cartItems.innerHTML = cartHTML;
+        }
+
+        function updateQuantity(index, change) {
+            const newQuantity = cart[index].quantity + change;
+            if (newQuantity < 1) {
+                removeFromCart(index);
+                return;
+            }
+            cart[index].quantity = newQuantity;
+            localStorage.setItem('varicom_cart', JSON.stringify(cart));
+            updateCartDisplay();
+            displayProducts();
+            updateStats();
+        }
+
+        function removeFromCart(index) {
+            const productName = cart[index].designation;
+            cart.splice(index, 1);
+            localStorage.setItem('varicom_cart', JSON.stringify(cart));
+            updateCartDisplay();
+            displayProducts();
+            updateStats();
+            showSyncStatus(`${productName} retiré du panier`, 'warning');
+        }
+
+        function clearCart() {
+            if (confirm('Voulez-vous vraiment vider votre panier?')) {
+                cart = [];
+                localStorage.setItem('varicom_cart', JSON.stringify(cart));
+                updateCartDisplay();
+                displayProducts();
+                updateStats();
+                showSyncStatus('Panier vidé', 'success');
+            }
+        }
+
+        function checkout() {
+            if (cart.length === 0) {
+                showSyncStatus('Votre panier est vide', 'warning');
+                return;
+            }
+
+            const total = cart.reduce((sum, item) => sum + (item.prix * item.quantity), 0);
+            const productList = cart.map(item => 
+                `• ${item.designation} (${item.ref}) - ${item.quantity}x = ${formatPrice(item.prix * item.quantity)}`
+            ).join('\n');
+
+            const message = `🎉 COMMANDE CONFIRMÉE! 🎉\n\n` +
+                          `Récapitulatif de votre commande:\n\n${productList}\n\n` +
+                          `💰 TOTAL: ${formatPrice(total)}\n\n` +
+                          `Merci pour votre confiance! Votre commande sera traitée dans les plus brefs délais.`;
+
+            alert(message);
+            
+            // Réinitialiser le panier après commande
+            cart = [];
+            localStorage.setItem('varicom_cart', JSON.stringify(cart));
+            updateCartDisplay();
+            displayProducts();
+            updateStats();
+        }
+
+        function formatPrice(price) {
+            return new Intl.NumberFormat('fr-FR', {minimumFractionDigits: 2}).format(price) + ' DA';
+        }
+
+        function showSyncStatus(message, type) {
+            const syncStatus = document.getElementById('syncStatus');
+            syncStatus.innerHTML = `
+                <i class="fas fa-${getStatusIcon(type)} me-2"></i>
+                ${message}
+            `;
+            syncStatus.className = `sync-status sync-${type}`;
+            syncStatus.style.display = 'block';
+            setTimeout(() => syncStatus.style.display = 'none', 5000);
+        }
+
+        function getStatusIcon(type) {
+            switch(type) {
+                case 'success': return 'check-circle';
+                case 'warning': return 'exclamation-triangle';
+                case 'error': return 'exclamation-circle';
+                default: return 'info-circle';
+            }
+        }
+
+        // Nettoyer à la fermeture
+        window.addEventListener('beforeunload', () => {
+            if (autoRefreshInterval) {
+                clearInterval(autoRefreshInterval);
+            }
+        });
     </script>
 </body>
 </html>
