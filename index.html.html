@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="fr" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VARICOM - Catalogue Produits</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #1a3a6c;
+            --secondary-color: #e63946;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+        }
+        
+        .company-header {
+            background: linear-gradient(135deg, var(--primary-color), #2a4d7a);
+            color: white;
+            padding: 20px 0;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .card {
+            border: none;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            transition: transform 0.2s;
+        }
+        
+        .card:hover {
+            transform: translateY(-2px);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--secondary-color), #c1121f);
+            border: none;
+            border-radius: 8px;
+            padding: 10px 20px;
+            font-weight: 600;
+        }
+        
+        .categories-sidebar {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            height: fit-content;
+            position: sticky;
+            top: 20px;
+        }
+        
+        .category-item {
+            padding: 12px 18px;
+            margin-bottom: 8px;
+            border-radius: 8px;
+            cursor: pointer;
+            border-left: 4px solid transparent;
+            transition: all 0.3s;
+        }
+        
+        .category-item:hover, .category-item.active {
+            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            border-left-color: var(--secondary-color);
+            transform: translateX(5px);
+        }
+        
+        .cart-sidebar {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-top: 25px;
+        }
+        
+        .sync-status {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            padding: 12px 20px;
+            border-radius: 8px;
+            display: none;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        
+        .sync-success { background: linear-gradient(135deg, #28a745, #20c997); color: white; }
+        .sync-warning { background: linear-gradient(135deg, #ffc107, #fd7e14); color: black; }
+        .sync-error { background: linear-gradient(135deg, #dc3545, #c82333); color: white; }
+        
+        .product-card {
+            transition: all 0.3s;
+            border: 1px solid #e9ecef;
+            height: 100%;
+        }
+        
+        .product-card:hover {
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+        
+        .search-box {
+            border-radius: 25px;
+            padding: 12px 20px;
+            border: 2px solid #e9ecef;
+            transition: all 0.3s;
+        }
+        
+        .search-box:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(26, 58, 108, 0.25);
+        }
+    </style>
+</head>
+<body>
+    <div id="syncStatus" class="sync-status"></div>
+
+    <header class="company-header">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <div class="company-logo">
+                        <h2 class="mb-1"><i class="fas fa-laptop-code me-2"></i>VARICOM</h2>
+                        <p class="mb-0 opacity-75">Votre partenaire informatique de confiance</p>
+                    </div>
+                    <div class="company-info mt-3">
+                        <div class="mb-1"><i class="fas fa-map-marker-alt me-2"></i>07 Boulevard MIRA Abderahmen Loc N°2, Oran</div>
+                        <div><i class="fas fa-phone me-2"></i>05 41 52 75 61 | <i class="fas fa-fax me-2"></i>041 36 32 57</div>
+                    </div>
+                </div>
+                <div class="col-md-6 text-md-end">
+                    <div class="company-info">
+                        <div class="mb-2"><i class="fas fa-envelope me-2"></i>contact@varicom-dz.com</div>
+                        <div class="badge bg-light text-dark fs-6 p-2">
+                            <i class="fas fa-sync-alt me-1"></i>
+                            <span id="lastSyncTime">Actualisé</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container my-5">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-lg-3 mb-4">
+                <!-- Catégories -->
+                <div class="categories-sidebar">
+                    <h5><i class="fas fa-list me-2"></i>Catégories</h5>
+                    <input type="text" id="categorySearch" class="form-control search-box mb-3" placeholder="🔍 Rechercher catégorie...">
+                    <div id="categoriesList">
+                        <div class="category-item active" data-category="">
+                            <i class="fas fa-th-large me-2"></i>Toutes les catégories
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Panier -->
+                <div class="cart-sidebar">
+                    <h5><i class="fas fa-shopping-cart me-2"></i>Mon Panier</h5>
+                    <div id="cartContent">
+                        <p class="text-muted text-center py-4" id="emptyCartMessage">
+                            <i class="fas fa-shopping-cart fa-2x mb-3"></i><br>
+                            Votre panier est vide
+                        </p>
+                        <div id="cartItems" style="display: none;"></div>
+                    </div>
+                    <div class="mt-4" id="cartActions" style="display: none;">
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-success btn-lg" onclick="checkout()">
+                                <i class="fas fa-credit-card me-2"></i>Commander
+                            </button>
+                            <button class="btn btn-outline-danger" onclick="clearCart()">
+                                <i class="fas fa-trash me-2"></i>Vider le panier
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contenu principal -->
+            <div class="col-lg-9">
+                <!-- Barre de recherche -->
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <div class="row g-3 align-items-center">
+                            <div class="col-md-8">
+                                <input type="text" id="searchInput" class="form-control search-box" 
+                                       placeholder="🔍 Rechercher un produit...">
+                            </div>
+                            <div class="col-md-4">
+                                <select id="categoryFilter" class="form-select search-box">
+                                    <option value="">Toutes les catégories</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Statistiques -->
+                <div class="row mb-4">
+                    <div class="col-12">
+                        <div class="card">
+                            <div class="card-body py-3">
+                                <div class="row text-center">
+                                    <div class="col-md-4">
+                                        <div class="h4 text-primary mb-1" id="totalProducts">0</div>
+                                        <small class="text-muted">Produits</small>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="h4 text-success mb-1" id="totalCategories">0</div>
+                                        <small class="text-muted">Catégories</small>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="h4 text-warning mb-1" id="cartTotal">0</div>
+                                        <small class="text-muted">Panier Total</small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Liste des produits -->
+                <div class="card">
+                    <div class="card-header text-white" style="background: linear-gradient(135deg, var(--primary-color), #2a4d7a);">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0"><i class="fas fa-table me-2"></i>Catalogue Produits</h5>
+                            <span class="badge bg-light text-dark fs-6" id="productCount">0 produits</span>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div id="productsContainer">
+                            <div class="text-center py-5 text-muted">
+                                <i class="fas fa-spinner fa-spin fa-2x mb-3"></i>
+                                <p>Chargement des produits...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // كود JavaScript سيأتي في الجزء التالي
+        console.log("VARICOM Client Loaded");
+    </script>
+</body>
+</html>
