@@ -7,7 +7,6 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        /* أنماط CSS تبقى كما هي */
         :root {
             --primary-color: #1a3a6c;
             --secondary-color: #e63946;
@@ -16,12 +15,13 @@
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: #f8f9fa;
+            min-height: 100vh;
         }
         
         .company-header {
             background: linear-gradient(135deg, var(--primary-color), #2a4d7a);
             color: white;
-            padding: 20px 0;
+            padding: 15px 0;
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         }
         
@@ -30,6 +30,7 @@
             border-radius: 12px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.08);
             transition: transform 0.2s;
+            margin-bottom: 1rem;
         }
         
         .card:hover {
@@ -42,24 +43,30 @@
             border-radius: 8px;
             padding: 10px 20px;
             font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            transform: scale(1.05);
         }
         
         .categories-sidebar {
             background: white;
             border-radius: 12px;
-            padding: 25px;
+            padding: 20px;
             height: fit-content;
             position: sticky;
             top: 20px;
         }
         
         .category-item {
-            padding: 12px 18px;
+            padding: 12px 15px;
             margin-bottom: 8px;
             border-radius: 8px;
             cursor: pointer;
             border-left: 4px solid transparent;
             transition: all 0.3s;
+            font-size: 0.9rem;
         }
         
         .category-item:hover, .category-item.active {
@@ -71,8 +78,8 @@
         .cart-sidebar {
             background: white;
             border-radius: 12px;
-            padding: 25px;
-            margin-top: 25px;
+            padding: 20px;
+            margin-top: 20px;
         }
         
         .sync-status {
@@ -84,6 +91,8 @@
             border-radius: 8px;
             display: none;
             box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            max-width: 300px;
+            word-wrap: break-word;
         }
         
         .sync-success { background: linear-gradient(135deg, #28a745, #20c997); color: white; }
@@ -105,6 +114,7 @@
             padding: 12px 20px;
             border: 2px solid #e9ecef;
             transition: all 0.3s;
+            font-size: 0.9rem;
         }
         
         .search-box:focus {
@@ -120,10 +130,173 @@
         .auto-refresh-badge:hover {
             transform: scale(1.05);
         }
+
+        /* تحسينات التجاوب للهواتف */
+        @media (max-width: 768px) {
+            .company-header {
+                padding: 10px 0;
+            }
+            
+            .company-header h2 {
+                font-size: 1.3rem;
+            }
+            
+            .company-header p {
+                font-size: 0.8rem;
+            }
+            
+            .company-info div {
+                font-size: 0.8rem;
+            }
+            
+            .categories-sidebar {
+                position: static;
+                margin-bottom: 1rem;
+            }
+            
+            .cart-sidebar {
+                margin-top: 1rem;
+            }
+            
+            .sync-status {
+                top: 10px;
+                right: 10px;
+                left: 10px;
+                max-width: none;
+            }
+            
+            .search-box {
+                padding: 10px 15px;
+                font-size: 16px; /* منع التكبير في iOS */
+            }
+            
+            .btn-primary {
+                padding: 8px 16px;
+                font-size: 0.9rem;
+            }
+            
+            .card-body {
+                padding: 1rem;
+            }
+            
+            .product-card .card-body {
+                padding: 1rem;
+            }
+            
+            .category-item {
+                padding: 10px 12px;
+                font-size: 0.85rem;
+            }
+            
+            .stats-card .h4 {
+                font-size: 1.2rem;
+            }
+            
+            .stats-card small {
+                font-size: 0.7rem;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .container {
+                padding-left: 10px;
+                padding-right: 10px;
+            }
+            
+            .company-header .col-md-6 {
+                text-align: center !important;
+                margin-bottom: 10px;
+            }
+            
+            .products-grid {
+                grid-template-columns: 1fr !important;
+            }
+            
+            .product-card .card-body {
+                padding: 0.8rem;
+            }
+        }
+
+        /* تحسينات عامة */
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1rem;
+        }
+
+        .stats-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+
+        .stats-card .h4 {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .mobile-bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            display: none;
+            z-index: 1000;
+        }
+
+        .nav-item {
+            flex: 1;
+            text-align: center;
+            padding: 10px;
+            border-right: 1px solid #eee;
+        }
+
+        .nav-item:last-child {
+            border-right: none;
+        }
+
+        .nav-item.active {
+            color: var(--primary-color);
+        }
+
+        /* تحسينات للأجهزة اللوحية */
+        @media (max-width: 1024px) and (min-width: 769px) {
+            .products-grid {
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            }
+        }
     </style>
 </head>
 <body>
     <div id="syncStatus" class="sync-status"></div>
+
+    <!-- شريط التنقل للهواتف -->
+    <div class="mobile-bottom-nav d-lg-none">
+        <div class="d-flex">
+            <div class="nav-item active" onclick="showSection('products')">
+                <i class="fas fa-th-large"></i>
+                <div class="small">المنتجات</div>
+            </div>
+            <div class="nav-item" onclick="showSection('categories')">
+                <i class="fas fa-list"></i>
+                <div class="small">الفئات</div>
+            </div>
+            <div class="nav-item" onclick="showSection('cart')">
+                <i class="fas fa-shopping-cart"></i>
+                <div class="small">السلة</div>
+                <span class="badge bg-danger cart-badge-mobile">0</span>
+            </div>
+            <div class="nav-item" onclick="refreshData()">
+                <i class="fas fa-sync-alt"></i>
+                <div class="small">تحديث</div>
+            </div>
+        </div>
+    </div>
 
     <header class="company-header">
         <div class="container">
@@ -133,15 +306,15 @@
                         <h2 class="mb-1"><i class="fas fa-laptop-code me-2"></i>VARICOM</h2>
                         <p class="mb-0 opacity-75">Votre partenaire informatique de confiance</p>
                     </div>
-                    <div class="company-info mt-3">
-                        <div class="mb-1"><i class="fas fa-map-marker-alt me-2"></i>07 Boulevard MIRA Abderahmen Loc N°2, Oran</div>
-                        <div><i class="fas fa-phone me-2"></i>05 41 52 75 61 | <i class="fas fa-fax me-2"></i>041 36 32 57</div>
+                    <div class="company-info mt-2">
+                        <div class="mb-1 small"><i class="fas fa-map-marker-alt me-2"></i>07 Boulevard MIRA Abderahmen Loc N°2, Oran</div>
+                        <div class="small"><i class="fas fa-phone me-2"></i>05 41 52 75 61 | <i class="fas fa-fax me-2"></i>041 36 32 57</div>
                     </div>
                 </div>
                 <div class="col-md-6 text-md-end">
                     <div class="company-info">
-                        <div class="mb-2"><i class="fas fa-envelope me-2"></i>contact@varicom-dz.com</div>
-                        <div class="badge bg-light text-dark fs-6 p-2 auto-refresh-badge" onclick="refreshData()" title="Cliquer pour actualiser">
+                        <div class="mb-2 small"><i class="fas fa-envelope me-2"></i>contact@varicom-dz.com</div>
+                        <div class="badge bg-light text-dark p-2 auto-refresh-badge" onclick="refreshData()" title="Cliquer pour actualiser">
                             <i class="fas fa-sync-alt me-1"></i>
                             <span id="lastSyncTime">Actualiser</span>
                         </div>
@@ -151,11 +324,11 @@
         </div>
     </header>
 
-    <div class="container my-5">
+    <div class="container my-4">
         <div class="row">
-            <!-- Sidebar -->
-            <div class="col-lg-3 mb-4">
-                <!-- Catégories -->
+            <!-- الشريط الجانبي - يظهر فقط في الشاشات الكبيرة -->
+            <div class="col-lg-3 d-none d-lg-block">
+                <!-- الفئات -->
                 <div class="categories-sidebar">
                     <h5><i class="fas fa-list me-2"></i>Catégories</h5>
                     <input type="text" id="categorySearch" class="form-control search-box mb-3" placeholder="🔍 Rechercher catégorie...">
@@ -166,7 +339,7 @@
                     </div>
                 </div>
 
-                <!-- Panier -->
+                <!-- السلة -->
                 <div class="cart-sidebar">
                     <h5><i class="fas fa-shopping-cart me-2"></i>Mon Panier</h5>
                     <div id="cartContent">
@@ -189,12 +362,12 @@
                 </div>
             </div>
 
-            <!-- Contenu principal -->
+            <!-- المحتوى الرئيسي -->
             <div class="col-lg-9">
-                <!-- Barre de recherche -->
-                <div class="card mb-4">
-                    <div class="card-body">
-                        <div class="row g-3 align-items-center">
+                <!-- شريط البحث -->
+                <div class="card mb-3">
+                    <div class="card-body py-3">
+                        <div class="row g-2 align-items-center">
                             <div class="col-md-8">
                                 <input type="text" id="searchInput" class="form-control search-box" 
                                        placeholder="🔍 Rechercher un produit...">
@@ -208,40 +381,40 @@
                     </div>
                 </div>
 
-                <!-- Statistiques -->
-                <div class="row mb-4">
-                    <div class="col-12">
-                        <div class="card">
-                            <div class="card-body py-3">
-                                <div class="row text-center">
-                                    <div class="col-md-3">
-                                        <div class="h4 text-primary mb-1" id="totalProducts">0</div>
-                                        <small class="text-muted">Produits</small>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <div class="h4 text-success mb-1" id="totalCategories">0</div>
-                                        <small class="text-muted">Catégories</small>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <div class="h4 text-warning mb-1" id="cartTotal">0</div>
-                                        <small class="text-muted">Panier Total</small>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <div class="h4 text-info mb-1" id="lastUpdate">--:--</div>
-                                        <small class="text-muted">Dernière MAJ</small>
-                                    </div>
-                                </div>
-                            </div>
+                <!-- الإحصائيات -->
+                <div class="row g-2 mb-3">
+                    <div class="col-6 col-md-3">
+                        <div class="stats-card">
+                            <div class="h4" id="totalProducts">0</div>
+                            <small>Produits</small>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="stats-card">
+                            <div class="h4" id="totalCategories">0</div>
+                            <small>Catégories</small>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="stats-card">
+                            <div class="h4" id="cartTotal">0</div>
+                            <small>Panier Total</small>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="stats-card">
+                            <div class="h4" id="lastUpdate">--:--</div>
+                            <small>Dernière MAJ</small>
                         </div>
                     </div>
                 </div>
 
-                <!-- Liste des produits -->
+                <!-- قائمة المنتجات -->
                 <div class="card">
                     <div class="card-header text-white" style="background: linear-gradient(135deg, var(--primary-color), #2a4d7a);">
                         <div class="d-flex justify-content-between align-items-center">
                             <h5 class="mb-0"><i class="fas fa-table me-2"></i>Catalogue Produits</h5>
-                            <span class="badge bg-light text-dark fs-6" id="productCount">0 produits</span>
+                            <span class="badge bg-light text-dark" id="productCount">0 produits</span>
                         </div>
                     </div>
                     <div class="card-body">
@@ -258,14 +431,22 @@
     </div>
 
     <script>
+        // الرابط الثابت للبيانات - يمكن تحديثه من قبل المسؤول
+        const DATA_SOURCES = {
+            primary: "https://gist.githubusercontent.com/your-username/your-gist-id/raw/products.json",
+            backup: "https://raw.githubusercontent.com/your-username/your-repo/main/products.json"
+        };
+
         let products = [];
         let filteredProducts = [];
         let categories = [];
         let cart = JSON.parse(localStorage.getItem('varicom_cart')) || [];
         let autoRefreshInterval;
+        let currentDataSource = DATA_SOURCES.primary;
 
         document.addEventListener('DOMContentLoaded', function() {
             initializeApp();
+            setupMobileNav();
         });
 
         function initializeApp() {
@@ -273,6 +454,26 @@
             loadProducts();
             updateCartDisplay();
             startAutoRefresh();
+        }
+
+        function setupMobileNav() {
+            // إظهار شريط التنقل السفلي للهواتف فقط
+            if (window.innerWidth <= 768) {
+                document.querySelector('.mobile-bottom-nav').style.display = 'flex';
+                updateMobileCartBadge();
+            }
+        }
+
+        function showSection(section) {
+            // في الإصدار الحالي، كل شيء في صفحة واحدة
+            // يمكن تطوير هذا ليكون تبادلياً في المستقبل
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+            
+            if (section === 'cart') {
+                // يمكن إضافة منطق لإظهار السلة في وضع منبثق في المستقبل
+                showSyncStatus('Ouvrir le panier', 'warning');
+            }
         }
 
         function setupEventListeners() {
@@ -286,34 +487,33 @@
                     item.style.display = text.includes(searchTerm) ? 'block' : 'none';
                 });
             });
+
+            // تحسين الأداء على الهواتف
+            let searchTimer;
+            document.getElementById('searchInput').addEventListener('input', function() {
+                clearTimeout(searchTimer);
+                searchTimer = setTimeout(filterProducts, 300);
+            });
         }
 
         async function loadProducts() {
             showSyncStatus('Chargement des données...', 'warning');
 
-            const urlParams = new URLSearchParams(window.location.search);
-            const gistId = urlParams.get('gist');
-            const dataParam = urlParams.get('data');
-
             try {
-                let productsData = null;
-
-                if (gistId) {
-                    // Charger depuis GitHub Gist
-                    productsData = await loadFromGitHubGist(gistId);
-                } else if (dataParam) {
-                    // Données encodées dans l'URL
-                    productsData = await loadFromDataParam(dataParam);
-                } else {
-                    // Aucune source de données - utiliser données de démonstration
-                    productsData = await loadDemoData();
+                // محاولة المصدر الرئيسي أولاً
+                let productsData = await loadFromURL(currentDataSource);
+                
+                if (!productsData.success) {
+                    // إذا فشل المصدر الرئيسي، جرب المصدر الاحتياطي
+                    console.log('Tentative du source de backup...');
+                    productsData = await loadFromURL(DATA_SOURCES.backup);
                 }
 
-                if (productsData && productsData.success) {
+                if (productsData.success) {
                     processProductsData(productsData);
                     showSyncStatus('Catalogue chargé avec succès', 'success');
                 } else {
-                    throw new Error(productsData?.error || 'Erreur inconnue lors du chargement');
+                    throw new Error(productsData.error || 'Erreur inconnue');
                 }
                 
             } catch (error) {
@@ -323,48 +523,32 @@
             }
         }
 
-        async function loadFromGitHubGist(gistId) {
+        async function loadFromURL(url) {
             try {
-                console.log('🔗 Chargement depuis GitHub Gist:', gistId);
+                console.log('🔗 Chargement depuis:', url);
                 
-                const response = await fetch(`https://api.github.com/gists/${gistId}`);
+                const response = await fetch(url, {
+                    headers: {
+                        'Cache-Control': 'no-cache',
+                        'Pragma': 'no-cache'
+                    }
+                });
                 
                 if (!response.ok) {
                     throw new Error(`Erreur HTTP: ${response.status}`);
                 }
                 
-                const gistData = await response.json();
-                console.log('📦 Données Gist reçues:', gistData);
-                
-                // Chercher le fichier produits.json
-                const productsFile = Object.values(gistData.files).find(file => 
-                    file.filename.toLowerCase().includes('produit') || 
-                    file.filename.toLowerCase().includes('product')
-                );
-
-                if (!productsFile) {
-                    throw new Error('Fichier produits non trouvé dans le Gist');
-                }
-                
-                let productsContent;
-                try {
-                    // GitHub API retourne déjà le contenu décodé
-                    productsContent = JSON.parse(productsFile.content);
-                } catch (parseError) {
-                    console.error('Erreur parsing JSON:', parseError);
-                    throw new Error('Format JSON invalide dans le Gist');
-                }
-                
-                console.log('📊 Produits parsés:', productsContent);
+                const data = await response.json();
+                console.log('📊 Données reçues:', data);
                 
                 return {
                     success: true,
-                    data: productsContent,
-                    lastUpdate: gistData.updated_at
+                    data: data,
+                    lastUpdate: new Date().toISOString()
                 };
                 
             } catch (error) {
-                console.error('Erreur Gist:', error);
+                console.error('Erreur de chargement:', error);
                 return {
                     success: false,
                     error: error.message
@@ -372,68 +556,11 @@
             }
         }
 
-        async function loadFromDataParam(dataParam) {
-            try {
-                console.log('🔗 Chargement depuis paramètre data');
-                
-                // Décoder les données base64
-                const decodedData = atob(dataParam);
-                const jsonData = JSON.parse(decodedData);
-                
-                return {
-                    success: true,
-                    data: jsonData,
-                    lastUpdate: new Date().toISOString()
-                };
-                
-            } catch (error) {
-                console.error('Erreur data param:', error);
-                return {
-                    success: false,
-                    error: 'Format de données invalide'
-                };
-            }
-        }
-
-        async function loadDemoData() {
-            // Données de démonstration en cas d'absence de source
-            const demoData = [
-                {
-                    id: 1,
-                    ref: "LAP-DEL-001",
-                    designation: "Laptop Dell Inspiron 15",
-                    prix: 45000,
-                    famille: "Ordinateurs Portables"
-                },
-                {
-                    id: 2,
-                    ref: "PC-HP-002",
-                    designation: "PC Bureau HP ProDesk",
-                    prix: 35000,
-                    famille: "Ordinateurs Bureau"
-                },
-                {
-                    id: 3,
-                    ref: "SOU-LG-003",
-                    designation: "Écran LG 24\" Full HD",
-                    prix: 12000,
-                    famille: "Écrans"
-                }
-            ];
-
-            return {
-                success: true,
-                data: demoData,
-                lastUpdate: new Date().toISOString()
-            };
-        }
-
         function processProductsData(productsData) {
             console.log('🔄 Traitement des données produits:', productsData);
             
             let rawProducts = [];
             
-            // Gérer différents formats de données
             if (Array.isArray(productsData.data)) {
                 rawProducts = productsData.data;
             } else if (productsData.data && Array.isArray(productsData.data.products)) {
@@ -442,7 +569,6 @@
                 throw new Error('Format de données non supporté');
             }
 
-            // Filtrer les produits valides
             products = rawProducts.filter(product => 
                 product && 
                 product.id && 
@@ -456,7 +582,6 @@
                 return;
             }
 
-            // Extraire les catégories uniques
             categories = [...new Set(products
                 .map(p => p.famille || 'Non catégorisé')
                 .filter(famille => famille)
@@ -470,14 +595,6 @@
 
             console.log('✅ Produits traités:', products.length);
             console.log('✅ Catégories:', categories);
-        }
-
-        function validateProductData(product) {
-            return product && 
-                   product.id && 
-                   product.ref && 
-                   product.designation && 
-                   product.prix > 0;
         }
 
         function showNoDataMessage() {
@@ -495,10 +612,10 @@
 
         function refreshData() {
             loadProducts();
+            showSyncStatus('Données actualisées', 'success');
         }
 
         function startAutoRefresh() {
-            // Actualiser automatiquement toutes les 2 minutes
             if (autoRefreshInterval) {
                 clearInterval(autoRefreshInterval);
             }
@@ -506,7 +623,7 @@
             autoRefreshInterval = setInterval(() => {
                 console.log('🔄 Actualisation automatique...');
                 loadProducts();
-            }, 120000); // 2 minutes
+            }, 120000); // 2 دقيقة
         }
 
         function updateLastSyncTime(timestamp) {
@@ -526,6 +643,8 @@
 
         function updateCategoriesDisplay() {
             const categoriesList = document.getElementById('categoriesList');
+            if (!categoriesList) return; // قد لا يكون موجوداً في الهواتف
+            
             categoriesList.innerHTML = `
                 <div class="category-item active" data-category="">
                     <i class="fas fa-th-large me-2"></i>Toutes les catégories
@@ -592,30 +711,28 @@
                 return;
             }
 
-            let html = '<div class="row g-4">';
+            let html = '<div class="products-grid">';
             
             filteredProducts.forEach(product => {
                 const isInCart = cart.some(item => item.id === product.id);
                 const famille = product.famille || 'Non catégorisé';
                 
                 html += `
-                    <div class="col-xl-4 col-lg-6 col-md-6">
-                        <div class="card product-card h-100">
-                            <div class="card-body d-flex flex-column">
-                                <div class="d-flex justify-content-between align-items-start mb-2">
-                                    <span class="badge bg-secondary">${product.ref}</span>
-                                    <span class="badge bg-info">${famille}</span>
-                                </div>
-                                <h6 class="card-title flex-grow-1">${product.designation}</h6>
-                                <div class="mt-auto">
-                                    <div class="d-flex justify-content-between align-items-center mt-3">
-                                        <h5 class="text-primary mb-0">${formatPrice(product.prix)}</h5>
-                                        <button class="btn ${isInCart ? 'btn-warning' : 'btn-primary'}" 
-                                                onclick="toggleCart(${product.id})">
-                                            <i class="fas ${isInCart ? 'fa-shopping-cart' : 'fa-cart-plus'} me-1"></i>
-                                            ${isInCart ? 'Dans panier' : 'Ajouter'}
-                                        </button>
-                                    </div>
+                    <div class="product-card card">
+                        <div class="card-body d-flex flex-column">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <span class="badge bg-secondary">${product.ref}</span>
+                                <span class="badge bg-info">${famille}</span>
+                            </div>
+                            <h6 class="card-title flex-grow-1">${product.designation}</h6>
+                            <div class="mt-auto">
+                                <div class="d-flex justify-content-between align-items-center mt-3">
+                                    <h5 class="text-primary mb-0">${formatPrice(product.prix)}</h5>
+                                    <button class="btn ${isInCart ? 'btn-warning' : 'btn-primary'} btn-sm" 
+                                            onclick="toggleCart(${product.id})">
+                                        <i class="fas ${isInCart ? 'fa-shopping-cart' : 'fa-cart-plus'} me-1"></i>
+                                        ${isInCart ? 'Dans panier' : 'Ajouter'}
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -657,12 +774,23 @@
             displayProducts();
             updateCartDisplay();
             updateStats();
+            updateMobileCartBadge();
+        }
+
+        function updateMobileCartBadge() {
+            const badge = document.querySelector('.cart-badge-mobile');
+            if (badge) {
+                badge.textContent = cart.reduce((total, item) => total + item.quantity, 0);
+                badge.style.display = cart.length > 0 ? 'inline' : 'none';
+            }
         }
 
         function updateCartDisplay() {
             const cartItems = document.getElementById('cartItems');
             const emptyMessage = document.getElementById('emptyCartMessage');
             const cartActions = document.getElementById('cartActions');
+
+            if (!cartItems || !emptyMessage || !cartActions) return;
 
             if (cart.length === 0) {
                 cartItems.style.display = 'none';
@@ -734,6 +862,7 @@
             updateCartDisplay();
             displayProducts();
             updateStats();
+            updateMobileCartBadge();
         }
 
         function removeFromCart(index) {
@@ -743,6 +872,7 @@
             updateCartDisplay();
             displayProducts();
             updateStats();
+            updateMobileCartBadge();
             showSyncStatus(`${productName} retiré du panier`, 'warning');
         }
 
@@ -753,6 +883,7 @@
                 updateCartDisplay();
                 displayProducts();
                 updateStats();
+                updateMobileCartBadge();
                 showSyncStatus('Panier vidé', 'success');
             }
         }
@@ -775,12 +906,12 @@
 
             alert(message);
             
-            // Réinitialiser le panier après commande
             cart = [];
             localStorage.setItem('varicom_cart', JSON.stringify(cart));
             updateCartDisplay();
             displayProducts();
             updateStats();
+            updateMobileCartBadge();
         }
 
         function formatPrice(price) {
@@ -807,11 +938,15 @@
             }
         }
 
-        // Nettoyer à la fermeture
         window.addEventListener('beforeunload', () => {
             if (autoRefreshInterval) {
                 clearInterval(autoRefreshInterval);
             }
+        });
+
+        // تحسين الأداء على الهواتف
+        window.addEventListener('resize', function() {
+            setupMobileNav();
         });
     </script>
 </body>
