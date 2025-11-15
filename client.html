@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VARICOM - Catalogue Professionnel</title>
+    <title>VARICOM - Catalogue Intelligent</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -38,11 +38,6 @@
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
         
-        .company-logo h2 {
-            font-weight: 700;
-            font-size: 1.5rem;
-        }
-        
         /* Notification System */
         .notification-container {
             position: fixed;
@@ -63,6 +58,7 @@
             display: flex;
             align-items: flex-start;
             gap: 10px;
+            cursor: pointer;
         }
         
         .notification.success { border-left-color: #28a745; }
@@ -110,22 +106,84 @@
             to { transform: translateX(0); opacity: 1; }
         }
         
-        /* Admin Notification Panel */
-        .admin-panel {
-            background: white;
+        /* New Arrivals Section */
+        .new-arrivals {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
             border-radius: 10px;
             padding: 1.5rem;
             margin-bottom: 1.5rem;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            border: 1px solid #e9ecef;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
         }
         
-        .admin-panel h5 {
-            color: var(--primary-color);
+        .new-arrivals-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
             margin-bottom: 1rem;
+        }
+        
+        .new-arrivals-title {
+            font-weight: 700;
+            font-size: 1.2rem;
             display: flex;
             align-items: center;
             gap: 0.5rem;
+        }
+        
+        .new-arrivals-badge {
+            background: rgba(255,255,255,0.2);
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+        }
+        
+        .new-arrivals-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+        
+        .new-product-card {
+            background: rgba(255,255,255,0.1);
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+        
+        .new-product-card:hover {
+            transform: translateY(-5px);
+            background: rgba(255,255,255,0.15);
+        }
+        
+        .new-product-image {
+            width: 80px;
+            height: 80px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 0.75rem;
+        }
+        
+        .new-product-image img {
+            max-width: 100%;
+            max-height: 100%;
+            border-radius: 6px;
+        }
+        
+        .new-product-name {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+        }
+        
+        .new-product-price {
+            font-weight: 700;
+            font-size: 1rem;
         }
         
         /* Card Styles */
@@ -156,6 +214,7 @@
             font-weight: 500;
             transition: all 0.2s ease;
             padding: 0.5rem 1rem;
+            font-size: 0.9rem;
         }
         
         .btn-primary {
@@ -184,6 +243,17 @@
             color: white;
         }
         
+        .btn-pdf {
+            background: #dc3545;
+            color: white;
+            border: none;
+        }
+        
+        .btn-pdf:hover {
+            background: #c82333;
+            color: white;
+        }
+        
         /* Sidebar Styles */
         .categories-sidebar {
             background: white;
@@ -195,22 +265,30 @@
             box-shadow: 0 2px 10px rgba(0,0,0,0.08);
         }
         
-        .category-item {
-            padding: 0.75rem 1rem;
-            margin-bottom: 0.5rem;
-            border-radius: 6px;
-            cursor: pointer;
-            border-left: 3px solid transparent;
-            transition: all 0.2s ease;
-            font-size: 0.9rem;
-            display: flex;
-            align-items: center;
+        .categories-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
             gap: 0.5rem;
         }
         
-        .category-item:hover, .category-item.active {
+        .category-item {
+            padding: 0.75rem;
+            border-radius: 6px;
+            cursor: pointer;
+            border: 1px solid #e9ecef;
+            transition: all 0.2s ease;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
             background: #f8f9fa;
-            border-left-color: var(--secondary-color);
+        }
+        
+        .category-item:hover, .category-item.active {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
         }
         
         .cart-sidebar {
@@ -242,12 +320,18 @@
         }
         
         .product-image {
-            height: 140px;
+            height: 160px;
             background: linear-gradient(135deg, #f1f3f4, #e1e5e9);
             display: flex;
             align-items: center;
             justify-content: center;
             position: relative;
+        }
+        
+        .product-image img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: cover;
         }
         
         .product-image i {
@@ -490,8 +574,16 @@
                 margin-bottom: 1rem;
             }
             
+            .categories-grid {
+                grid-template-columns: 1fr;
+            }
+            
             .products-grid {
                 grid-template-columns: 1fr;
+            }
+            
+            .new-arrivals-grid {
+                grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
             }
             
             .search-box {
@@ -529,7 +621,7 @@
             }
             
             .product-image {
-                height: 120px;
+                height: 140px;
             }
             
             .product-image i {
@@ -546,6 +638,15 @@
             
             .product-price {
                 font-size: 1rem;
+            }
+            
+            .new-product-card {
+                padding: 0.75rem;
+            }
+            
+            .new-product-image {
+                width: 60px;
+                height: 60px;
             }
         }
         
@@ -574,9 +675,9 @@
                 <div class="small">السلة</div>
                 <span class="cart-badge-mobile" style="display: none;">0</span>
             </div>
-            <div class="nav-item" onclick="showSection('notifications')">
-                <i class="fas fa-bell"></i>
-                <div class="small">الإشعارات</div>
+            <div class="nav-item" onclick="showSection('new')">
+                <i class="fas fa-star"></i>
+                <div class="small">الجديد</div>
             </div>
         </div>
     </div>
@@ -613,42 +714,21 @@
     </header>
 
     <div class="container my-4">
-        <!-- لوحة المسؤول للإشعارات (يمكن إخفاؤها في النسخة النهائية) -->
-        <div class="admin-panel" id="adminPanel">
-            <h5><i class="fas fa-cog"></i> لوحة تحكم المسؤول</h5>
-            <div class="row g-2">
-                <div class="col-md-8">
-                    <input type="text" id="notificationTitle" class="form-control form-control-sm" placeholder="عنوان الإشعار">
+        <!-- قسم المنتجات الجديدة -->
+        <div class="new-arrivals" id="newArrivalsSection">
+            <div class="new-arrivals-header">
+                <div class="new-arrivals-title">
+                    <i class="fas fa-star"></i> Nouveaux Arrivages
                 </div>
-                <div class="col-md-4">
-                    <select id="notificationType" class="form-select form-select-sm">
-                        <option value="info">معلومات</option>
-                        <option value="success">نجاح</option>
-                        <option value="warning">تحذير</option>
-                        <option value="error">خطأ</option>
-                    </select>
-                </div>
-                <div class="col-12">
-                    <textarea id="notificationMessage" class="form-control form-control-sm" rows="2" placeholder="نص الإشعار"></textarea>
-                </div>
-                <div class="col-12">
-                    <div class="d-flex gap-2">
-                        <button class="btn btn-primary btn-sm" onclick="sendNotification()">
-                            <i class="fas fa-paper-plane me-1"></i> إرسال إشعار
-                        </button>
-                        <button class="btn btn-outline-secondary btn-sm" onclick="clearAllNotifications()">
-                            <i class="fas fa-trash me-1"></i> مسح الكل
-                        </button>
-                        <button class="btn btn-outline-secondary btn-sm" onclick="toggleAdminPanel()">
-                            <i class="fas fa-eye-slash me-1"></i> إخفاء
-                        </button>
-                    </div>
-                </div>
+                <div class="new-arrivals-badge" id="newArrivalsCount">0 produits</div>
+            </div>
+            <div class="new-arrivals-grid" id="newArrivalsGrid">
+                <!-- سيتم ملؤها ديناميكياً -->
             </div>
         </div>
 
         <div class="row">
-            <!-- الشريط الجانبي - يظهر فقط في الشاشات الكبيرة -->
+            <!-- الشريط الجانبي -->
             <div class="col-lg-3 d-none d-lg-block">
                 <!-- الفئات -->
                 <div class="categories-sidebar">
@@ -656,10 +736,11 @@
                     <div class="search-container mb-3">
                         <input type="text" id="categorySearch" class="form-control search-box" placeholder="🔍 Rechercher catégorie...">
                     </div>
-                    <div id="categoriesList">
+                    <div class="categories-grid" id="categoriesList">
                         <div class="category-item active" data-category="">
-                            <i class="fas fa-th-large"></i>Toutes les catégories
+                            <i class="fas fa-th-large me-2"></i>Toutes
                         </div>
+                        <!-- سيتم ملؤها ديناميكياً -->
                     </div>
                 </div>
 
@@ -678,14 +759,16 @@
                             <button class="btn btn-success btn-sm" onclick="checkout()">
                                 <i class="fas fa-credit-card me-1"></i>Commander
                             </button>
-                            <button class="btn btn-whatsapp btn-sm" onclick="shareViaWhatsApp()">
-                                <i class="fab fa-whatsapp me-1"></i>WhatsApp
-                            </button>
-                            <button class="btn btn-outline-primary btn-sm" onclick="generatePDF()">
-                                <i class="fas fa-file-pdf me-1"></i>PDF
-                            </button>
+                            <div class="d-flex gap-2">
+                                <button class="btn btn-whatsapp btn-sm flex-fill" onclick="shareViaWhatsApp()">
+                                    <i class="fab fa-whatsapp me-1"></i>WhatsApp
+                                </button>
+                                <button class="btn btn-pdf btn-sm flex-fill" onclick="generatePDF()">
+                                    <i class="fas fa-file-pdf me-1"></i>PDF
+                                </button>
+                            </div>
                             <button class="btn btn-outline-danger btn-sm" onclick="clearCart()">
-                                <i class="fas fa-trash me-1"></i>Vider
+                                <i class="fas fa-trash me-1"></i>Vider le panier
                             </button>
                         </div>
                     </div>
@@ -765,49 +848,22 @@
     </div>
 
     <script>
-        // الرابط الثابت للبيانات
+        // البيانات الثابتة
         const DEFAULT_GIST_ID = "YOUR_DEFAULT_GIST_ID_HERE";
 
+        // المتغيرات العامة
         let products = [];
         let filteredProducts = [];
         let categories = [];
+        let notifications = [];
         let cart = JSON.parse(localStorage.getItem('varicom_cart')) || [];
-        let notifications = JSON.parse(localStorage.getItem('varicom_notifications')) || [];
+        let readNotifications = JSON.parse(localStorage.getItem('varicom_read_notifications')) || [];
         let autoRefreshInterval;
         let searchTimer;
-
-        // إشعارات افتراضية
-        const defaultNotifications = [
-            {
-                id: 1,
-                title: "Bienvenue chez VARICOM",
-                message: "Découvrez notre catalogue de produits informatiques de qualité.",
-                type: "info",
-                timestamp: new Date().toISOString(),
-                read: false
-            },
-            {
-                id: 2,
-                title: "Livraison Gratuite",
-                message: "Profitez de la livraison gratuite pour toute commande supérieure à 100,000 DA.",
-                type: "success",
-                timestamp: new Date().toISOString(),
-                read: false
-            },
-            {
-                id: 3,
-                title: "Nouveaux Produits",
-                message: "Découvrez nos nouveaux ordinateurs portables et accessoires.",
-                type: "info",
-                timestamp: new Date().toISOString(),
-                read: false
-            }
-        ];
 
         document.addEventListener('DOMContentLoaded', function() {
             initializeApp();
             setupMobileNav();
-            loadNotifications();
         });
 
         function initializeApp() {
@@ -815,13 +871,6 @@
             loadProducts();
             updateCartDisplay();
             startAutoRefresh();
-            
-            // إخفاء لوحة المسؤول تلقائياً بعد 10 ثواني
-            setTimeout(() => {
-                if (localStorage.getItem('showAdminPanel') !== 'true') {
-                    document.getElementById('adminPanel').style.display = 'none';
-                }
-            }, 10000);
         }
 
         function setupMobileNav() {
@@ -837,102 +886,30 @@
             
             if (section === 'cart') {
                 showCartModal();
-            } else if (section === 'notifications') {
-                showNotificationsModal();
+            } else if (section === 'new') {
+                document.getElementById('newArrivalsSection').scrollIntoView({ behavior: 'smooth' });
             }
         }
 
-        function showCartModal() {
-            if (cart.length === 0) {
-                showNotification("Votre panier est vide", "warning");
-                return;
-            }
-            
-            const total = cart.reduce((sum, item) => sum + (item.prix * item.quantity), 0);
-            let message = "🛒 VOTRE PANIER\n\n";
-            
-            cart.forEach(item => {
-                message += `• ${item.designation}\n`;
-                message += `  ${item.quantity} x ${formatPrice(item.prix)} = ${formatPrice(item.prix * item.quantity)}\n\n`;
-            });
-            
-            message += `💰 TOTAL: ${formatPrice(total)}\n\n`;
-            
-            const action = confirm(message + "Cliquez sur OK pour commander.");
-            
-            if (action) {
-                checkout();
-            }
-        }
-
-        function showNotificationsModal() {
-            const unreadCount = notifications.filter(n => !n.read).length;
-            let message = "📢 MESSAGES IMPORTANTS\n\n";
-            
-            if (notifications.length === 0) {
-                message += "Aucun message pour le moment.";
-            } else {
-                notifications.slice(0, 5).forEach(notification => {
-                    const date = new Date(notification.timestamp).toLocaleDateString('fr-FR');
-                    message += `• ${notification.title}\n`;
-                    message += `  ${notification.message}\n`;
-                    message += `  ${date}\n\n`;
-                });
-            }
-            
-            alert(message);
-            
-            // تعليم الإشعارات كمقروءة
-            notifications.forEach(notification => notification.read = true);
-            localStorage.setItem('varicom_notifications', JSON.stringify(notifications));
-        }
-
-        function setupEventListeners() {
-            document.getElementById('searchInput').addEventListener('input', function() {
-                clearTimeout(searchTimer);
-                searchTimer = setTimeout(filterProducts, 300);
-            });
-            
-            document.getElementById('categoryFilter').addEventListener('change', filterProducts);
-            
-            document.getElementById('categorySearch').addEventListener('input', function(e) {
-                const searchTerm = e.target.value.toLowerCase();
-                document.querySelectorAll('.category-item').forEach(item => {
-                    const text = item.textContent.toLowerCase();
-                    item.style.display = text.includes(searchTerm) ? 'flex' : 'none';
-                });
-            });
-        }
-
-        // نظام الإشعارات
-        function loadNotifications() {
-            if (notifications.length === 0) {
-                notifications = [...defaultNotifications];
-                localStorage.setItem('varicom_notifications', JSON.stringify(notifications));
-            }
-            
-            displayNotifications();
-        }
-
+        // نظام الإشعارات المتطور
         function displayNotifications() {
             const container = document.getElementById('notificationContainer');
             container.innerHTML = '';
             
-            // عرض آخر 3 إشعارات غير مقروءة
             const unreadNotifications = notifications
-                .filter(n => !n.read)
-                .slice(-3);
+                .filter(n => !readNotifications.includes(n.id))
+                .slice(0, 3);
             
             unreadNotifications.forEach(notification => {
                 const notificationElement = createNotificationElement(notification);
                 container.appendChild(notificationElement);
                 
-                // إزالة الإشعار تلقائياً بعد 5 ثواني
+                // إزالة الإشعار تلقائياً بعد 10 ثواني
                 setTimeout(() => {
                     if (notificationElement.parentNode) {
                         notificationElement.remove();
                     }
-                }, 5000);
+                }, 10000);
             });
         }
 
@@ -958,6 +935,12 @@
                 </button>
             `;
             
+            // وضع علامة مقروء عند النقر
+            div.addEventListener('click', function() {
+                markNotificationAsRead(notification.id);
+                this.remove();
+            });
+            
             return div;
         }
 
@@ -972,14 +955,15 @@
         }
 
         function closeNotification(id, element) {
-            // تعليم الإشعار كمقروء
-            notifications = notifications.map(n => 
-                n.id === id ? { ...n, read: true } : n
-            );
-            localStorage.setItem('varicom_notifications', JSON.stringify(notifications));
-            
-            // إزالة العنصر من الواجهة
+            markNotificationAsRead(id);
             element.closest('.notification').remove();
+        }
+
+        function markNotificationAsRead(id) {
+            if (!readNotifications.includes(id)) {
+                readNotifications.push(id);
+                localStorage.setItem('varicom_read_notifications', JSON.stringify(readNotifications));
+            }
         }
 
         function showNotification(message, type = "info", title = "Notification") {
@@ -988,61 +972,46 @@
                 title: title,
                 message: message,
                 type: type,
-                timestamp: new Date().toISOString(),
-                read: false
+                timestamp: new Date().toISOString()
             };
             
-            notifications.push(notification);
-            localStorage.setItem('varicom_notifications', JSON.stringify(notifications));
-            
+            // إضافة للإشعارات المؤقتة فقط (لا تحفظ في localStorage)
+            const tempNotifications = [notification, ...notifications].slice(0, 5);
+            notifications = tempNotifications;
             displayNotifications();
         }
 
-        // وظائف المسؤول
-        function sendNotification() {
-            const title = document.getElementById('notificationTitle').value.trim();
-            const message = document.getElementById('notificationMessage').value.trim();
-            const type = document.getElementById('notificationType').value;
+        // بقية الوظائف
+        function setupEventListeners() {
+            document.getElementById('searchInput').addEventListener('input', function() {
+                clearTimeout(searchTimer);
+                searchTimer = setTimeout(filterProducts, 300);
+            });
             
-            if (!title || !message) {
-                alert("Veuillez remplir le titre et le message de la notification.");
-                return;
-            }
+            document.getElementById('categoryFilter').addEventListener('change', filterProducts);
             
-            showNotification(message, type, title);
-            
-            // مسح الحقول
-            document.getElementById('notificationTitle').value = '';
-            document.getElementById('notificationMessage').value = '';
+            document.getElementById('categorySearch').addEventListener('input', function(e) {
+                const searchTerm = e.target.value.toLowerCase();
+                document.querySelectorAll('.category-item').forEach(item => {
+                    const text = item.textContent.toLowerCase();
+                    item.style.display = text.includes(searchTerm) ? 'flex' : 'none';
+                });
+            });
         }
 
-        function clearAllNotifications() {
-            if (confirm("Voulez-vous vraiment supprimer toutes les notifications?")) {
-                notifications = [];
-                localStorage.setItem('varicom_notifications', JSON.stringify(notifications));
-                document.getElementById('notificationContainer').innerHTML = '';
-                showNotification("Toutes les notifications ont été supprimées", "info", "Nettoyage");
-            }
-        }
-
-        function toggleAdminPanel() {
-            const panel = document.getElementById('adminPanel');
-            const isVisible = panel.style.display !== 'none';
-            panel.style.display = isVisible ? 'none' : 'block';
-            localStorage.setItem('showAdminPanel', !isVisible);
-        }
-
-        // بقية الوظائف (تبقى كما هي مع تعديلات طفيفة)
         async function loadProducts() {
             showNotification("Chargement des données...", "info");
 
             const urlParams = new URLSearchParams(window.location.search);
             const gistId = urlParams.get('gist') || DEFAULT_GIST_ID;
+            const dataParam = urlParams.get('data');
 
             try {
                 let productsData = null;
 
-                if (gistId && gistId !== "YOUR_DEFAULT_GIST_ID_HERE") {
+                if (dataParam) {
+                    productsData = await loadFromDataParam(dataParam);
+                } else if (gistId && gistId !== "YOUR_DEFAULT_GIST_ID_HERE") {
                     productsData = await loadFromGitHubGist(gistId);
                 } else {
                     productsData = await loadDemoData();
@@ -1059,6 +1028,24 @@
                 console.error('Erreur détaillée:', error);
                 showNotification("Erreur lors du chargement: " + error.message, "error");
                 showNoDataMessage();
+            }
+        }
+
+        async function loadFromDataParam(dataParam) {
+            try {
+                const decodedData = decodeURIComponent(atob(dataParam));
+                const parsedData = JSON.parse(decodedData);
+                
+                return {
+                    success: true,
+                    data: parsedData,
+                    lastUpdate: new Date().toISOString()
+                };
+            } catch (error) {
+                return {
+                    success: false,
+                    error: 'Erreur de décodage des données'
+                };
             }
         }
 
@@ -1106,36 +1093,47 @@
         }
 
         async function loadDemoData() {
-            const demoData = [
-                {
-                    id: 1,
-                    ref: "LAP-DEL-001",
-                    designation: "Laptop Dell Inspiron 15 - i7, 16GB RAM, 512GB SSD",
-                    prix: 125000,
-                    famille: "Ordinateurs Portables"
-                },
-                {
-                    id: 2,
-                    ref: "PC-HP-002",
-                    designation: "PC Bureau HP ProDesk - i5, 8GB RAM, 1TB HDD",
-                    prix: 75000,
-                    famille: "Ordinateurs Bureau"
-                },
-                {
-                    id: 3,
-                    ref: "ECR-LG-003",
-                    designation: "Écran LG 24\" Full HD - 1920x1080",
-                    prix: 22000,
-                    famille: "Écrans"
-                },
-                {
-                    id: 4,
-                    ref: "SOU-SAM-004",
-                    designation: "Smartphone Samsung Galaxy S23 - 128GB",
-                    prix: 68000,
-                    famille: "Téléphones"
-                }
-            ];
+            const demoData = {
+                products: [
+                    {
+                        id: 1,
+                        ref: "LAP-DEL-001",
+                        designation: "Laptop Dell Inspiron 15 - i7, 16GB RAM, 512GB SSD",
+                        prix: 125000,
+                        famille: "Ordinateurs Portables"
+                    },
+                    {
+                        id: 2,
+                        ref: "PC-HP-002",
+                        designation: "PC Bureau HP ProDesk - i5, 8GB RAM, 1TB HDD",
+                        prix: 75000,
+                        famille: "Ordinateurs Bureau"
+                    },
+                    {
+                        id: 3,
+                        ref: "ECR-LG-003",
+                        designation: "Écran LG 24\" Full HD - 1920x1080",
+                        prix: 22000,
+                        famille: "Écrans"
+                    }
+                ],
+                notifications: [
+                    {
+                        id: 1,
+                        title: "Bienvenue chez VARICOM",
+                        message: "Découvrez notre catalogue de produits informatiques de qualité.",
+                        type: "info",
+                        timestamp: new Date().toISOString()
+                    },
+                    {
+                        id: 2,
+                        title: "Livraison Gratuite",
+                        message: "Profitez de la livraison gratuite pour toute commande supérieure à 100,000 DA.",
+                        type: "success",
+                        timestamp: new Date().toISOString()
+                    }
+                ]
+            };
 
             return {
                 success: true,
@@ -1146,11 +1144,16 @@
 
         function processProductsData(productsData) {
             let rawProducts = [];
+            let rawNotifications = [];
             
             if (Array.isArray(productsData.data)) {
                 rawProducts = productsData.data;
             } else if (productsData.data && Array.isArray(productsData.data.products)) {
                 rawProducts = productsData.data.products;
+                rawNotifications = productsData.data.notifications || [];
+            } else if (productsData.data && productsData.data.products) {
+                rawProducts = productsData.data.products;
+                rawNotifications = productsData.data.notifications || [];
             } else {
                 throw new Error('Format de données non supporté');
             }
@@ -1162,6 +1165,9 @@
                 product.designation && 
                 product.prix > 0
             );
+
+            // تحميل الإشعارات من البيانات
+            notifications = rawNotifications;
 
             if (products.length === 0) {
                 showNoDataMessage();
@@ -1178,6 +1184,9 @@
             filterProducts();
             updateStats();
             updateLastSyncTime(productsData.lastUpdate);
+            
+            // عرض الإشعارات
+            displayNotifications();
         }
 
         function showNoDataMessage() {
@@ -1226,24 +1235,26 @@
             const categoriesList = document.getElementById('categoriesList');
             if (!categoriesList) return;
             
-            categoriesList.innerHTML = `
-                <div class="category-item active" data-category="">
-                    <i class="fas fa-th-large"></i>Toutes les catégories
-                </div>
-            `;
+            let html = '<div class="category-item active" data-category=""><i class="fas fa-th-large me-2"></i>Toutes</div>';
             
             categories.forEach(category => {
-                const categoryItem = document.createElement('div');
-                categoryItem.className = 'category-item';
-                categoryItem.innerHTML = `<i class="fas fa-tag"></i>${category}`;
-                categoryItem.setAttribute('data-category', category);
-                categoryItem.addEventListener('click', function() {
-                    document.querySelectorAll('.category-item').forEach(item => item.classList.remove('active'));
+                html += `
+                    <div class="category-item" data-category="${category}">
+                        <i class="fas fa-tag me-2"></i>${category}
+                    </div>
+                `;
+            });
+            
+            categoriesList.innerHTML = html;
+            
+            // إضافة مستمعي الأحداث
+            document.querySelectorAll('.category-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    document.querySelectorAll('.category-item').forEach(i => i.classList.remove('active'));
                     this.classList.add('active');
-                    document.getElementById('categoryFilter').value = category;
+                    document.getElementById('categoryFilter').value = this.getAttribute('data-category');
                     filterProducts();
                 });
-                categoriesList.appendChild(categoryItem);
             });
         }
 
@@ -1550,11 +1561,10 @@ Prix: ${formatPrice(product.prix)}
 
             showNotification('Génération du PDF en cours...', 'info');
             
-            // محاكاة إنشاء PDF (يمكن استبدالها بمكتبة jsPDF فعلية)
+            // محاكاة إنشاء PDF
             setTimeout(() => {
                 showNotification('PDF généré avec succès!', 'success');
                 
-                // في التطبيق الحقيقي، هنا نستخدم jsPDF لإنشاء الملف
                 const total = cart.reduce((sum, item) => sum + (item.prix * item.quantity), 0);
                 const currentDate = new Date().toLocaleDateString('fr-FR');
                 
@@ -1580,6 +1590,29 @@ Prix: ${formatPrice(product.prix)}
                 a.click();
                 URL.revokeObjectURL(url);
             }, 1000);
+        }
+
+        function showCartModal() {
+            if (cart.length === 0) {
+                showNotification("Votre panier est vide", "warning");
+                return;
+            }
+            
+            const total = cart.reduce((sum, item) => sum + (item.prix * item.quantity), 0);
+            let message = "🛒 VOTRE PANIER\n\n";
+            
+            cart.forEach(item => {
+                message += `• ${item.designation}\n`;
+                message += `  ${item.quantity} x ${formatPrice(item.prix)} = ${formatPrice(item.prix * item.quantity)}\n\n`;
+            });
+            
+            message += `💰 TOTAL: ${formatPrice(total)}\n\n`;
+            
+            const action = confirm(message + "Cliquez sur OK pour commander.");
+            
+            if (action) {
+                checkout();
+            }
         }
 
         function formatPrice(price) {
