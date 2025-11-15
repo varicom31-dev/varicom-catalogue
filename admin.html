@@ -81,6 +81,14 @@
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
         
+        .new-products-management {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
         .notification-preview {
             border-left: 4px solid;
             padding: 15px;
@@ -92,6 +100,22 @@
         .notification-success { border-left-color: #28a745; }
         .notification-warning { border-left-color: #ffc107; }
         .notification-error { border-left-color: #dc3545; }
+        
+        .new-product-card {
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+            background: #f8f9fa;
+        }
+        
+        .new-product-image {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 6px;
+            margin-right: 15px;
+        }
     </style>
 </head>
 <body>
@@ -131,6 +155,85 @@
                                 • Famille / Catégorie<br>
                                 • Prix / Price<br>
                                 <strong>Important:</strong> La première ligne doit contenir les en-têtes
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gestion des Produits Nouveaux -->
+        <div class="new-products-management">
+            <h4><i class="fas fa-plus-circle me-2"></i>Gestion des Nouveaux Produits</h4>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header bg-success text-white">
+                            <h5 class="mb-0"><i class="fas fa-plus me-2"></i>Ajouter un Nouveau Produit</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label class="form-label">Nom du produit:</label>
+                                <input type="text" class="form-control" id="newProductName" placeholder="Ex: Laptop Gaming ASUS ROG">
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Prix (DA):</label>
+                                <input type="number" class="form-control" id="newProductPrice" placeholder="Ex: 185000">
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">URL de l'image:</label>
+                                <input type="text" class="form-control" id="newProductImage" placeholder="https://example.com/image.jpg">
+                                <small class="form-text text-muted">Vous pouvez utiliser des URLs d'images depuis internet</small>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Catégorie:</label>
+                                <select class="form-select" id="newProductCategory">
+                                    <option value="Ordinateurs Portables">Ordinateurs Portables</option>
+                                    <option value="Ordinateurs Bureau">Ordinateurs Bureau</option>
+                                    <option value="Écrans">Écrans</option>
+                                    <option value="Téléphones">Téléphones</option>
+                                    <option value="Périphériques">Périphériques</option>
+                                    <option value="Accessoires">Accessoires</option>
+                                </select>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Aperçu:</label>
+                                <div class="new-product-card d-flex align-items-center">
+                                    <img id="imagePreview" src="https://via.placeholder.com/80x80/6c757d/ffffff?text=Image" 
+                                         class="new-product-image" alt="Aperçu">
+                                    <div>
+                                        <strong id="namePreview">Nom du produit</strong>
+                                        <div id="pricePreview" class="text-success">0 DA</div>
+                                        <small id="categoryPreview" class="text-muted">Catégorie</small>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <button class="btn btn-success w-100" onclick="addNewProduct()">
+                                <i class="fas fa-plus me-2"></i>Ajouter le Produit
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header bg-info text-white">
+                            <h5 class="mb-0"><i class="fas fa-list me-2"></i>Produits Nouveaux Actifs</h5>
+                        </div>
+                        <div class="card-body">
+                            <div id="activeNewProducts">
+                                <p class="text-muted text-center">Aucun produit nouveau</p>
+                            </div>
+                            <div class="mt-3">
+                                <button class="btn btn-outline-danger btn-sm w-100" onclick="clearAllNewProducts()">
+                                    <i class="fas fa-trash me-2"></i>Supprimer Tous les Produits
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -178,7 +281,7 @@
                                 </div>
                             </div>
                             
-                            <button class="btn btn-success w-100" onclick="createNotification()">
+                            <button class="btn btn-primary w-100" onclick="createNotification()">
                                 <i class="fas fa-paper-plane me-2"></i>Envoyer la Notification
                             </button>
                         </div>
@@ -187,7 +290,7 @@
                 
                 <div class="col-md-6">
                     <div class="card">
-                        <div class="card-header bg-info text-white">
+                        <div class="card-header bg-warning text-white">
                             <h5 class="mb-0"><i class="fas fa-list me-2"></i>Notifications Actives</h5>
                         </div>
                         <div class="card-body">
@@ -287,13 +390,16 @@
     <script>
         let currentProducts = [];
         let currentNotifications = [];
+        let currentNewProducts = [];
         let gistUrl = '';
 
         document.addEventListener('DOMContentLoaded', function() {
             loadToken();
             setupEventListeners();
             loadNotifications();
+            loadNewProducts();
             updateNotificationPreview();
+            updateProductPreview();
         });
 
         function loadToken() {
@@ -336,6 +442,12 @@
             document.getElementById('notificationTitle').addEventListener('input', updateNotificationPreview);
             document.getElementById('notificationMessage').addEventListener('input', updateNotificationPreview);
             document.getElementById('notificationType').addEventListener('change', updateNotificationPreview);
+
+            // Mise à jour de l'aperçu du produit
+            document.getElementById('newProductName').addEventListener('input', updateProductPreview);
+            document.getElementById('newProductPrice').addEventListener('input', updateProductPreview);
+            document.getElementById('newProductImage').addEventListener('input', updateProductPreview);
+            document.getElementById('newProductCategory').addEventListener('change', updateProductPreview);
         }
 
         function loadNotifications() {
@@ -343,6 +455,14 @@
             if (savedNotifications) {
                 currentNotifications = JSON.parse(savedNotifications);
                 displayActiveNotifications();
+            }
+        }
+
+        function loadNewProducts() {
+            const savedNewProducts = localStorage.getItem('varicom_new_products');
+            if (savedNewProducts) {
+                currentNewProducts = JSON.parse(savedNewProducts);
+                displayActiveNewProducts();
             }
         }
 
@@ -359,6 +479,18 @@
             document.getElementById('previewType').textContent = `Type: ${getNotificationTypeText(type)}`;
         }
 
+        function updateProductPreview() {
+            const name = document.getElementById('newProductName').value || 'Nom du produit';
+            const price = document.getElementById('newProductPrice').value || '0';
+            const image = document.getElementById('newProductImage').value || 'https://via.placeholder.com/80x80/6c757d/ffffff?text=Image';
+            const category = document.getElementById('newProductCategory').value;
+            
+            document.getElementById('namePreview').textContent = name;
+            document.getElementById('pricePreview').textContent = formatPrice(price);
+            document.getElementById('categoryPreview').textContent = category;
+            document.getElementById('imagePreview').src = image;
+        }
+
         function getNotificationTypeText(type) {
             const types = {
                 'info': 'Information',
@@ -367,6 +499,92 @@
                 'error': 'Erreur'
             };
             return types[type] || 'Information';
+        }
+
+        function addNewProduct() {
+            const name = document.getElementById('newProductName').value.trim();
+            const price = parseFloat(document.getElementById('newProductPrice').value);
+            const image = document.getElementById('newProductImage').value.trim();
+            const category = document.getElementById('newProductCategory').value;
+            
+            if (!name || !price || price <= 0) {
+                showSyncStatus('Veuillez remplir le nom et le prix correctement', 'error');
+                return;
+            }
+            
+            const newProduct = {
+                id: Date.now(),
+                name: name,
+                price: price,
+                image: image || 'https://via.placeholder.com/150x150/6c757d/ffffff?text=Image',
+                category: category,
+                timestamp: new Date().toISOString()
+            };
+            
+            currentNewProducts.unshift(newProduct);
+            localStorage.setItem('varicom_new_products', JSON.stringify(currentNewProducts));
+            
+            displayActiveNewProducts();
+            
+            // Réinitialiser le formulaire
+            document.getElementById('newProductName').value = '';
+            document.getElementById('newProductPrice').value = '';
+            document.getElementById('newProductImage').value = '';
+            updateProductPreview();
+            
+            showSyncStatus('Produit nouveau ajouté avec succès', 'success');
+        }
+
+        function displayActiveNewProducts() {
+            const container = document.getElementById('activeNewProducts');
+            
+            if (currentNewProducts.length === 0) {
+                container.innerHTML = '<p class="text-muted text-center">Aucun produit nouveau</p>';
+                return;
+            }
+            
+            let html = '';
+            currentNewProducts.slice(0, 5).forEach((product, index) => {
+                const time = new Date(product.timestamp).toLocaleString('fr-FR');
+                html += `
+                    <div class="new-product-card d-flex align-items-center">
+                        <img src="${product.image}" class="new-product-image" alt="${product.name}" 
+                             onerror="this.src='https://via.placeholder.com/80x80/6c757d/ffffff?text=Image'">
+                        <div class="flex-grow-1">
+                            <strong>${product.name}</strong>
+                            <div class="text-success">${formatPrice(product.price)}</div>
+                            <small class="text-muted">${product.category} - ${time}</small>
+                        </div>
+                        <button class="btn btn-sm btn-outline-danger" onclick="removeNewProduct(${index})">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                `;
+            });
+            
+            if (currentNewProducts.length > 5) {
+                html += `<p class="text-center text-muted small">+ ${currentNewProducts.length - 5} produits supplémentaires</p>`;
+            }
+            
+            container.innerHTML = html;
+        }
+
+        function removeNewProduct(index) {
+            if (confirm('Êtes-vous sûr de vouloir supprimer ce produit?')) {
+                currentNewProducts.splice(index, 1);
+                localStorage.setItem('varicom_new_products', JSON.stringify(currentNewProducts));
+                displayActiveNewProducts();
+                showSyncStatus('Produit supprimé', 'warning');
+            }
+        }
+
+        function clearAllNewProducts() {
+            if (confirm('Êtes-vous sûr de vouloir supprimer tous les produits nouveaux?')) {
+                currentNewProducts = [];
+                localStorage.setItem('varicom_new_products', JSON.stringify(currentNewProducts));
+                displayActiveNewProducts();
+                showSyncStatus('Tous les produits nouveaux ont été supprimés', 'success');
+            }
         }
 
         function createNotification() {
@@ -589,11 +807,6 @@
         }
 
         async function uploadToGitHubGist() {
-            if (currentProducts.length === 0) {
-                showSyncStatus('Aucune donnée à publier', 'error');
-                return;
-            }
-
             const token = document.getElementById('githubToken').value.trim();
             if (!token) {
                 showSyncStatus('Veuillez entrer votre token GitHub', 'error');
@@ -603,22 +816,24 @@
             showSyncStatus('Publication sur GitHub Gist en cours...', 'warning');
 
             try {
-                // Préparer les données
-                const productsData = {
+                // Préparer les données complètes
+                const completeData = {
                     products: currentProducts,
                     notifications: currentNotifications,
+                    newProducts: currentNewProducts,
                     lastUpdate: new Date().toISOString(),
                     totalProducts: currentProducts.length,
-                    totalNotifications: currentNotifications.length
+                    totalNotifications: currentNotifications.length,
+                    totalNewProducts: currentNewProducts.length
                 };
 
                 // Créer ou mettre à jour le Gist
                 const gistData = {
-                    description: "Catalogue Produits VARICOM",
+                    description: "Catalogue Produits VARICOM - " + new Date().toLocaleDateString('fr-FR'),
                     public: true,
                     files: {
-                        "produits.json": {
-                            content: JSON.stringify(productsData, null, 2)
+                        "varicom_data.json": {
+                            content: JSON.stringify(completeData, null, 2)
                         }
                     }
                 };
@@ -674,11 +889,13 @@
 
         function generateClientLink() {
             if (!gistUrl) {
-                // Si pas de Gist, créer un lien avec les données encodées
-                const dataStr = JSON.stringify({
+                // Si pas de Gist, créer un lien مع البيانات المحلية
+                const completeData = {
                     products: currentProducts,
-                    notifications: currentNotifications
-                });
+                    notifications: currentNotifications,
+                    newProducts: currentNewProducts
+                };
+                const dataStr = JSON.stringify(completeData);
                 const compressed = btoa(unescape(encodeURIComponent(dataStr)));
                 const clientUrl = `${window.location.origin}${window.location.pathname.replace('admin.html', 'index.html')}?data=${compressed}`;
                 
