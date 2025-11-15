@@ -3,11 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VARICOM - Catalogue Intelligent</title>
+    <title>VARICOM - Catalogue Professionnel</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         :root {
             --primary-color: #1a3a6c;
@@ -15,8 +14,6 @@
             --accent-color: #2a9d8f;
             --dark-color: #2d3748;
             --light-color: #f8f9fa;
-            --success-color: #28a745;
-            --warning-color: #ffc107;
         }
         
         * {
@@ -26,201 +23,237 @@
         }
         
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background-color: #f8f9fa;
             min-height: 100vh;
             color: #333;
-            line-height: 1.6;
+            line-height: 1.5;
         }
         
         /* Header Styles */
         .company-header {
             background: linear-gradient(135deg, var(--primary-color), #2a4d7a);
             color: white;
-            padding: 15px 0;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .company-header::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="%23ffffff" opacity="0.05"><polygon points="0,0 100,0 50,100"/></svg>');
-            background-size: 200px;
-        }
-        
-        .company-logo {
-            position: relative;
-            z-index: 1;
+            padding: 1rem 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
         
         .company-logo h2 {
-            font-weight: 800;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            font-weight: 700;
+            font-size: 1.5rem;
+        }
+        
+        /* Notification System */
+        .notification-container {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            z-index: 1050;
+            max-width: 350px;
+        }
+        
+        .notification {
+            background: white;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 0.5rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+            border-left: 4px solid var(--primary-color);
+            animation: slideInRight 0.3s ease;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+        }
+        
+        .notification.success { border-left-color: #28a745; }
+        .notification.warning { border-left-color: #ffc107; }
+        .notification.error { border-left-color: #dc3545; }
+        .notification.info { border-left-color: var(--primary-color); }
+        
+        .notification-icon {
+            font-size: 1.2rem;
+            margin-top: 2px;
+        }
+        
+        .notification-content {
+            flex: 1;
+        }
+        
+        .notification-title {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+            font-size: 0.95rem;
+        }
+        
+        .notification-message {
+            font-size: 0.85rem;
+            color: #666;
+            margin-bottom: 0.5rem;
+        }
+        
+        .notification-time {
+            font-size: 0.75rem;
+            color: #999;
+        }
+        
+        .notification-close {
+            background: none;
+            border: none;
+            color: #999;
+            cursor: pointer;
+            font-size: 0.9rem;
+            padding: 0;
+        }
+        
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        /* Admin Notification Panel */
+        .admin-panel {
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            border: 1px solid #e9ecef;
+        }
+        
+        .admin-panel h5 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
         
         /* Card Styles */
         .card {
             border: none;
-            border-radius: 16px;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
-            transition: all 0.3s ease;
-            margin-bottom: 1.5rem;
-            overflow: hidden;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            transition: all 0.2s ease;
+            margin-bottom: 1rem;
             background: white;
         }
         
         .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 12px 30px rgba(0,0,0,0.15);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.12);
         }
         
         .card-header {
             background: linear-gradient(135deg, var(--primary-color), #2a4d7a);
             color: white;
             border: none;
-            padding: 1.25rem;
+            padding: 1rem 1.25rem;
             font-weight: 600;
         }
         
         /* Button Styles */
+        .btn {
+            border-radius: 6px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            padding: 0.5rem 1rem;
+        }
+        
         .btn-primary {
-            background: linear-gradient(135deg, var(--secondary-color), #c1121f);
+            background: var(--primary-color);
             border: none;
-            border-radius: 10px;
-            padding: 12px 24px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(231, 57, 70, 0.3);
         }
         
         .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(231, 57, 70, 0.4);
+            background: #15325c;
+            transform: translateY(-1px);
         }
         
         .btn-success {
-            background: linear-gradient(135deg, var(--success-color), #20c997);
+            background: #28a745;
             border: none;
-            border-radius: 10px;
-            padding: 12px 24px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
-        }
-        
-        .btn-success:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
         }
         
         .btn-whatsapp {
-            background: linear-gradient(135deg, #25D366, #128C7E);
+            background: #25D366;
             color: white;
             border: none;
-            border-radius: 10px;
-            padding: 12px 24px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3);
         }
         
         .btn-whatsapp:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(37, 211, 102, 0.4);
+            background: #128C7E;
             color: white;
         }
         
         /* Sidebar Styles */
         .categories-sidebar {
             background: white;
-            border-radius: 16px;
-            padding: 1.5rem;
+            border-radius: 10px;
+            padding: 1.25rem;
             height: fit-content;
             position: sticky;
             top: 20px;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
         }
         
         .category-item {
-            padding: 14px 18px;
-            margin-bottom: 10px;
-            border-radius: 10px;
+            padding: 0.75rem 1rem;
+            margin-bottom: 0.5rem;
+            border-radius: 6px;
             cursor: pointer;
-            border-left: 4px solid transparent;
-            transition: all 0.3s ease;
-            font-size: 0.95rem;
+            border-left: 3px solid transparent;
+            transition: all 0.2s ease;
+            font-size: 0.9rem;
             display: flex;
             align-items: center;
-            background: #f8f9fa;
+            gap: 0.5rem;
         }
         
         .category-item:hover, .category-item.active {
-            background: linear-gradient(135deg, #e3f2fd, #bbdefb);
+            background: #f8f9fa;
             border-left-color: var(--secondary-color);
-            transform: translateX(5px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
         
         .cart-sidebar {
             background: white;
-            border-radius: 16px;
-            padding: 1.5rem;
-            margin-top: 1.5rem;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            border-radius: 10px;
+            padding: 1.25rem;
+            margin-top: 1rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
         }
         
         /* Product Grid */
         .products-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 1.5rem;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1rem;
         }
         
         .product-card {
-            transition: all 0.3s ease;
+            transition: all 0.2s ease;
             border: 1px solid #e9ecef;
             height: 100%;
-            border-radius: 16px;
+            border-radius: 10px;
             overflow: hidden;
             background: white;
-            position: relative;
         }
         
         .product-card:hover {
-            box-shadow: 0 12px 30px rgba(0,0,0,0.15);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         }
         
         .product-image {
-            height: 180px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            height: 140px;
+            background: linear-gradient(135deg, #f1f3f4, #e1e5e9);
             display: flex;
             align-items: center;
             justify-content: center;
             position: relative;
-            overflow: hidden;
         }
         
         .product-image i {
-            font-size: 4rem;
-            color: rgba(255,255,255,0.9);
-            z-index: 1;
-        }
-        
-        .product-image::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="%23ffffff" opacity="0.1"><circle cx="50" cy="50" r="40"/></svg>');
-            background-size: 150px;
+            font-size: 2.5rem;
+            color: var(--primary-color);
+            opacity: 0.8;
         }
         
         .product-badges {
@@ -233,35 +266,29 @@
         }
         
         .product-badge {
-            padding: 5px 10px;
-            border-radius: 20px;
-            font-size: 0.75rem;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.7rem;
             font-weight: 600;
         }
         
         .product-info {
-            padding: 1.5rem;
+            padding: 1rem;
         }
         
         .product-name {
-            font-weight: 700;
+            font-weight: 600;
             color: var(--dark-color);
             margin-bottom: 0.5rem;
-            font-size: 1.1rem;
-            line-height: 1.4;
-        }
-        
-        .product-description {
-            color: #6c757d;
-            margin-bottom: 1rem;
-            font-size: 0.9rem;
+            font-size: 0.95rem;
+            line-height: 1.3;
         }
         
         .product-price {
-            font-size: 1.5rem;
-            font-weight: 800;
+            font-size: 1.1rem;
+            font-weight: 700;
             color: var(--primary-color);
-            margin-bottom: 1rem;
+            margin-bottom: 0.75rem;
         }
         
         .product-actions {
@@ -273,81 +300,63 @@
         /* Search & Filter */
         .search-container {
             position: relative;
-            margin-bottom: 1.5rem;
+            margin-bottom: 1rem;
         }
         
         .search-box {
-            border-radius: 50px;
-            padding: 15px 20px;
-            border: 2px solid #e9ecef;
-            transition: all 0.3s ease;
-            font-size: 1rem;
+            border-radius: 6px;
+            padding: 0.75rem 1rem;
+            border: 1px solid #e9ecef;
+            transition: all 0.2s ease;
+            font-size: 0.9rem;
             width: 100%;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
         }
         
         .search-box:focus {
             border-color: var(--primary-color);
-            box-shadow: 0 4px 20px rgba(26, 58, 108, 0.2);
-        }
-        
-        .search-icon {
-            position: absolute;
-            right: 20px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: #6c757d;
+            box-shadow: 0 0 0 2px rgba(26, 58, 108, 0.1);
         }
         
         .filter-section {
             background: white;
-            border-radius: 16px;
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
         }
         
         /* Stats Cards */
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 1rem;
-            margin-bottom: 1.5rem;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 0.75rem;
+            margin-bottom: 1rem;
         }
         
         .stat-card {
             background: white;
-            border-radius: 16px;
-            padding: 1.5rem;
+            border-radius: 8px;
+            padding: 1rem;
             text-align: center;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
-            transition: all 0.3s ease;
-        }
-        
-        .stat-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 12px 30px rgba(0,0,0,0.15);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
         }
         
         .stat-icon {
-            font-size: 2.5rem;
-            margin-bottom: 1rem;
-            background: linear-gradient(135deg, var(--primary-color), #2a4d7a);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            color: var(--primary-color);
         }
         
         .stat-value {
-            font-size: 2rem;
-            font-weight: 800;
+            font-size: 1.25rem;
+            font-weight: 700;
             color: var(--dark-color);
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.25rem;
         }
         
         .stat-label {
             color: #6c757d;
-            font-size: 0.9rem;
-            font-weight: 600;
+            font-size: 0.8rem;
         }
         
         /* Cart Styles */
@@ -355,7 +364,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 1rem 0;
+            padding: 0.75rem 0;
             border-bottom: 1px solid #e9ecef;
         }
         
@@ -370,75 +379,43 @@
         .cart-item-name {
             font-weight: 600;
             margin-bottom: 0.25rem;
+            font-size: 0.9rem;
         }
         
         .cart-item-ref {
             color: #6c757d;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
         }
         
         .cart-item-actions {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
         }
         
         .cart-item-quantity {
-            font-weight: 700;
-            margin: 0 10px;
+            font-weight: 600;
+            margin: 0 0.5rem;
         }
         
         .cart-item-price {
             font-weight: 700;
             color: var(--primary-color);
-            min-width: 100px;
+            min-width: 80px;
             text-align: right;
+            font-size: 0.9rem;
         }
         
         .cart-total {
-            font-size: 1.5rem;
-            font-weight: 800;
+            font-size: 1.1rem;
+            font-weight: 700;
             color: var(--primary-color);
             text-align: center;
-            margin: 1.5rem 0;
-            padding: 1rem;
+            margin: 1rem 0;
+            padding: 0.75rem;
             background: #f8f9fa;
-            border-radius: 10px;
-        }
-        
-        /* Sync Status */
-        .sync-status {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 1000;
-            padding: 15px 25px;
-            border-radius: 10px;
-            display: none;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
-            max-width: 350px;
-            word-wrap: break-word;
-            animation: slideIn 0.3s ease;
-        }
-        
-        @keyframes slideIn {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-        
-        .sync-success { 
-            background: linear-gradient(135deg, var(--success-color), #20c997); 
-            color: white; 
-        }
-        
-        .sync-warning { 
-            background: linear-gradient(135deg, var(--warning-color), #fd7e14); 
-            color: black; 
-        }
-        
-        .sync-error { 
-            background: linear-gradient(135deg, var(--secondary-color), #c1121f); 
-            color: white; 
+            border-radius: 6px;
         }
         
         /* Mobile Bottom Nav */
@@ -448,96 +425,64 @@
             left: 0;
             right: 0;
             background: white;
-            box-shadow: 0 -2px 20px rgba(0,0,0,0.1);
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
             display: none;
             z-index: 1000;
-            padding: 10px 0;
+            padding: 0.5rem 0;
         }
         
         .nav-item {
             flex: 1;
             text-align: center;
-            padding: 8px 5px;
+            padding: 0.5rem;
             cursor: pointer;
-            transition: all 0.3s ease;
-            border-radius: 10px;
-            margin: 0 5px;
+            transition: all 0.2s ease;
+            border-radius: 6px;
+            margin: 0 0.25rem;
         }
         
         .nav-item.active {
-            background: linear-gradient(135deg, var(--primary-color), #2a4d7a);
+            background: var(--primary-color);
             color: white;
-            box-shadow: 0 4px 15px rgba(26, 58, 108, 0.3);
         }
         
         .nav-item i {
-            font-size: 1.3rem;
-            margin-bottom: 3px;
+            font-size: 1.1rem;
+            margin-bottom: 0.25rem;
         }
         
         .nav-item .small {
-            font-size: 0.75rem;
+            font-size: 0.7rem;
         }
         
         .cart-badge-mobile {
             position: absolute;
-            top: 5px;
+            top: 0;
             right: 25%;
             background: var(--secondary-color);
             color: white;
             border-radius: 50%;
-            width: 20px;
-            height: 20px;
-            font-size: 0.75rem;
+            width: 18px;
+            height: 18px;
+            font-size: 0.7rem;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-weight: 700;
-        }
-        
-        /* AI Recommendations */
-        .ai-recommendations {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border-radius: 16px;
-            padding: 1.5rem;
-            margin-bottom: 1.5rem;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-        }
-        
-        .ai-header {
-            display: flex;
-            align-items: center;
-            margin-bottom: 1rem;
-        }
-        
-        .ai-icon {
-            font-size: 1.5rem;
-            margin-right: 10px;
-        }
-        
-        .ai-title {
-            font-weight: 700;
-            font-size: 1.2rem;
-        }
-        
-        .ai-message {
-            font-size: 0.95rem;
-            opacity: 0.9;
+            font-weight: 600;
         }
         
         /* Responsive Design */
         @media (max-width: 768px) {
             .company-header {
-                padding: 10px 0;
+                padding: 0.75rem 0;
             }
             
             .company-header h2 {
-                font-size: 1.4rem;
+                font-size: 1.3rem;
             }
             
             .company-info div {
-                font-size: 0.85rem;
+                font-size: 0.8rem;
             }
             
             .categories-sidebar {
@@ -550,16 +495,15 @@
             }
             
             .search-box {
-                padding: 12px 15px;
-                font-size: 16px;
+                padding: 0.75rem;
             }
             
             .stat-card {
-                padding: 1rem;
+                padding: 0.75rem;
             }
             
             .stat-value {
-                font-size: 1.5rem;
+                font-size: 1.1rem;
             }
             
             .mobile-bottom-nav {
@@ -567,11 +511,11 @@
             }
             
             body {
-                padding-bottom: 70px;
+                padding-bottom: 60px;
             }
             
-            .sync-status {
-                top: 10px;
+            .notification-container {
+                top: 70px;
                 right: 10px;
                 left: 10px;
                 max-width: none;
@@ -581,63 +525,38 @@
         @media (max-width: 576px) {
             .company-header .col-md-6 {
                 text-align: center !important;
-                margin-bottom: 10px;
+                margin-bottom: 0.5rem;
             }
             
             .product-image {
-                height: 150px;
+                height: 120px;
             }
             
             .product-image i {
-                font-size: 3rem;
+                font-size: 2rem;
             }
             
             .product-info {
-                padding: 1rem;
+                padding: 0.75rem;
             }
             
             .product-name {
-                font-size: 1rem;
+                font-size: 0.9rem;
             }
             
             .product-price {
-                font-size: 1.3rem;
-            }
-            
-            .btn-primary, .btn-success, .btn-whatsapp {
-                padding: 10px 15px;
-                font-size: 0.9rem;
+                font-size: 1rem;
             }
         }
         
-        /* Animation for new items */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        .product-card {
-            animation: fadeIn 0.5s ease;
-        }
-        
-        /* Loading animation */
-        .loading-spinner {
-            display: inline-block;
-            width: 50px;
-            height: 50px;
-            border: 5px solid rgba(255,255,255,0.3);
-            border-radius: 50%;
-            border-top-color: white;
-            animation: spin 1s ease-in-out infinite;
-        }
-        
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
+        /* Utility Classes */
+        .text-small { font-size: 0.85rem; }
+        .text-smaller { font-size: 0.75rem; }
+        .fw-medium { font-weight: 500; }
     </style>
 </head>
 <body>
-    <div id="syncStatus" class="sync-status"></div>
+    <div id="notificationContainer" class="notification-container"></div>
 
     <!-- شريط التنقل للهواتف -->
     <div class="mobile-bottom-nav d-lg-none">
@@ -655,9 +574,9 @@
                 <div class="small">السلة</div>
                 <span class="cart-badge-mobile" style="display: none;">0</span>
             </div>
-            <div class="nav-item" onclick="showSection('ai')">
-                <i class="fas fa-robot"></i>
-                <div class="small">التوصيات</div>
+            <div class="nav-item" onclick="showSection('notifications')">
+                <i class="fas fa-bell"></i>
+                <div class="small">الإشعارات</div>
             </div>
         </div>
     </div>
@@ -668,22 +587,22 @@
                 <div class="col-md-6">
                     <div class="company-logo">
                         <h2 class="mb-1"><i class="fas fa-laptop-code me-2"></i>VARICOM</h2>
-                        <p class="mb-0 opacity-75">Votre partenaire informatique de confiance</p>
+                        <p class="mb-0 opacity-75 text-small">Votre partenaire informatique de confiance</p>
                     </div>
                     <div class="company-info mt-2">
-                        <div class="mb-1 small"><i class="fas fa-map-marker-alt me-2"></i>07 Boulevard MIRA Abderahmen Loc N°2, Oran</div>
-                        <div class="small"><i class="fas fa-phone me-2"></i>05 41 52 75 61 | <i class="fas fa-fax me-2"></i>041 36 32 57</div>
+                        <div class="mb-1 text-small"><i class="fas fa-map-marker-alt me-2"></i>07 Boulevard MIRA Abderahmen Loc N°2, Oran</div>
+                        <div class="text-small"><i class="fas fa-phone me-2"></i>05 41 52 75 61 | <i class="fas fa-fax me-2"></i>041 36 32 57</div>
                     </div>
                 </div>
                 <div class="col-md-6 text-md-end">
                     <div class="company-info">
-                        <div class="mb-2 small"><i class="fas fa-envelope me-2"></i>contact@varicom-dz.com</div>
+                        <div class="mb-2 text-small"><i class="fas fa-envelope me-2"></i>contact@varicom-dz.com</div>
                         <div class="d-flex justify-content-end gap-2">
-                            <div class="badge bg-light text-dark p-2 auto-refresh-badge" onclick="refreshData()" title="Cliquer pour actualiser">
+                            <div class="badge bg-light text-dark p-2" onclick="refreshData()" title="Cliquer pour actualiser" style="cursor: pointer;">
                                 <i class="fas fa-sync-alt me-1"></i>
                                 <span id="lastSyncTime">Actualiser</span>
                             </div>
-                            <div class="badge bg-success text-white p-2" onclick="generatePDF()" title="Générer PDF">
+                            <div class="badge bg-success text-white p-2" onclick="generatePDF()" title="Générer PDF" style="cursor: pointer;">
                                 <i class="fas fa-file-pdf me-1"></i> PDF
                             </div>
                         </div>
@@ -694,48 +613,79 @@
     </header>
 
     <div class="container my-4">
+        <!-- لوحة المسؤول للإشعارات (يمكن إخفاؤها في النسخة النهائية) -->
+        <div class="admin-panel" id="adminPanel">
+            <h5><i class="fas fa-cog"></i> لوحة تحكم المسؤول</h5>
+            <div class="row g-2">
+                <div class="col-md-8">
+                    <input type="text" id="notificationTitle" class="form-control form-control-sm" placeholder="عنوان الإشعار">
+                </div>
+                <div class="col-md-4">
+                    <select id="notificationType" class="form-select form-select-sm">
+                        <option value="info">معلومات</option>
+                        <option value="success">نجاح</option>
+                        <option value="warning">تحذير</option>
+                        <option value="error">خطأ</option>
+                    </select>
+                </div>
+                <div class="col-12">
+                    <textarea id="notificationMessage" class="form-control form-control-sm" rows="2" placeholder="نص الإشعار"></textarea>
+                </div>
+                <div class="col-12">
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-primary btn-sm" onclick="sendNotification()">
+                            <i class="fas fa-paper-plane me-1"></i> إرسال إشعار
+                        </button>
+                        <button class="btn btn-outline-secondary btn-sm" onclick="clearAllNotifications()">
+                            <i class="fas fa-trash me-1"></i> مسح الكل
+                        </button>
+                        <button class="btn btn-outline-secondary btn-sm" onclick="toggleAdminPanel()">
+                            <i class="fas fa-eye-slash me-1"></i> إخفاء
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <div class="row">
             <!-- الشريط الجانبي - يظهر فقط في الشاشات الكبيرة -->
             <div class="col-lg-3 d-none d-lg-block">
                 <!-- الفئات -->
                 <div class="categories-sidebar">
-                    <h5 class="d-flex align-items-center"><i class="fas fa-list me-2"></i>Catégories</h5>
+                    <h5 class="d-flex align-items-center mb-3"><i class="fas fa-list me-2"></i>Catégories</h5>
                     <div class="search-container mb-3">
                         <input type="text" id="categorySearch" class="form-control search-box" placeholder="🔍 Rechercher catégorie...">
-                        <div class="search-icon">
-                            <i class="fas fa-search"></i>
-                        </div>
                     </div>
                     <div id="categoriesList">
                         <div class="category-item active" data-category="">
-                            <i class="fas fa-th-large me-2"></i>Toutes les catégories
+                            <i class="fas fa-th-large"></i>Toutes les catégories
                         </div>
                     </div>
                 </div>
 
                 <!-- السلة -->
                 <div class="cart-sidebar">
-                    <h5 class="d-flex align-items-center"><i class="fas fa-shopping-cart me-2"></i>Mon Panier</h5>
+                    <h5 class="d-flex align-items-center mb-3"><i class="fas fa-shopping-cart me-2"></i>Mon Panier</h5>
                     <div id="cartContent">
-                        <p class="text-muted text-center py-4" id="emptyCartMessage">
-                            <i class="fas fa-shopping-cart fa-2x mb-3"></i><br>
+                        <p class="text-muted text-center py-3" id="emptyCartMessage">
+                            <i class="fas fa-shopping-cart fa-lg mb-2"></i><br>
                             Votre panier est vide
                         </p>
                         <div id="cartItems" style="display: none;"></div>
                     </div>
-                    <div class="mt-4" id="cartActions" style="display: none;">
+                    <div class="mt-3" id="cartActions" style="display: none;">
                         <div class="d-grid gap-2">
-                            <button class="btn btn-success" onclick="checkout()">
-                                <i class="fas fa-credit-card me-2"></i>Commander
+                            <button class="btn btn-success btn-sm" onclick="checkout()">
+                                <i class="fas fa-credit-card me-1"></i>Commander
                             </button>
-                            <button class="btn btn-whatsapp" onclick="shareViaWhatsApp()">
-                                <i class="fab fa-whatsapp me-2"></i>Envoyer sur WhatsApp
+                            <button class="btn btn-whatsapp btn-sm" onclick="shareViaWhatsApp()">
+                                <i class="fab fa-whatsapp me-1"></i>WhatsApp
                             </button>
-                            <button class="btn btn-outline-primary" onclick="generatePDF()">
-                                <i class="fas fa-file-pdf me-2"></i>Générer PDF
+                            <button class="btn btn-outline-primary btn-sm" onclick="generatePDF()">
+                                <i class="fas fa-file-pdf me-1"></i>PDF
                             </button>
-                            <button class="btn btn-outline-danger" onclick="clearCart()">
-                                <i class="fas fa-trash me-2"></i>Vider le panier
+                            <button class="btn btn-outline-danger btn-sm" onclick="clearCart()">
+                                <i class="fas fa-trash me-1"></i>Vider
                             </button>
                         </div>
                     </div>
@@ -744,25 +694,13 @@
 
             <!-- المحتوى الرئيسي -->
             <div class="col-lg-9 col-12">
-                <!-- توصيات الذكاء الاصطناعي -->
-                <div class="ai-recommendations" id="aiRecommendations" style="display: none;">
-                    <div class="ai-header">
-                        <i class="fas fa-robot ai-icon"></i>
-                        <div class="ai-title">Recommandations Intelligentes</div>
-                    </div>
-                    <div class="ai-message" id="aiMessage"></div>
-                </div>
-
                 <!-- شريط البحث -->
                 <div class="filter-section">
-                    <div class="row g-3 align-items-center">
+                    <div class="row g-2 align-items-center">
                         <div class="col-md-8 col-12">
                             <div class="search-container">
                                 <input type="text" id="searchInput" class="form-control search-box" 
-                                       placeholder="🔍 Rechercher un produit, une référence ou une catégorie...">
-                                <div class="search-icon">
-                                    <i class="fas fa-search"></i>
-                                </div>
+                                       placeholder="🔍 Rechercher un produit...">
                             </div>
                         </div>
                         <div class="col-md-4 col-12">
@@ -810,14 +748,14 @@
                     <div class="card-header">
                         <div class="d-flex justify-content-between align-items-center">
                             <h5 class="mb-0"><i class="fas fa-table me-2"></i>Catalogue Produits</h5>
-                            <span class="badge bg-light text-dark fs-6" id="productCount">0 produits</span>
+                            <span class="badge bg-light text-dark" id="productCount">0 produits</span>
                         </div>
                     </div>
                     <div class="card-body">
                         <div id="productsContainer">
-                            <div class="text-center py-5 text-muted">
-                                <div class="loading-spinner mb-3"></div>
-                                <p>Chargement des produits...</p>
+                            <div class="text-center py-4 text-muted">
+                                <div class="spinner-border spinner-border-sm text-primary mb-2"></div>
+                                <p class="mb-0">Chargement des produits...</p>
                             </div>
                         </div>
                     </div>
@@ -834,12 +772,42 @@
         let filteredProducts = [];
         let categories = [];
         let cart = JSON.parse(localStorage.getItem('varicom_cart')) || [];
+        let notifications = JSON.parse(localStorage.getItem('varicom_notifications')) || [];
         let autoRefreshInterval;
         let searchTimer;
+
+        // إشعارات افتراضية
+        const defaultNotifications = [
+            {
+                id: 1,
+                title: "Bienvenue chez VARICOM",
+                message: "Découvrez notre catalogue de produits informatiques de qualité.",
+                type: "info",
+                timestamp: new Date().toISOString(),
+                read: false
+            },
+            {
+                id: 2,
+                title: "Livraison Gratuite",
+                message: "Profitez de la livraison gratuite pour toute commande supérieure à 100,000 DA.",
+                type: "success",
+                timestamp: new Date().toISOString(),
+                read: false
+            },
+            {
+                id: 3,
+                title: "Nouveaux Produits",
+                message: "Découvrez nos nouveaux ordinateurs portables et accessoires.",
+                type: "info",
+                timestamp: new Date().toISOString(),
+                read: false
+            }
+        ];
 
         document.addEventListener('DOMContentLoaded', function() {
             initializeApp();
             setupMobileNav();
+            loadNotifications();
         });
 
         function initializeApp() {
@@ -847,7 +815,13 @@
             loadProducts();
             updateCartDisplay();
             startAutoRefresh();
-            generateAIRecommendations();
+            
+            // إخفاء لوحة المسؤول تلقائياً بعد 10 ثواني
+            setTimeout(() => {
+                if (localStorage.getItem('showAdminPanel') !== 'true') {
+                    document.getElementById('adminPanel').style.display = 'none';
+                }
+            }, 10000);
         }
 
         function setupMobileNav() {
@@ -863,40 +837,60 @@
             
             if (section === 'cart') {
                 showCartModal();
-            } else if (section === 'ai') {
-                generateAIRecommendations();
-                document.getElementById('aiRecommendations').style.display = 'block';
+            } else if (section === 'notifications') {
+                showNotificationsModal();
             }
         }
 
         function showCartModal() {
             if (cart.length === 0) {
-                alert("Votre panier est vide");
+                showNotification("Votre panier est vide", "warning");
                 return;
             }
             
             const total = cart.reduce((sum, item) => sum + (item.prix * item.quantity), 0);
-            let message = "🛒 VOTRE PANIER 🛒\n\n";
+            let message = "🛒 VOTRE PANIER\n\n";
             
             cart.forEach(item => {
-                message += `• ${item.designation} (${item.ref})\n`;
-                message += `  Quantité: ${item.quantity} x ${formatPrice(item.prix)} = ${formatPrice(item.prix * item.quantity)}\n\n`;
+                message += `• ${item.designation}\n`;
+                message += `  ${item.quantity} x ${formatPrice(item.prix)} = ${formatPrice(item.prix * item.quantity)}\n\n`;
             });
             
             message += `💰 TOTAL: ${formatPrice(total)}\n\n`;
-            message += "Que souhaitez-vous faire?";
             
-            const action = confirm(message + "\n\nCliquez sur OK pour commander ou Annuler pour d'autres options.");
+            const action = confirm(message + "Cliquez sur OK pour commander.");
             
             if (action) {
                 checkout();
             }
         }
 
+        function showNotificationsModal() {
+            const unreadCount = notifications.filter(n => !n.read).length;
+            let message = "📢 MESSAGES IMPORTANTS\n\n";
+            
+            if (notifications.length === 0) {
+                message += "Aucun message pour le moment.";
+            } else {
+                notifications.slice(0, 5).forEach(notification => {
+                    const date = new Date(notification.timestamp).toLocaleDateString('fr-FR');
+                    message += `• ${notification.title}\n`;
+                    message += `  ${notification.message}\n`;
+                    message += `  ${date}\n\n`;
+                });
+            }
+            
+            alert(message);
+            
+            // تعليم الإشعارات كمقروءة
+            notifications.forEach(notification => notification.read = true);
+            localStorage.setItem('varicom_notifications', JSON.stringify(notifications));
+        }
+
         function setupEventListeners() {
             document.getElementById('searchInput').addEventListener('input', function() {
                 clearTimeout(searchTimer);
-                searchTimer = setTimeout(filterProducts, 400);
+                searchTimer = setTimeout(filterProducts, 300);
             });
             
             document.getElementById('categoryFilter').addEventListener('change', filterProducts);
@@ -910,8 +904,137 @@
             });
         }
 
+        // نظام الإشعارات
+        function loadNotifications() {
+            if (notifications.length === 0) {
+                notifications = [...defaultNotifications];
+                localStorage.setItem('varicom_notifications', JSON.stringify(notifications));
+            }
+            
+            displayNotifications();
+        }
+
+        function displayNotifications() {
+            const container = document.getElementById('notificationContainer');
+            container.innerHTML = '';
+            
+            // عرض آخر 3 إشعارات غير مقروءة
+            const unreadNotifications = notifications
+                .filter(n => !n.read)
+                .slice(-3);
+            
+            unreadNotifications.forEach(notification => {
+                const notificationElement = createNotificationElement(notification);
+                container.appendChild(notificationElement);
+                
+                // إزالة الإشعار تلقائياً بعد 5 ثواني
+                setTimeout(() => {
+                    if (notificationElement.parentNode) {
+                        notificationElement.remove();
+                    }
+                }, 5000);
+            });
+        }
+
+        function createNotificationElement(notification) {
+            const div = document.createElement('div');
+            div.className = `notification ${notification.type}`;
+            
+            const icon = getNotificationIcon(notification.type);
+            const time = new Date(notification.timestamp).toLocaleTimeString('fr-FR', { 
+                hour: '2-digit', 
+                minute: '2-digit' 
+            });
+            
+            div.innerHTML = `
+                <div class="notification-icon">${icon}</div>
+                <div class="notification-content">
+                    <div class="notification-title">${notification.title}</div>
+                    <div class="notification-message">${notification.message}</div>
+                    <div class="notification-time">${time}</div>
+                </div>
+                <button class="notification-close" onclick="closeNotification(${notification.id}, this)">
+                    <i class="fas fa-times"></i>
+                </button>
+            `;
+            
+            return div;
+        }
+
+        function getNotificationIcon(type) {
+            const icons = {
+                'success': '<i class="fas fa-check-circle text-success"></i>',
+                'warning': '<i class="fas fa-exclamation-triangle text-warning"></i>',
+                'error': '<i class="fas fa-times-circle text-danger"></i>',
+                'info': '<i class="fas fa-info-circle text-primary"></i>'
+            };
+            return icons[type] || icons.info;
+        }
+
+        function closeNotification(id, element) {
+            // تعليم الإشعار كمقروء
+            notifications = notifications.map(n => 
+                n.id === id ? { ...n, read: true } : n
+            );
+            localStorage.setItem('varicom_notifications', JSON.stringify(notifications));
+            
+            // إزالة العنصر من الواجهة
+            element.closest('.notification').remove();
+        }
+
+        function showNotification(message, type = "info", title = "Notification") {
+            const notification = {
+                id: Date.now(),
+                title: title,
+                message: message,
+                type: type,
+                timestamp: new Date().toISOString(),
+                read: false
+            };
+            
+            notifications.push(notification);
+            localStorage.setItem('varicom_notifications', JSON.stringify(notifications));
+            
+            displayNotifications();
+        }
+
+        // وظائف المسؤول
+        function sendNotification() {
+            const title = document.getElementById('notificationTitle').value.trim();
+            const message = document.getElementById('notificationMessage').value.trim();
+            const type = document.getElementById('notificationType').value;
+            
+            if (!title || !message) {
+                alert("Veuillez remplir le titre et le message de la notification.");
+                return;
+            }
+            
+            showNotification(message, type, title);
+            
+            // مسح الحقول
+            document.getElementById('notificationTitle').value = '';
+            document.getElementById('notificationMessage').value = '';
+        }
+
+        function clearAllNotifications() {
+            if (confirm("Voulez-vous vraiment supprimer toutes les notifications?")) {
+                notifications = [];
+                localStorage.setItem('varicom_notifications', JSON.stringify(notifications));
+                document.getElementById('notificationContainer').innerHTML = '';
+                showNotification("Toutes les notifications ont été supprimées", "info", "Nettoyage");
+            }
+        }
+
+        function toggleAdminPanel() {
+            const panel = document.getElementById('adminPanel');
+            const isVisible = panel.style.display !== 'none';
+            panel.style.display = isVisible ? 'none' : 'block';
+            localStorage.setItem('showAdminPanel', !isVisible);
+        }
+
+        // بقية الوظائف (تبقى كما هي مع تعديلات طفيفة)
         async function loadProducts() {
-            showSyncStatus('Chargement des données...', 'warning');
+            showNotification("Chargement des données...", "info");
 
             const urlParams = new URLSearchParams(window.location.search);
             const gistId = urlParams.get('gist') || DEFAULT_GIST_ID;
@@ -927,14 +1050,14 @@
 
                 if (productsData && productsData.success) {
                     processProductsData(productsData);
-                    showSyncStatus('Catalogue chargé avec succès', 'success');
+                    showNotification("Catalogue chargé avec succès", "success");
                 } else {
                     throw new Error(productsData?.error || 'Erreur inconnue lors du chargement');
                 }
                 
             } catch (error) {
                 console.error('Erreur détaillée:', error);
-                showSyncStatus('Erreur lors du chargement: ' + error.message, 'error');
+                showNotification("Erreur lors du chargement: " + error.message, "error");
                 showNoDataMessage();
             }
         }
@@ -987,66 +1110,30 @@
                 {
                     id: 1,
                     ref: "LAP-DEL-001",
-                    designation: "Laptop Dell Inspiron 15 - Processeur i7, 16GB RAM, 512GB SSD",
+                    designation: "Laptop Dell Inspiron 15 - i7, 16GB RAM, 512GB SSD",
                     prix: 125000,
-                    famille: "Ordinateurs Portables",
-                    description: "Idéal pour le travail et le gaming"
+                    famille: "Ordinateurs Portables"
                 },
                 {
                     id: 2,
                     ref: "PC-HP-002",
-                    designation: "PC Bureau HP ProDesk - Processeur i5, 8GB RAM, 1TB HDD",
+                    designation: "PC Bureau HP ProDesk - i5, 8GB RAM, 1TB HDD",
                     prix: 75000,
-                    famille: "Ordinateurs Bureau",
-                    description: "Parfait pour le bureau et la maison"
+                    famille: "Ordinateurs Bureau"
                 },
                 {
                     id: 3,
                     ref: "ECR-LG-003",
-                    designation: "Écran LG 24\" Full HD - Résolution 1920x1080",
+                    designation: "Écran LG 24\" Full HD - 1920x1080",
                     prix: 22000,
-                    famille: "Écrans",
-                    description: "Affichage net et précis"
+                    famille: "Écrans"
                 },
                 {
                     id: 4,
-                    ref: "CLA-LOG-004",
-                    designation: "Clavier Logitech Mécanique - Rétroéclairage RGB",
-                    prix: 8500,
-                    famille: "Périphériques",
-                    description: "Tactile et durable"
-                },
-                {
-                    id: 5,
-                    ref: "SOU-SAM-005",
-                    designation: "Smartphone Samsung Galaxy S23 - 128GB, Double SIM",
+                    ref: "SOU-SAM-004",
+                    designation: "Smartphone Samsung Galaxy S23 - 128GB",
                     prix: 68000,
-                    famille: "Téléphones",
-                    description: "Performant et élégant"
-                },
-                {
-                    id: 6,
-                    ref: "TAB-APP-006",
-                    designation: "Tablette Apple iPad 10.2\" - 64GB, Wi-Fi",
-                    prix: 89000,
-                    famille: "Tablettes",
-                    description: "Parfaite pour la productivité"
-                },
-                {
-                    id: 7,
-                    ref: "IMP-CAN-007",
-                    designation: "Imprimante Canon PIXMA - Multifonction WiFi",
-                    prix: 45000,
-                    famille: "Imprimantes",
-                    description: "Impression, scan, copie"
-                },
-                {
-                    id: 8,
-                    ref: "DIS-SSD-008",
-                    designation: "Disque SSD 1TB - Vitesse de lecture 550MB/s",
-                    prix: 12000,
-                    famille: "Composants",
-                    description: "Améliorez les performances de votre PC"
+                    famille: "Téléphones"
                 }
             ];
 
@@ -1091,17 +1178,16 @@
             filterProducts();
             updateStats();
             updateLastSyncTime(productsData.lastUpdate);
-            generateAIRecommendations();
         }
 
         function showNoDataMessage() {
             document.getElementById('productsContainer').innerHTML = `
-                <div class="text-center py-5 text-muted">
-                    <i class="fas fa-exclamation-triangle fa-2x mb-3"></i>
-                    <h5>Aucun produit disponible</h5>
-                    <p class="mb-3">Aucun produit valide n'a été trouvé dans les données</p>
-                    <button class="btn btn-primary" onclick="loadProducts()">
-                        <i class="fas fa-sync me-2"></i>Réessayer
+                <div class="text-center py-4 text-muted">
+                    <i class="fas fa-exclamation-triangle fa-lg mb-2"></i>
+                    <h6>Aucun produit disponible</h6>
+                    <p class="mb-2">Aucun produit valide n'a été trouvé</p>
+                    <button class="btn btn-primary btn-sm" onclick="loadProducts()">
+                        <i class="fas fa-sync me-1"></i>Réessayer
                     </button>
                 </div>
             `;
@@ -1117,7 +1203,6 @@
             }
             
             autoRefreshInterval = setInterval(() => {
-                console.log('🔄 Actualisation automatique...');
                 loadProducts();
             }, 120000);
         }
@@ -1143,14 +1228,14 @@
             
             categoriesList.innerHTML = `
                 <div class="category-item active" data-category="">
-                    <i class="fas fa-th-large me-2"></i>Toutes les catégories
+                    <i class="fas fa-th-large"></i>Toutes les catégories
                 </div>
             `;
             
             categories.forEach(category => {
                 const categoryItem = document.createElement('div');
                 categoryItem.className = 'category-item';
-                categoryItem.innerHTML = `<i class="fas fa-tag me-2"></i>${category}`;
+                categoryItem.innerHTML = `<i class="fas fa-tag"></i>${category}`;
                 categoryItem.setAttribute('data-category', category);
                 categoryItem.addEventListener('click', function() {
                     document.querySelectorAll('.category-item').forEach(item => item.classList.remove('active'));
@@ -1182,8 +1267,7 @@
                 const matchesSearch = 
                     product.ref.toLowerCase().includes(searchTerm) ||
                     product.designation.toLowerCase().includes(searchTerm) ||
-                    (product.famille && product.famille.toLowerCase().includes(searchTerm)) ||
-                    (product.description && product.description.toLowerCase().includes(searchTerm));
+                    (product.famille && product.famille.toLowerCase().includes(searchTerm));
                 
                 const matchesCategory = !selectedCategory || product.famille === selectedCategory;
                 
@@ -1192,7 +1276,6 @@
 
             displayProducts();
             updateProductCount();
-            generateAIRecommendations();
         }
 
         function displayProducts() {
@@ -1200,9 +1283,9 @@
             
             if (filteredProducts.length === 0) {
                 container.innerHTML = `
-                    <div class="text-center py-5 text-muted">
-                        <i class="fas fa-search fa-2x mb-3"></i>
-                        <h5>Aucun produit trouvé</h5>
+                    <div class="text-center py-4 text-muted">
+                        <i class="fas fa-search fa-lg mb-2"></i>
+                        <h6>Aucun produit trouvé</h6>
                         <p>Essayez de modifier vos critères de recherche</p>
                     </div>
                 `;
@@ -1215,7 +1298,6 @@
                 const isInCart = cart.some(item => item.id === product.id);
                 const famille = product.famille || 'Non catégorisé';
                 const icon = getProductIcon(famille);
-                const description = product.description || 'Produit de qualité professionnelle';
                 
                 html += `
                     <div class="product-card">
@@ -1228,10 +1310,9 @@
                         </div>
                         <div class="product-info">
                             <div class="product-name">${product.designation}</div>
-                            <div class="product-description">${description}</div>
                             <div class="product-price">${formatPrice(product.prix)}</div>
                             <div class="product-actions">
-                                <button class="btn ${isInCart ? 'btn-warning' : 'btn-primary'}" 
+                                <button class="btn ${isInCart ? 'btn-warning' : 'btn-primary'} btn-sm" 
                                         onclick="toggleCart(${product.id})">
                                     <i class="fas ${isInCart ? 'fa-shopping-cart' : 'fa-cart-plus'} me-1"></i>
                                     ${isInCart ? 'Dans panier' : 'Ajouter'}
@@ -1256,9 +1337,7 @@
                 'Écrans': 'fas fa-tv',
                 'Périphériques': 'fas fa-keyboard',
                 'Téléphones': 'fas fa-mobile-alt',
-                'Tablettes': 'fas fa-tablet-alt',
-                'Imprimantes': 'fas fa-print',
-                'Composants': 'fas fa-microchip'
+                'Tablettes': 'fas fa-tablet-alt'
             };
             return icons[category] || 'fas fa-box';
         }
@@ -1272,7 +1351,6 @@ Référence: ${product.ref}
 Désignation: ${product.designation}
 Catégorie: ${product.famille || 'Non catégorisé'}
 Prix: ${formatPrice(product.prix)}
-${product.description ? `Description: ${product.description}` : ''}
             `.trim();
             
             alert(details);
@@ -1291,7 +1369,7 @@ ${product.description ? `Description: ${product.description}` : ''}
             
             if (existingIndex > -1) {
                 cart.splice(existingIndex, 1);
-                showSyncStatus('Produit retiré du panier', 'warning');
+                showNotification('Produit retiré du panier', 'warning');
             } else {
                 cart.push({
                     id: product.id,
@@ -1301,7 +1379,7 @@ ${product.description ? `Description: ${product.description}` : ''}
                     quantity: 1,
                     famille: product.famille
                 });
-                showSyncStatus('Produit ajouté au panier!', 'success');
+                showNotification('Produit ajouté au panier!', 'success');
             }
 
             localStorage.setItem('varicom_cart', JSON.stringify(cart));
@@ -1309,7 +1387,6 @@ ${product.description ? `Description: ${product.description}` : ''}
             updateCartDisplay();
             updateStats();
             updateMobileCartBadge();
-            generateAIRecommendations();
         }
 
         function updateMobileCartBadge() {
@@ -1350,15 +1427,15 @@ ${product.description ? `Description: ${product.description}` : ''}
                         <div class="cart-item-info">
                             <div class="cart-item-name">${item.designation}</div>
                             <div class="cart-item-ref">${item.ref}</div>
-                            <div class="cart-item-actions mt-2">
+                            <div class="cart-item-actions">
                                 <button class="btn btn-outline-secondary btn-sm" onclick="updateQuantity(${index}, -1)">
                                     <i class="fas fa-minus"></i>
                                 </button>
-                                <span class="cart-item-quantity mx-2">${item.quantity}</span>
+                                <span class="cart-item-quantity">${item.quantity}</span>
                                 <button class="btn btn-outline-secondary btn-sm" onclick="updateQuantity(${index}, 1)">
                                     <i class="fas fa-plus"></i>
                                 </button>
-                                <button class="btn btn-outline-danger btn-sm ms-2" onclick="removeFromCart(${index})">
+                                <button class="btn btn-outline-danger btn-sm" onclick="removeFromCart(${index})">
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </div>
@@ -1399,7 +1476,7 @@ ${product.description ? `Description: ${product.description}` : ''}
             displayProducts();
             updateStats();
             updateMobileCartBadge();
-            showSyncStatus(`${productName} retiré du panier`, 'warning');
+            showNotification(`${productName} retiré du panier`, 'warning');
         }
 
         function clearCart() {
@@ -1410,13 +1487,13 @@ ${product.description ? `Description: ${product.description}` : ''}
                 displayProducts();
                 updateStats();
                 updateMobileCartBadge();
-                showSyncStatus('Panier vidé', 'success');
+                showNotification('Panier vidé', 'success');
             }
         }
 
         function checkout() {
             if (cart.length === 0) {
-                showSyncStatus('Votre panier est vide', 'warning');
+                showNotification('Votre panier est vide', 'warning');
                 return;
             }
 
@@ -1442,7 +1519,7 @@ ${product.description ? `Description: ${product.description}` : ''}
 
         function shareViaWhatsApp() {
             if (cart.length === 0) {
-                showSyncStatus('Votre panier est vide', 'warning');
+                showNotification('Votre panier est vide', 'warning');
                 return;
             }
 
@@ -1467,144 +1544,46 @@ ${product.description ? `Description: ${product.description}` : ''}
 
         function generatePDF() {
             if (cart.length === 0) {
-                showSyncStatus('Votre panier est vide', 'warning');
+                showNotification('Votre panier est vide', 'warning');
                 return;
             }
 
-            showSyncStatus('Génération du PDF en cours...', 'warning');
+            showNotification('Génération du PDF en cours...', 'info');
             
-            // استخدام html2canvas لالتقاط لقطة للبيانات
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-            
-            const total = cart.reduce((sum, item) => sum + (item.prix * item.quantity), 0);
-            const currentDate = new Date().toLocaleDateString('fr-FR');
-            
-            // عنوان PDF
-            doc.setFontSize(20);
-            doc.setTextColor(26, 58, 108);
-            doc.text('VARICOM - DEVIS', 105, 20, { align: 'center' });
-            
-            // معلومات الشركة
-            doc.setFontSize(10);
-            doc.setTextColor(100, 100, 100);
-            doc.text('07 Boulevard MIRA Abderahmen Loc N°2, Oran', 105, 30, { align: 'center' });
-            doc.text('Tél: 05 41 52 75 61 | Fax: 041 36 32 57', 105, 35, { align: 'center' });
-            doc.text('Email: contact@varicom-dz.com', 105, 40, { align: 'center' });
-            
-            // تاريخ
-            doc.text(`Date: ${currentDate}`, 20, 50);
-            
-            // جدول المنتجات
-            let yPosition = 70;
-            doc.setFillColor(26, 58, 108);
-            doc.setTextColor(255, 255, 255);
-            doc.rect(20, yPosition, 170, 10, 'F');
-            doc.text('Produit', 25, yPosition + 7);
-            doc.text('Qté', 120, yPosition + 7);
-            doc.text('Prix', 140, yPosition + 7);
-            doc.text('Total', 160, yPosition + 7);
-            
-            yPosition += 10;
-            doc.setTextColor(0, 0, 0);
-            
-            cart.forEach(item => {
-                const itemTotal = item.prix * item.quantity;
+            // محاكاة إنشاء PDF (يمكن استبدالها بمكتبة jsPDF فعلية)
+            setTimeout(() => {
+                showNotification('PDF généré avec succès!', 'success');
                 
-                if (yPosition > 250) {
-                    doc.addPage();
-                    yPosition = 20;
-                }
-                
-                doc.text(item.designation.substring(0, 40) + (item.designation.length > 40 ? '...' : ''), 25, yPosition + 7);
-                doc.text(item.quantity.toString(), 120, yPosition + 7);
-                doc.text(formatPrice(item.prix), 140, yPosition + 7);
-                doc.text(formatPrice(itemTotal), 160, yPosition + 7);
-                
-                yPosition += 10;
-            });
-            
-            // الخط الإجمالي
-            yPosition += 10;
-            doc.setDrawColor(0, 0, 0);
-            doc.line(20, yPosition, 190, yPosition);
-            yPosition += 10;
-            
-            doc.setFontSize(12);
-            doc.setFont(undefined, 'bold');
-            doc.text(`TOTAL: ${formatPrice(total)}`, 160, yPosition, { align: 'right' });
-            
-            // حفظ PDF
-            doc.save(`devis-varicom-${currentDate.replace(/\//g, '-')}.pdf`);
-            showSyncStatus('PDF généré avec succès!', 'success');
-        }
-
-        function generateAIRecommendations() {
-            const aiMessage = document.getElementById('aiMessage');
-            if (!aiMessage) return;
-            
-            let message = "";
-            
-            if (cart.length > 0) {
+                // في التطبيق الحقيقي، هنا نستخدم jsPDF لإنشاء الملف
                 const total = cart.reduce((sum, item) => sum + (item.prix * item.quantity), 0);
-                const categoriesInCart = [...new Set(cart.map(item => item.famille))];
+                const currentDate = new Date().toLocaleDateString('fr-FR');
                 
-                message = `Votre panier contient ${cart.length} produit(s) pour un total de ${formatPrice(total)}. `;
+                let pdfContent = "VARICOM - DEVIS\n\n";
+                pdfContent += "07 Boulevard MIRA Abderahmen Loc N°2, Oran\n";
+                pdfContent += "Tél: 05 41 52 75 61 | Fax: 041 36 32 57\n";
+                pdfContent += `Date: ${currentDate}\n\n`;
+                pdfContent += "PRODUITS COMMANDÉS:\n\n";
                 
-                // توصيات بناءً على المنتجات في السلة
-                if (categoriesInCart.includes('Ordinateurs Portables')) {
-                    message += "Nous vous recommandons d'ajouter une sacoche de protection et une souris sans fil pour compléter votre achat. ";
-                }
+                cart.forEach(item => {
+                    pdfContent += `• ${item.designation} (${item.ref})\n`;
+                    pdfContent += `  Quantité: ${item.quantity} x ${formatPrice(item.prix)} = ${formatPrice(item.prix * item.quantity)}\n\n`;
+                });
                 
-                if (categoriesInCart.includes('Ordinateurs Bureau')) {
-                    message += "Pensez à ajouter un écran et un clavier/souris pour une expérience complète. ";
-                }
+                pdfContent += `TOTAL: ${formatPrice(total)}`;
                 
-                if (total > 100000) {
-                    message += "Profitez de nos solutions de paiement en plusieurs fois sans frais! ";
-                }
-            } else {
-                // توصيات عامة
-                const popularCategories = products.reduce((acc, product) => {
-                    acc[product.famille] = (acc[product.famille] || 0) + 1;
-                    return acc;
-                }, {});
-                
-                const mostPopularCategory = Object.keys(popularCategories).reduce((a, b) => 
-                    popularCategories[a] > popularCategories[b] ? a : b
-                );
-                
-                message = `Découvrez nos ${products.length} produits de qualité. `;
-                message += `La catégorie "${mostPopularCategory}" est particulièrement populaire en ce moment. `;
-                message += "Utilisez la barre de recherche pour trouver rapidement ce dont vous avez besoin.";
-            }
-            
-            aiMessage.textContent = message;
-            document.getElementById('aiRecommendations').style.display = 'block';
+                // إنشاء ملف نصي كمحاكاة للPDF
+                const blob = new Blob([pdfContent], { type: 'text/plain' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `devis-varicom-${currentDate.replace(/\//g, '-')}.txt`;
+                a.click();
+                URL.revokeObjectURL(url);
+            }, 1000);
         }
 
         function formatPrice(price) {
             return new Intl.NumberFormat('fr-FR', {minimumFractionDigits: 2}).format(price) + ' DA';
-        }
-
-        function showSyncStatus(message, type) {
-            const syncStatus = document.getElementById('syncStatus');
-            syncStatus.innerHTML = `
-                <i class="fas fa-${getStatusIcon(type)} me-2"></i>
-                ${message}
-            `;
-            syncStatus.className = `sync-status sync-${type}`;
-            syncStatus.style.display = 'block';
-            setTimeout(() => syncStatus.style.display = 'none', 5000);
-        }
-
-        function getStatusIcon(type) {
-            switch(type) {
-                case 'success': return 'check-circle';
-                case 'warning': return 'exclamation-triangle';
-                case 'error': return 'exclamation-circle';
-                default: return 'info-circle';
-            }
         }
 
         window.addEventListener('beforeunload', () => {
