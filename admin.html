@@ -116,6 +116,17 @@
             border-radius: 6px;
             margin-right: 15px;
         }
+        
+        .debug-info {
+            background: #f8f9fa;
+            border-radius: 5px;
+            padding: 10px;
+            margin: 10px 0;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 200px;
+            overflow-y: auto;
+        }
     </style>
 </head>
 <body>
@@ -156,6 +167,22 @@
                                 • Prix / Price<br>
                                 <strong>Important:</strong> La première ligne doit contenir les en-têtes
                             </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Debug Information -->
+        <div class="row" id="debugSection" style="display: none;">
+            <div class="col-12">
+                <div class="card m-4">
+                    <div class="card-header bg-warning text-dark">
+                        <h5 class="mb-0"><i class="fas fa-bug me-2"></i>Informations de Débogage</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="debug-info" id="debugInfo">
+                            <!-- Les informations de débogage seront affichées ici -->
                         </div>
                     </div>
                 </div>
@@ -324,6 +351,9 @@
                             <button class="btn btn-success btn-sm" onclick="generateClientLink()">
                                 <i class="fas fa-link me-1"></i>Lien Client
                             </button>
+                            <button class="btn btn-warning btn-sm" onclick="toggleDebug()">
+                                <i class="fas fa-bug me-1"></i>Debug
+                            </button>
                         </div>
                     </div>
                     <div class="card-body">
@@ -448,6 +478,18 @@
             document.getElementById('newProductPrice').addEventListener('input', updateProductPreview);
             document.getElementById('newProductImage').addEventListener('input', updateProductPreview);
             document.getElementById('newProductCategory').addEventListener('change', updateProductPreview);
+        }
+
+        function toggleDebug() {
+            const debugSection = document.getElementById('debugSection');
+            debugSection.style.display = debugSection.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function addDebugInfo(message) {
+            const debugInfo = document.getElementById('debugInfo');
+            const timestamp = new Date().toLocaleTimeString();
+            debugInfo.innerHTML += `[${timestamp}] ${message}\n`;
+            debugInfo.scrollTop = debugInfo.scrollHeight;
         }
 
         function loadNotifications() {
@@ -680,6 +722,7 @@
             }
 
             showSyncStatus('Lecture du fichier Excel en cours...', 'warning');
+            addDebugInfo(`Début du traitement du fichier: ${file.name}`);
 
             const reader = new FileReader();
             reader.onload = function(e) {
@@ -687,14 +730,33 @@
                     const data = new Uint8Array(e.target.result);
                     const workbook = XLSX.read(data, { type: 'array' });
                     
+                    addDebugInfo(`Fichier Excel chargé, nombre de feuilles: ${workbook.SheetNames.length}`);
+                    
                     const firstSheetName = workbook.SheetNames[0];
                     const worksheet = workbook.Sheets[firstSheetName];
+                    
+                    addDebugInfo(`Utilisation de la feuille: ${firstSheetName}`);
+                    
+                    // Obtenir les données brutes pour le débogage
+                    const rawData = XLSX.utils.sheet_to_json(worksheet, { header: 1 });
+                    addDebugInfo(`Nombre total de lignes dans le fichier: ${rawData.length}`);
+                    
+                    // Afficher les premières lignes pour le débogage
+                    if (rawData.length > 0) {
+                        addDebugInfo(`En-têtes détectés: ${JSON.stringify(rawData[0])}`);
+                        if (rawData.length > 1) {
+                            addDebugInfo(`Première ligne de données: ${JSON.stringify(rawData[1])}`);
+                        }
+                    }
+
                     const jsonData = XLSX.utils.sheet_to_json(worksheet);
+                    addDebugInfo(`Données JSON converties: ${jsonData.length} lignes`);
 
                     processExcelData(jsonData);
                     
                 } catch (error) {
                     console.error('Erreur:', error);
+                    addDebugInfo(`ERREUR lors de la lecture: ${error.message}`);
                     showSyncStatus('Erreur lors de la lecture du fichier Excel', 'error');
                 }
             };
@@ -704,49 +766,84 @@
         function processExcelData(excelData) {
             currentProducts = [];
             let skippedRows = 0;
+            let validRows = 0;
+
+            addDebugInfo(`Traitement de ${excelData.length} lignes de données...`);
 
             excelData.forEach((row, index) => {
                 const keys = Object.keys(row);
                 let ref = '', designation = '', famille = '', prix = 0;
 
+                // Debug: Afficher la structure de la ligne
+                if (index < 3) { // Afficher seulement les 3 premières lignes pour le débogage
+                    addDebugInfo(`Ligne ${index + 1} - Clés: ${keys.join(', ')}`);
+                    addDebugInfo(`Ligne ${index + 1} - Données: ${JSON.stringify(row)}`);
+                }
+
                 keys.forEach(key => {
-                    const keyLower = key.toLowerCase();
+                    const keyLower = key.toLowerCase().trim();
                     const value = row[key];
 
                     if (keyLower.includes('réf') || keyLower.includes('ref') || keyLower.includes('reference')) {
-                        ref = value || '';
+                        ref = value ? value.toString().trim() : '';
                     } else if (keyLower.includes('designation') || keyLower.includes('désignation') || keyLower.includes('produit') || keyLower.includes('product')) {
-                        designation = value || '';
+                        designation = value ? value.toString().trim() : '';
                     } else if (keyLower.includes('famille') || keyLower.includes('catégorie') || keyLower.includes('category')) {
-                        famille = value || 'Général';
+                        famille = value ? value.toString().trim() : 'Général';
                     } else if (keyLower.includes('prix') || keyLower.includes('price')) {
                         let priceValue = value;
                         if (typeof priceValue === 'string') {
+                            // Nettoyer le format du prix
                             priceValue = priceValue.replace(/[^\d,.-]/g, '').replace(',', '.');
                         }
                         prix = parseFloat(priceValue) || 0;
                     }
                 });
 
-                if (ref && designation && prix > 0) {
+                // Vérification plus stricte des données
+                const hasValidRef = ref && ref.length > 0;
+                const hasValidDesignation = designation && designation.length > 0;
+                const hasValidPrice = prix > 0;
+
+                if (hasValidRef && hasValidDesignation && hasValidPrice) {
                     currentProducts.push({
                         id: currentProducts.length + 1,
-                        ref: ref.toString().trim(),
-                        designation: designation.toString().trim(),
-                        famille: famille.toString().trim(),
+                        ref: ref,
+                        designation: designation,
+                        famille: famille,
                         prix: prix
                     });
+                    validRows++;
+                    
+                    if (validRows <= 3) {
+                        addDebugInfo(`✓ Ligne ${index + 1} VALIDE - Ref: "${ref}", Designation: "${designation.substring(0, 30)}...", Prix: ${prix}`);
+                    }
                 } else {
                     skippedRows++;
+                    if (skippedRows <= 3) {
+                        addDebugInfo(`✗ Ligne ${index + 1} INVALIDE - Ref: "${ref}", Designation: "${designation}", Prix: ${prix}`);
+                    }
                 }
             });
 
+            addDebugInfo(`=== RÉSULTATS DU TRAITEMENT ===`);
+            addDebugInfo(`Lignes valides: ${validRows}`);
+            addDebugInfo(`Lignes ignorées: ${skippedRows}`);
+            addDebugInfo(`Total des produits: ${currentProducts.length}`);
+
             if (currentProducts.length === 0) {
+                addDebugInfo(`AUCUNE DONNÉE VALIDE - Vérifiez le format de votre fichier Excel`);
                 showSyncStatus('Aucune donnée valide trouvée dans le fichier', 'error');
                 return;
             }
 
-            showSyncStatus(`${currentProducts.length} produits importés avec succès`, 'success');
+            // Afficher un échantillon des produits traités
+            addDebugInfo(`=== ÉCHANTILLON DES PRODUITS ===`);
+            currentProducts.slice(0, 3).forEach((product, index) => {
+                addDebugInfo(`Produit ${index + 1}: ${product.ref} - ${product.designation.substring(0, 40)}... - ${product.prix} DA`);
+            });
+
+            showSyncStatus(`${currentProducts.length} produits importés avec succès (${skippedRows} lignes ignorées)`, 'success');
             showPreview();
         }
 
@@ -761,11 +858,14 @@
                 <div class="alert alert-success">
                     <i class="fas fa-check-circle me-2"></i>
                     ${currentProducts.length} produits importés avec succès
+                    ${currentProducts.length !== (currentProducts.length + (parseInt(previewCount.textContent) - currentProducts.length)) ? 
+                      `<br><small>${parseInt(previewCount.textContent) - currentProducts.length} lignes ignorées (données incomplètes)</small>` : ''}
                 </div>
                 <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
                     <table class="table table-striped table-hover">
                         <thead class="table-dark sticky-top">
                             <tr>
+                                <th>#</th>
                                 <th>Référence</th>
                                 <th>Désignation</th>
                                 <th>Catégorie</th>
@@ -775,9 +875,10 @@
                         <tbody>
             `;
 
-            currentProducts.slice(0, 50).forEach(product => {
+            currentProducts.slice(0, 50).forEach((product, index) => {
                 html += `
                     <tr>
+                        <td><small class="text-muted">${index + 1}</small></td>
                         <td><strong>${product.ref}</strong></td>
                         <td>${product.designation}</td>
                         <td><span class="badge bg-info">${product.famille}</span></td>
@@ -789,7 +890,7 @@
             if (currentProducts.length > 50) {
                 html += `
                     <tr>
-                        <td colspan="4" class="text-center text-muted fst-italic">
+                        <td colspan="5" class="text-center text-muted fst-italic">
                             ... et ${currentProducts.length - 50} autres produits
                         </td>
                     </tr>
@@ -813,7 +914,13 @@
                 return;
             }
 
+            if (currentProducts.length === 0) {
+                showSyncStatus('Aucune donnée à publier', 'error');
+                return;
+            }
+
             showSyncStatus('Publication sur GitHub Gist en cours...', 'warning');
+            addDebugInfo('Début de la publication sur GitHub Gist...');
 
             try {
                 // Préparer les données complètes
@@ -824,8 +931,15 @@
                     lastUpdate: new Date().toISOString(),
                     totalProducts: currentProducts.length,
                     totalNotifications: currentNotifications.length,
-                    totalNewProducts: currentNewProducts.length
+                    totalNewProducts: currentNewProducts.length,
+                    metadata: {
+                        source: "VARICOM Admin Panel",
+                        version: "1.0",
+                        generatedAt: new Date().toISOString()
+                    }
                 };
+
+                addDebugInfo(`Données préparées: ${completeData.products.length} produits, ${completeData.newProducts.length} nouveaux produits, ${completeData.notifications.length} notifications`);
 
                 // Créer ou mettre à jour le Gist
                 const gistData = {
@@ -842,6 +956,7 @@
                 const existingGistId = localStorage.getItem('varicom_gist_id');
                 
                 if (existingGistId) {
+                    addDebugInfo(`Mise à jour du Gist existant: ${existingGistId}`);
                     // Mettre à jour le Gist existant
                     response = await fetch(`https://api.github.com/gists/${existingGistId}`, {
                         method: 'PATCH',
@@ -852,6 +967,7 @@
                         body: JSON.stringify(gistData)
                     });
                 } else {
+                    addDebugInfo('Création d\'un nouveau Gist...');
                     // Créer un nouveau Gist
                     response = await fetch('https://api.github.com/gists', {
                         method: 'POST',
@@ -865,6 +981,7 @@
 
                 if (!response.ok) {
                     const errorData = await response.json();
+                    addDebugInfo(`ERREUR GitHub API: ${errorData.message}`);
                     throw new Error(errorData.message || 'Erreur GitHub API');
                 }
 
@@ -873,6 +990,9 @@
                 // Sauvegarder l'ID du Gist
                 localStorage.setItem('varicom_gist_id', result.id);
                 gistUrl = result.html_url;
+
+                addDebugInfo(`✅ Gist publié avec succès: ${result.id}`);
+                addDebugInfo(`URL du Gist: ${gistUrl}`);
 
                 showSyncStatus('✅ Données publiées sur GitHub avec succès!', 'success');
                 
@@ -883,6 +1003,7 @@
 
             } catch (error) {
                 console.error('Erreur:', error);
+                addDebugInfo(`❌ Erreur publication: ${error.message}`);
                 showSyncStatus('❌ Erreur publication: ' + error.message, 'error');
             }
         }
@@ -910,6 +1031,8 @@
             const gistId = gistUrl.split('/').pop();
             const clientUrl = `${window.location.origin}${window.location.pathname.replace('admin.html', 'index.html')}?gist=${gistId}`;
             
+            addDebugInfo(`Génération du lien client: ${clientUrl}`);
+            
             navigator.clipboard.writeText(clientUrl).then(() => {
                 showSyncStatus('Lien client copié! Partagez-le.', 'success');
                 
@@ -929,6 +1052,7 @@
             `;
             document.getElementById('uploadButton').style.display = 'none';
             document.getElementById('previewCount').textContent = '0';
+            addDebugInfo('Aperçu des données effacé');
         }
 
         function formatPrice(price) {
