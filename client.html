@@ -151,6 +151,7 @@
             text-align: center;
             backdrop-filter: blur(10px);
             transition: all 0.3s ease;
+            cursor: pointer;
         }
         
         .new-product-card:hover {
@@ -167,11 +168,13 @@
             align-items: center;
             justify-content: center;
             margin: 0 auto 0.75rem;
+            overflow: hidden;
         }
         
         .new-product-image img {
-            max-width: 100%;
-            max-height: 100%;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
             border-radius: 6px;
         }
         
@@ -179,6 +182,7 @@
             font-weight: 600;
             margin-bottom: 0.5rem;
             font-size: 0.9rem;
+            line-height: 1.3;
         }
         
         .new-product-price {
@@ -723,7 +727,10 @@
                 <div class="new-arrivals-badge" id="newArrivalsCount">0 produits</div>
             </div>
             <div class="new-arrivals-grid" id="newArrivalsGrid">
-                <!-- سيتم ملؤها ديناميكياً -->
+                <div class="text-center text-white py-3">
+                    <div class="spinner-border spinner-border-sm"></div>
+                    <p class="mt-2 mb-0">Chargement des nouveaux produits...</p>
+                </div>
             </div>
         </div>
 
@@ -853,6 +860,7 @@
 
         // المتغيرات العامة
         let products = [];
+        let newProducts = [];
         let filteredProducts = [];
         let categories = [];
         let notifications = [];
@@ -981,6 +989,105 @@
             displayNotifications();
         }
 
+        // نظام المنتجات الجديدة
+        function displayNewProducts() {
+            const grid = document.getElementById('newArrivalsGrid');
+            const count = document.getElementById('newArrivalsCount');
+            
+            if (newProducts.length === 0) {
+                grid.innerHTML = '<div class="col-12 text-center text-white">Aucun nouveau produit disponible</div>';
+                count.textContent = '0 produits';
+                return;
+            }
+            
+            let html = '';
+            newProducts.slice(0, 6).forEach(product => {
+                html += `
+                    <div class="new-product-card" onclick="showProductDetailsModal(${product.id})">
+                        <div class="new-product-image">
+                            <img src="${product.image}" alt="${product.name}" 
+                                 onerror="this.src='https://via.placeholder.com/80x80/6c757d/ffffff?text=Image'">
+                        </div>
+                        <div class="new-product-name">${product.name}</div>
+                        <div class="new-product-price">${formatPrice(product.price)}</div>
+                    </div>
+                `;
+            });
+            
+            grid.innerHTML = html;
+            count.textContent = `${newProducts.length} produit${newProducts.length !== 1 ? 's' : ''}`;
+        }
+
+        function showProductDetailsModal(productId) {
+            const product = newProducts.find(p => p.id === productId);
+            if (!product) return;
+            
+            const modalHtml = `
+                <div class="modal fade" id="productModal" tabindex="-1">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">${product.name}</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body text-center">
+                                <img src="${product.image}" alt="${product.name}" 
+                                     class="img-fluid rounded mb-3" 
+                                     style="max-height: 200px;"
+                                     onerror="this.src='https://via.placeholder.com/300x200/6c757d/ffffff?text=Image'">
+                                <h4 class="text-primary">${formatPrice(product.price)}</h4>
+                                <p class="text-muted">Catégorie: ${product.category}</p>
+                                <p>Nouveau produit ajouté récemment</p>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                                <button type="button" class="btn btn-primary" onclick="addNewProductToCart(${productId})">
+                                    <i class="fas fa-cart-plus me-2"></i>Ajouter au panier
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // إضافة المودال إلى الجسم إذا لم يكن موجوداً
+            if (!document.getElementById('productModal')) {
+                document.body.insertAdjacentHTML('beforeend', modalHtml);
+            }
+            
+            // عرض المودال
+            const modal = new bootstrap.Modal(document.getElementById('productModal'));
+            modal.show();
+        }
+
+        function addNewProductToCart(productId) {
+            const product = newProducts.find(p => p.id === productId);
+            if (!product) return;
+
+            // إنشاء منتج في السلة بنفس هيكل المنتجات العادية
+            const cartProduct = {
+                id: product.id,
+                ref: "NEW-" + product.id,
+                designation: product.name,
+                prix: product.price,
+                quantity: 1,
+                famille: product.category
+            };
+
+            cart.push(cartProduct);
+            localStorage.setItem('varicom_cart', JSON.stringify(cart));
+            
+            updateCartDisplay();
+            updateStats();
+            updateMobileCartBadge();
+            
+            showNotification('Produit ajouté au panier!', 'success');
+            
+            // إغلاق المودال
+            const modal = bootstrap.Modal.getInstance(document.getElementById('productModal'));
+            modal.hide();
+        }
+
         // بقية الوظائف
         function setupEventListeners() {
             document.getElementById('searchInput').addEventListener('input', function() {
@@ -1059,19 +1166,19 @@
                 
                 const gistData = await response.json();
                 
-                const productsFile = Object.values(gistData.files).find(file => 
+                const dataFile = Object.values(gistData.files).find(file => 
+                    file.filename.toLowerCase().includes('varicom') || 
                     file.filename.toLowerCase().includes('produit') || 
-                    file.filename.toLowerCase().includes('product') ||
                     file.filename.toLowerCase().includes('data')
                 );
 
-                if (!productsFile) {
-                    throw new Error('Fichier produits non trouvé dans le Gist');
+                if (!dataFile) {
+                    throw new Error('Fichier données non trouvé dans le Gist');
                 }
                 
-                let productsContent;
+                let dataContent;
                 try {
-                    productsContent = JSON.parse(productsFile.content);
+                    dataContent = JSON.parse(dataFile.content);
                 } catch (parseError) {
                     console.error('Erreur parsing JSON:', parseError);
                     throw new Error('Format JSON invalide dans le Gist');
@@ -1079,7 +1186,7 @@
                 
                 return {
                     success: true,
-                    data: productsContent,
+                    data: dataContent,
                     lastUpdate: gistData.updated_at
                 };
                 
@@ -1108,13 +1215,24 @@
                         designation: "PC Bureau HP ProDesk - i5, 8GB RAM, 1TB HDD",
                         prix: 75000,
                         famille: "Ordinateurs Bureau"
+                    }
+                ],
+                newProducts: [
+                    {
+                        id: 1001,
+                        name: "Laptop Gaming ASUS ROG Strix",
+                        price: 185000,
+                        image: "https://via.placeholder.com/150x150/1a3a6c/ffffff?text=ASUS+ROG",
+                        category: "Ordinateurs Portables",
+                        timestamp: new Date().toISOString()
                     },
                     {
-                        id: 3,
-                        ref: "ECR-LG-003",
-                        designation: "Écran LG 24\" Full HD - 1920x1080",
-                        prix: 22000,
-                        famille: "Écrans"
+                        id: 1002,
+                        name: "Écran Curved Samsung 32\" 4K",
+                        price: 45000,
+                        image: "https://via.placeholder.com/150x150/e63946/ffffff?text=Samsung+32",
+                        category: "Écrans",
+                        timestamp: new Date().toISOString()
                     }
                 ],
                 notifications: [
@@ -1144,16 +1262,16 @@
 
         function processProductsData(productsData) {
             let rawProducts = [];
+            let rawNewProducts = [];
             let rawNotifications = [];
             
-            if (Array.isArray(productsData.data)) {
+            // معالجة البيانات من الهيكل الجديد
+            if (productsData.data && productsData.data.products) {
+                rawProducts = productsData.data.products;
+                rawNewProducts = productsData.data.newProducts || [];
+                rawNotifications = productsData.data.notifications || [];
+            } else if (Array.isArray(productsData.data)) {
                 rawProducts = productsData.data;
-            } else if (productsData.data && Array.isArray(productsData.data.products)) {
-                rawProducts = productsData.data.products;
-                rawNotifications = productsData.data.notifications || [];
-            } else if (productsData.data && productsData.data.products) {
-                rawProducts = productsData.data.products;
-                rawNotifications = productsData.data.notifications || [];
             } else {
                 throw new Error('Format de données non supporté');
             }
@@ -1166,10 +1284,13 @@
                 product.prix > 0
             );
 
+            // تحميل المنتجات الجديدة
+            newProducts = rawNewProducts;
+
             // تحميل الإشعارات من البيانات
             notifications = rawNotifications;
 
-            if (products.length === 0) {
+            if (products.length === 0 && newProducts.length === 0) {
                 showNoDataMessage();
                 return;
             }
@@ -1182,6 +1303,7 @@
             updateCategoriesDisplay();
             updateCategoryFilter();
             filterProducts();
+            displayNewProducts();
             updateStats();
             updateLastSyncTime(productsData.lastUpdate);
             
@@ -1213,7 +1335,7 @@
             
             autoRefreshInterval = setInterval(() => {
                 loadProducts();
-            }, 120000);
+            }, 120000); // كل دقيقتين
         }
 
         function updateLastSyncTime(timestamp) {
@@ -1628,6 +1750,13 @@ Prix: ${formatPrice(product.prix)}
         window.addEventListener('resize', function() {
             setupMobileNav();
         });
+
+        // إضافة Bootstrap JS يدوياً إذا لم يكن موجوداً
+        if (typeof bootstrap === 'undefined') {
+            const bootstrapScript = document.createElement('script');
+            bootstrapScript.src = 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js';
+            document.head.appendChild(bootstrapScript);
+        }
     </script>
 </body>
 </html>
