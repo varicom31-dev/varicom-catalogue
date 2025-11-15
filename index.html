@@ -994,7 +994,7 @@
             const grid = document.getElementById('newArrivalsGrid');
             const count = document.getElementById('newArrivalsCount');
             
-            if (newProducts.length === 0) {
+            if (!newProducts || newProducts.length === 0) {
                 grid.innerHTML = '<div class="col-12 text-center text-white">Aucun nouveau produit disponible</div>';
                 count.textContent = '0 produits';
                 return;
@@ -1085,7 +1085,9 @@
             
             // إغلاق المودال
             const modal = bootstrap.Modal.getInstance(document.getElementById('productModal'));
-            modal.hide();
+            if (modal) {
+                modal.hide();
+            }
         }
 
         // بقية الوظائف
@@ -1149,6 +1151,7 @@
                     lastUpdate: new Date().toISOString()
                 };
             } catch (error) {
+                console.error('Erreur de décodage:', error);
                 return {
                     success: false,
                     error: 'Erreur de décodage des données'
@@ -1158,6 +1161,7 @@
 
         async function loadFromGitHubGist(gistId) {
             try {
+                console.log('Chargement depuis Gist:', gistId);
                 const response = await fetch(`https://api.github.com/gists/${gistId}`);
                 
                 if (!response.ok) {
@@ -1165,7 +1169,9 @@
                 }
                 
                 const gistData = await response.json();
+                console.log('Données Gist reçues:', gistData);
                 
+                // Rechercher le fichier de données
                 const dataFile = Object.values(gistData.files).find(file => 
                     file.filename.toLowerCase().includes('varicom') || 
                     file.filename.toLowerCase().includes('produit') || 
@@ -1179,6 +1185,7 @@
                 let dataContent;
                 try {
                     dataContent = JSON.parse(dataFile.content);
+                    console.log('Contenu JSON parsé:', dataContent);
                 } catch (parseError) {
                     console.error('Erreur parsing JSON:', parseError);
                     throw new Error('Format JSON invalide dans le Gist');
@@ -1261,6 +1268,8 @@
         }
 
         function processProductsData(productsData) {
+            console.log('Traitement des données:', productsData);
+            
             let rawProducts = [];
             let rawNewProducts = [];
             let rawNotifications = [];
@@ -1270,9 +1279,12 @@
                 rawProducts = productsData.data.products;
                 rawNewProducts = productsData.data.newProducts || [];
                 rawNotifications = productsData.data.notifications || [];
+                console.log('Données structurées trouvées - Produits:', rawProducts.length, 'Nouveaux:', rawNewProducts.length, 'Notifications:', rawNotifications.length);
             } else if (Array.isArray(productsData.data)) {
                 rawProducts = productsData.data;
+                console.log('Données tableau simples trouvées - Produits:', rawProducts.length);
             } else {
+                console.error('Format de données non supporté:', productsData.data);
                 throw new Error('Format de données non supporté');
             }
 
@@ -1285,10 +1297,11 @@
             );
 
             // تحميل المنتجات الجديدة
-            newProducts = rawNewProducts;
+            newProducts = rawNewProducts || [];
+            console.log('Produits nouveaux chargés:', newProducts);
 
             // تحميل الإشعارات من البيانات
-            notifications = rawNotifications;
+            notifications = rawNotifications || [];
 
             if (products.length === 0 && newProducts.length === 0) {
                 showNoDataMessage();
@@ -1309,6 +1322,8 @@
             
             // عرض الإشعارات
             displayNotifications();
+            
+            console.log('Traitement terminé - Produits:', products.length, 'Nouveaux:', newProducts.length, 'Catégories:', categories.length);
         }
 
         function showNoDataMessage() {
@@ -1334,6 +1349,7 @@
             }
             
             autoRefreshInterval = setInterval(() => {
+                console.log('Actualisation automatique des données...');
                 loadProducts();
             }, 120000); // كل دقيقتين
         }
