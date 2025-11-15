@@ -3,150 +3,541 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VARICOM - Catalogue Produits</title>
+    <title>VARICOM - Catalogue Intelligent</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         :root {
             --primary-color: #1a3a6c;
             --secondary-color: #e63946;
+            --accent-color: #2a9d8f;
+            --dark-color: #2d3748;
+            --light-color: #f8f9fa;
+            --success-color: #28a745;
+            --warning-color: #ffc107;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
         
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f8f9fa;
-            padding-bottom: 60px; /* مساحة للشريط السفلي في الهواتف */
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            color: #333;
+            line-height: 1.6;
         }
         
+        /* Header Styles */
         .company-header {
             background: linear-gradient(135deg, var(--primary-color), #2a4d7a);
             color: white;
             padding: 15px 0;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+            position: relative;
+            overflow: hidden;
         }
         
+        .company-header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="%23ffffff" opacity="0.05"><polygon points="0,0 100,0 50,100"/></svg>');
+            background-size: 200px;
+        }
+        
+        .company-logo {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .company-logo h2 {
+            font-weight: 800;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        /* Card Styles */
         .card {
             border: none;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-            transition: transform 0.2s;
-            margin-bottom: 1rem;
+            border-radius: 16px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+            background: white;
         }
         
         .card:hover {
-            transform: translateY(-2px);
+            transform: translateY(-5px);
+            box-shadow: 0 12px 30px rgba(0,0,0,0.15);
         }
         
+        .card-header {
+            background: linear-gradient(135deg, var(--primary-color), #2a4d7a);
+            color: white;
+            border: none;
+            padding: 1.25rem;
+            font-weight: 600;
+        }
+        
+        /* Button Styles */
         .btn-primary {
             background: linear-gradient(135deg, var(--secondary-color), #c1121f);
             border: none;
-            border-radius: 8px;
-            padding: 10px 20px;
+            border-radius: 10px;
+            padding: 12px 24px;
             font-weight: 600;
             transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(231, 57, 70, 0.3);
         }
         
         .btn-primary:hover {
-            transform: scale(1.05);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(231, 57, 70, 0.4);
         }
         
+        .btn-success {
+            background: linear-gradient(135deg, var(--success-color), #20c997);
+            border: none;
+            border-radius: 10px;
+            padding: 12px 24px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+        }
+        
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(40, 167, 69, 0.4);
+        }
+        
+        .btn-whatsapp {
+            background: linear-gradient(135deg, #25D366, #128C7E);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 12px 24px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3);
+        }
+        
+        .btn-whatsapp:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(37, 211, 102, 0.4);
+            color: white;
+        }
+        
+        /* Sidebar Styles */
         .categories-sidebar {
             background: white;
-            border-radius: 12px;
-            padding: 20px;
+            border-radius: 16px;
+            padding: 1.5rem;
             height: fit-content;
             position: sticky;
             top: 20px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
         }
         
         .category-item {
-            padding: 12px 15px;
-            margin-bottom: 8px;
-            border-radius: 8px;
+            padding: 14px 18px;
+            margin-bottom: 10px;
+            border-radius: 10px;
             cursor: pointer;
             border-left: 4px solid transparent;
-            transition: all 0.3s;
-            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            background: #f8f9fa;
         }
         
         .category-item:hover, .category-item.active {
             background: linear-gradient(135deg, #e3f2fd, #bbdefb);
             border-left-color: var(--secondary-color);
             transform: translateX(5px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
         
         .cart-sidebar {
             background: white;
-            border-radius: 12px;
-            padding: 20px;
-            margin-top: 20px;
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
         }
         
+        /* Product Grid */
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        .product-card {
+            transition: all 0.3s ease;
+            border: 1px solid #e9ecef;
+            height: 100%;
+            border-radius: 16px;
+            overflow: hidden;
+            background: white;
+            position: relative;
+        }
+        
+        .product-card:hover {
+            box-shadow: 0 12px 30px rgba(0,0,0,0.15);
+        }
+        
+        .product-image {
+            height: 180px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .product-image i {
+            font-size: 4rem;
+            color: rgba(255,255,255,0.9);
+            z-index: 1;
+        }
+        
+        .product-image::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="%23ffffff" opacity="0.1"><circle cx="50" cy="50" r="40"/></svg>');
+            background-size: 150px;
+        }
+        
+        .product-badges {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        
+        .product-badge {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .product-info {
+            padding: 1.5rem;
+        }
+        
+        .product-name {
+            font-weight: 700;
+            color: var(--dark-color);
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+            line-height: 1.4;
+        }
+        
+        .product-description {
+            color: #6c757d;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+        }
+        
+        .product-price {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+        
+        .product-actions {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        /* Search & Filter */
+        .search-container {
+            position: relative;
+            margin-bottom: 1.5rem;
+        }
+        
+        .search-box {
+            border-radius: 50px;
+            padding: 15px 20px;
+            border: 2px solid #e9ecef;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+            width: 100%;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+        
+        .search-box:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 4px 20px rgba(26, 58, 108, 0.2);
+        }
+        
+        .search-icon {
+            position: absolute;
+            right: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6c757d;
+        }
+        
+        .filter-section {
+            background: white;
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+        }
+        
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 16px;
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 30px rgba(0,0,0,0.15);
+        }
+        
+        .stat-icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--primary-color), #2a4d7a);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 800;
+            color: var(--dark-color);
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-label {
+            color: #6c757d;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+        
+        /* Cart Styles */
+        .cart-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+        
+        .cart-item:last-child {
+            border-bottom: none;
+        }
+        
+        .cart-item-info {
+            flex: 1;
+        }
+        
+        .cart-item-name {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+        
+        .cart-item-ref {
+            color: #6c757d;
+            font-size: 0.85rem;
+        }
+        
+        .cart-item-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .cart-item-quantity {
+            font-weight: 700;
+            margin: 0 10px;
+        }
+        
+        .cart-item-price {
+            font-weight: 700;
+            color: var(--primary-color);
+            min-width: 100px;
+            text-align: right;
+        }
+        
+        .cart-total {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--primary-color);
+            text-align: center;
+            margin: 1.5rem 0;
+            padding: 1rem;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+        
+        /* Sync Status */
         .sync-status {
             position: fixed;
             top: 20px;
             right: 20px;
             z-index: 1000;
-            padding: 12px 20px;
-            border-radius: 8px;
+            padding: 15px 25px;
+            border-radius: 10px;
             display: none;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-            max-width: 300px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+            max-width: 350px;
             word-wrap: break-word;
+            animation: slideIn 0.3s ease;
         }
         
-        .sync-success { background: linear-gradient(135deg, #28a745, #20c997); color: white; }
-        .sync-warning { background: linear-gradient(135deg, #ffc107, #fd7e14); color: black; }
-        .sync-error { background: linear-gradient(135deg, #dc3545, #c82333); color: white; }
-        
-        .product-card {
-            transition: all 0.3s;
-            border: 1px solid #e9ecef;
-            height: 100%;
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
         }
         
-        .product-card:hover {
+        .sync-success { 
+            background: linear-gradient(135deg, var(--success-color), #20c997); 
+            color: white; 
+        }
+        
+        .sync-warning { 
+            background: linear-gradient(135deg, var(--warning-color), #fd7e14); 
+            color: black; 
+        }
+        
+        .sync-error { 
+            background: linear-gradient(135deg, var(--secondary-color), #c1121f); 
+            color: white; 
+        }
+        
+        /* Mobile Bottom Nav */
+        .mobile-bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            box-shadow: 0 -2px 20px rgba(0,0,0,0.1);
+            display: none;
+            z-index: 1000;
+            padding: 10px 0;
+        }
+        
+        .nav-item {
+            flex: 1;
+            text-align: center;
+            padding: 8px 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-radius: 10px;
+            margin: 0 5px;
+        }
+        
+        .nav-item.active {
+            background: linear-gradient(135deg, var(--primary-color), #2a4d7a);
+            color: white;
+            box-shadow: 0 4px 15px rgba(26, 58, 108, 0.3);
+        }
+        
+        .nav-item i {
+            font-size: 1.3rem;
+            margin-bottom: 3px;
+        }
+        
+        .nav-item .small {
+            font-size: 0.75rem;
+        }
+        
+        .cart-badge-mobile {
+            position: absolute;
+            top: 5px;
+            right: 25%;
+            background: var(--secondary-color);
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 0.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+        }
+        
+        /* AI Recommendations */
+        .ai-recommendations {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 16px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
             box-shadow: 0 8px 25px rgba(0,0,0,0.15);
         }
         
-        .search-box {
-            border-radius: 25px;
-            padding: 12px 20px;
-            border: 2px solid #e9ecef;
-            transition: all 0.3s;
-            font-size: 0.9rem;
+        .ai-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
         }
         
-        .search-box:focus {
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 0.2rem rgba(26, 58, 108, 0.25);
-        }
-
-        .auto-refresh-badge {
-            cursor: pointer;
-            transition: all 0.3s;
+        .ai-icon {
+            font-size: 1.5rem;
+            margin-right: 10px;
         }
         
-        .auto-refresh-badge:hover {
-            transform: scale(1.05);
+        .ai-title {
+            font-weight: 700;
+            font-size: 1.2rem;
         }
-
-        /* تحسينات التجاوب للهواتف */
+        
+        .ai-message {
+            font-size: 0.95rem;
+            opacity: 0.9;
+        }
+        
+        /* Responsive Design */
         @media (max-width: 768px) {
             .company-header {
                 padding: 10px 0;
             }
             
             .company-header h2 {
-                font-size: 1.3rem;
-            }
-            
-            .company-header p {
-                font-size: 0.8rem;
+                font-size: 1.4rem;
             }
             
             .company-info div {
-                font-size: 0.8rem;
+                font-size: 0.85rem;
             }
             
             .categories-sidebar {
@@ -154,8 +545,29 @@
                 margin-bottom: 1rem;
             }
             
-            .cart-sidebar {
-                margin-top: 1rem;
+            .products-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .search-box {
+                padding: 12px 15px;
+                font-size: 16px;
+            }
+            
+            .stat-card {
+                padding: 1rem;
+            }
+            
+            .stat-value {
+                font-size: 1.5rem;
+            }
+            
+            .mobile-bottom-nav {
+                display: flex;
+            }
+            
+            body {
+                padding-bottom: 70px;
             }
             
             .sync-status {
@@ -163,154 +575,64 @@
                 right: 10px;
                 left: 10px;
                 max-width: none;
-                font-size: 0.9rem;
-                padding: 10px 15px;
-            }
-            
-            .search-box {
-                padding: 10px 15px;
-                font-size: 16px; /* منع التكبير في iOS */
-            }
-            
-            .btn-primary {
-                padding: 8px 16px;
-                font-size: 0.9rem;
-            }
-            
-            .card-body {
-                padding: 1rem;
-            }
-            
-            .product-card .card-body {
-                padding: 1rem;
-            }
-            
-            .category-item {
-                padding: 10px 12px;
-                font-size: 0.85rem;
-            }
-            
-            .stats-card .h4 {
-                font-size: 1.2rem;
-            }
-            
-            .stats-card small {
-                font-size: 0.7rem;
-            }
-
-            .container {
-                padding-left: 10px;
-                padding-right: 10px;
             }
         }
-
+        
         @media (max-width: 576px) {
             .company-header .col-md-6 {
                 text-align: center !important;
                 margin-bottom: 10px;
             }
             
-            .product-card .card-body {
-                padding: 0.8rem;
+            .product-image {
+                height: 150px;
             }
-
-            .btn-primary {
-                padding: 6px 12px;
-                font-size: 0.8rem;
+            
+            .product-image i {
+                font-size: 3rem;
+            }
+            
+            .product-info {
+                padding: 1rem;
+            }
+            
+            .product-name {
+                font-size: 1rem;
+            }
+            
+            .product-price {
+                font-size: 1.3rem;
+            }
+            
+            .btn-primary, .btn-success, .btn-whatsapp {
+                padding: 10px 15px;
+                font-size: 0.9rem;
             }
         }
-
-        /* تحسينات عامة */
-        .products-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 1rem;
+        
+        /* Animation for new items */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
-
-        .stats-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border-radius: 12px;
-            padding: 15px;
-            text-align: center;
-            margin-bottom: 1rem;
+        
+        .product-card {
+            animation: fadeIn 0.5s ease;
         }
-
-        .stats-card .h4 {
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-
-        /* شريط التنقل السفلي للهواتف */
-        .mobile-bottom-nav {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: white;
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
-            display: none;
-            z-index: 1000;
-            padding: 8px 0;
-        }
-
-        .nav-item {
-            flex: 1;
-            text-align: center;
-            padding: 5px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .nav-item.active {
-            color: var(--primary-color);
-        }
-
-        .nav-item i {
-            font-size: 1.2rem;
-            margin-bottom: 2px;
-        }
-
-        .nav-item .small {
-            font-size: 0.7rem;
-        }
-
-        .cart-badge-mobile {
-            position: absolute;
-            top: 0;
-            right: 20%;
-            background: var(--secondary-color);
-            color: white;
+        
+        /* Loading animation */
+        .loading-spinner {
+            display: inline-block;
+            width: 50px;
+            height: 50px;
+            border: 5px solid rgba(255,255,255,0.3);
             border-radius: 50%;
-            width: 18px;
-            height: 18px;
-            font-size: 0.7rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            border-top-color: white;
+            animation: spin 1s ease-in-out infinite;
         }
-
-        /* تحسينات للأجهزة اللوحية */
-        @media (max-width: 1024px) and (min-width: 769px) {
-            .products-grid {
-                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-            }
-        }
-
-        /* تحسين عرض المنتجات في الشبكة */
-        .product-image {
-            height: 120px;
-            background: #f8f9fa;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 8px;
-            margin-bottom: 10px;
-        }
-
-        .product-image i {
-            font-size: 2rem;
-            color: #6c757d;
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
     </style>
 </head>
@@ -333,9 +655,9 @@
                 <div class="small">السلة</div>
                 <span class="cart-badge-mobile" style="display: none;">0</span>
             </div>
-            <div class="nav-item" onclick="refreshData()">
-                <i class="fas fa-sync-alt"></i>
-                <div class="small">تحديث</div>
+            <div class="nav-item" onclick="showSection('ai')">
+                <i class="fas fa-robot"></i>
+                <div class="small">التوصيات</div>
             </div>
         </div>
     </div>
@@ -356,9 +678,14 @@
                 <div class="col-md-6 text-md-end">
                     <div class="company-info">
                         <div class="mb-2 small"><i class="fas fa-envelope me-2"></i>contact@varicom-dz.com</div>
-                        <div class="badge bg-light text-dark p-2 auto-refresh-badge" onclick="refreshData()" title="Cliquer pour actualiser">
-                            <i class="fas fa-sync-alt me-1"></i>
-                            <span id="lastSyncTime">Actualiser</span>
+                        <div class="d-flex justify-content-end gap-2">
+                            <div class="badge bg-light text-dark p-2 auto-refresh-badge" onclick="refreshData()" title="Cliquer pour actualiser">
+                                <i class="fas fa-sync-alt me-1"></i>
+                                <span id="lastSyncTime">Actualiser</span>
+                            </div>
+                            <div class="badge bg-success text-white p-2" onclick="generatePDF()" title="Générer PDF">
+                                <i class="fas fa-file-pdf me-1"></i> PDF
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -372,8 +699,13 @@
             <div class="col-lg-3 d-none d-lg-block">
                 <!-- الفئات -->
                 <div class="categories-sidebar">
-                    <h5><i class="fas fa-list me-2"></i>Catégories</h5>
-                    <input type="text" id="categorySearch" class="form-control search-box mb-3" placeholder="🔍 Rechercher catégorie...">
+                    <h5 class="d-flex align-items-center"><i class="fas fa-list me-2"></i>Catégories</h5>
+                    <div class="search-container mb-3">
+                        <input type="text" id="categorySearch" class="form-control search-box" placeholder="🔍 Rechercher catégorie...">
+                        <div class="search-icon">
+                            <i class="fas fa-search"></i>
+                        </div>
+                    </div>
                     <div id="categoriesList">
                         <div class="category-item active" data-category="">
                             <i class="fas fa-th-large me-2"></i>Toutes les catégories
@@ -383,7 +715,7 @@
 
                 <!-- السلة -->
                 <div class="cart-sidebar">
-                    <h5><i class="fas fa-shopping-cart me-2"></i>Mon Panier</h5>
+                    <h5 class="d-flex align-items-center"><i class="fas fa-shopping-cart me-2"></i>Mon Panier</h5>
                     <div id="cartContent">
                         <p class="text-muted text-center py-4" id="emptyCartMessage">
                             <i class="fas fa-shopping-cart fa-2x mb-3"></i><br>
@@ -393,8 +725,14 @@
                     </div>
                     <div class="mt-4" id="cartActions" style="display: none;">
                         <div class="d-grid gap-2">
-                            <button class="btn btn-success btn-lg" onclick="checkout()">
+                            <button class="btn btn-success" onclick="checkout()">
                                 <i class="fas fa-credit-card me-2"></i>Commander
+                            </button>
+                            <button class="btn btn-whatsapp" onclick="shareViaWhatsApp()">
+                                <i class="fab fa-whatsapp me-2"></i>Envoyer sur WhatsApp
+                            </button>
+                            <button class="btn btn-outline-primary" onclick="generatePDF()">
+                                <i class="fas fa-file-pdf me-2"></i>Générer PDF
                             </button>
                             <button class="btn btn-outline-danger" onclick="clearCart()">
                                 <i class="fas fa-trash me-2"></i>Vider le panier
@@ -406,63 +744,79 @@
 
             <!-- المحتوى الرئيسي -->
             <div class="col-lg-9 col-12">
+                <!-- توصيات الذكاء الاصطناعي -->
+                <div class="ai-recommendations" id="aiRecommendations" style="display: none;">
+                    <div class="ai-header">
+                        <i class="fas fa-robot ai-icon"></i>
+                        <div class="ai-title">Recommandations Intelligentes</div>
+                    </div>
+                    <div class="ai-message" id="aiMessage"></div>
+                </div>
+
                 <!-- شريط البحث -->
-                <div class="card mb-3">
-                    <div class="card-body py-3">
-                        <div class="row g-2 align-items-center">
-                            <div class="col-md-8 col-12 mb-2 mb-md-0">
+                <div class="filter-section">
+                    <div class="row g-3 align-items-center">
+                        <div class="col-md-8 col-12">
+                            <div class="search-container">
                                 <input type="text" id="searchInput" class="form-control search-box" 
-                                       placeholder="🔍 Rechercher un produit...">
+                                       placeholder="🔍 Rechercher un produit, une référence ou une catégorie...">
+                                <div class="search-icon">
+                                    <i class="fas fa-search"></i>
+                                </div>
                             </div>
-                            <div class="col-md-4 col-12">
-                                <select id="categoryFilter" class="form-select search-box">
-                                    <option value="">Toutes les catégories</option>
-                                </select>
-                            </div>
+                        </div>
+                        <div class="col-md-4 col-12">
+                            <select id="categoryFilter" class="form-select search-box">
+                                <option value="">Toutes les catégories</option>
+                            </select>
                         </div>
                     </div>
                 </div>
 
                 <!-- الإحصائيات -->
-                <div class="row g-2 mb-3">
-                    <div class="col-6 col-md-3">
-                        <div class="stats-card">
-                            <div class="h4" id="totalProducts">0</div>
-                            <small>Produits</small>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-box"></i>
                         </div>
+                        <div class="stat-value" id="totalProducts">0</div>
+                        <div class="stat-label">Produits</div>
                     </div>
-                    <div class="col-6 col-md-3">
-                        <div class="stats-card">
-                            <div class="h4" id="totalCategories">0</div>
-                            <small>Catégories</small>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-tags"></i>
                         </div>
+                        <div class="stat-value" id="totalCategories">0</div>
+                        <div class="stat-label">Catégories</div>
                     </div>
-                    <div class="col-6 col-md-3">
-                        <div class="stats-card">
-                            <div class="h4" id="cartTotal">0</div>
-                            <small>Panier Total</small>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-shopping-cart"></i>
                         </div>
+                        <div class="stat-value" id="cartTotal">0 DA</div>
+                        <div class="stat-label">Panier Total</div>
                     </div>
-                    <div class="col-6 col-md-3">
-                        <div class="stats-card">
-                            <div class="h4" id="lastUpdate">--:--</div>
-                            <small>Dernière MAJ</small>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-clock"></i>
                         </div>
+                        <div class="stat-value" id="lastUpdate">--:--</div>
+                        <div class="stat-label">Dernière MAJ</div>
                     </div>
                 </div>
 
                 <!-- قائمة المنتجات -->
                 <div class="card">
-                    <div class="card-header text-white" style="background: linear-gradient(135deg, var(--primary-color), #2a4d7a);">
+                    <div class="card-header">
                         <div class="d-flex justify-content-between align-items-center">
                             <h5 class="mb-0"><i class="fas fa-table me-2"></i>Catalogue Produits</h5>
-                            <span class="badge bg-light text-dark" id="productCount">0 produits</span>
+                            <span class="badge bg-light text-dark fs-6" id="productCount">0 produits</span>
                         </div>
                     </div>
                     <div class="card-body">
                         <div id="productsContainer">
                             <div class="text-center py-5 text-muted">
-                                <i class="fas fa-spinner fa-spin fa-2x mb-3"></i>
+                                <div class="loading-spinner mb-3"></div>
                                 <p>Chargement des produits...</p>
                             </div>
                         </div>
@@ -474,13 +828,14 @@
 
     <script>
         // الرابط الثابت للبيانات
-        const DEFAULT_GIST_ID = "YOUR_DEFAULT_GIST_ID_HERE"; // ضع معرف الـ Gist الافتراضي هنا
+        const DEFAULT_GIST_ID = "YOUR_DEFAULT_GIST_ID_HERE";
 
         let products = [];
         let filteredProducts = [];
         let categories = [];
         let cart = JSON.parse(localStorage.getItem('varicom_cart')) || [];
         let autoRefreshInterval;
+        let searchTimer;
 
         document.addEventListener('DOMContentLoaded', function() {
             initializeApp();
@@ -492,10 +847,10 @@
             loadProducts();
             updateCartDisplay();
             startAutoRefresh();
+            generateAIRecommendations();
         }
 
         function setupMobileNav() {
-            // إظهار شريط التنقل السفلي للهواتف فقط
             if (window.innerWidth <= 768) {
                 document.querySelector('.mobile-bottom-nav').style.display = 'flex';
                 updateMobileCartBadge();
@@ -503,53 +858,55 @@
         }
 
         function showSection(section) {
-            // تحديث النشاط في شريط التنقل
             document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
             event.currentTarget.classList.add('active');
             
             if (section === 'cart') {
-                // في الهواتف، يمكن إظهار السلة في modal أو صفحة منفصلة
                 showCartModal();
+            } else if (section === 'ai') {
+                generateAIRecommendations();
+                document.getElementById('aiRecommendations').style.display = 'block';
             }
         }
 
         function showCartModal() {
-            // عرض السلة في نافذة منبثقة على الهواتف
-            const cartItems = cart.map(item => 
-                `${item.designation} (${item.quantity}x) - ${formatPrice(item.prix * item.quantity)}`
-            ).join('\n');
-            
-            const total = cart.reduce((sum, item) => sum + (item.prix * item.quantity), 0);
-            
             if (cart.length === 0) {
                 alert("Votre panier est vide");
                 return;
             }
             
-            const message = `Votre Panier:\n\n${cartItems}\n\nTotal: ${formatPrice(total)}\n\nSouhaitez-vous commander?`;
+            const total = cart.reduce((sum, item) => sum + (item.prix * item.quantity), 0);
+            let message = "🛒 VOTRE PANIER 🛒\n\n";
             
-            if (confirm(message)) {
+            cart.forEach(item => {
+                message += `• ${item.designation} (${item.ref})\n`;
+                message += `  Quantité: ${item.quantity} x ${formatPrice(item.prix)} = ${formatPrice(item.prix * item.quantity)}\n\n`;
+            });
+            
+            message += `💰 TOTAL: ${formatPrice(total)}\n\n`;
+            message += "Que souhaitez-vous faire?";
+            
+            const action = confirm(message + "\n\nCliquez sur OK pour commander ou Annuler pour d'autres options.");
+            
+            if (action) {
                 checkout();
             }
         }
 
         function setupEventListeners() {
-            document.getElementById('searchInput').addEventListener('input', filterProducts);
+            document.getElementById('searchInput').addEventListener('input', function() {
+                clearTimeout(searchTimer);
+                searchTimer = setTimeout(filterProducts, 400);
+            });
+            
             document.getElementById('categoryFilter').addEventListener('change', filterProducts);
             
             document.getElementById('categorySearch').addEventListener('input', function(e) {
                 const searchTerm = e.target.value.toLowerCase();
                 document.querySelectorAll('.category-item').forEach(item => {
                     const text = item.textContent.toLowerCase();
-                    item.style.display = text.includes(searchTerm) ? 'block' : 'none';
+                    item.style.display = text.includes(searchTerm) ? 'flex' : 'none';
                 });
-            });
-
-            // تحسين الأداء على الهواتف
-            let searchTimer;
-            document.getElementById('searchInput').addEventListener('input', function() {
-                clearTimeout(searchTimer);
-                searchTimer = setTimeout(filterProducts, 300);
             });
         }
 
@@ -563,10 +920,8 @@
                 let productsData = null;
 
                 if (gistId && gistId !== "YOUR_DEFAULT_GIST_ID_HERE") {
-                    // Charger depuis GitHub Gist
                     productsData = await loadFromGitHubGist(gistId);
                 } else {
-                    // Aucune source de données - utiliser données de démonstration
                     productsData = await loadDemoData();
                 }
 
@@ -586,8 +941,6 @@
 
         async function loadFromGitHubGist(gistId) {
             try {
-                console.log('🔗 Chargement depuis GitHub Gist:', gistId);
-                
                 const response = await fetch(`https://api.github.com/gists/${gistId}`);
                 
                 if (!response.ok) {
@@ -595,9 +948,7 @@
                 }
                 
                 const gistData = await response.json();
-                console.log('📦 Données Gist reçues:', gistData);
                 
-                // Chercher le fichier produits.json
                 const productsFile = Object.values(gistData.files).find(file => 
                     file.filename.toLowerCase().includes('produit') || 
                     file.filename.toLowerCase().includes('product') ||
@@ -616,8 +967,6 @@
                     throw new Error('Format JSON invalide dans le Gist');
                 }
                 
-                console.log('📊 Produits parsés:', productsContent);
-                
                 return {
                     success: true,
                     data: productsContent,
@@ -634,49 +983,70 @@
         }
 
         async function loadDemoData() {
-            // Données de démonstration en cas d'absence de source
             const demoData = [
                 {
                     id: 1,
                     ref: "LAP-DEL-001",
-                    designation: "Laptop Dell Inspiron 15",
-                    prix: 45000,
-                    famille: "Ordinateurs Portables"
+                    designation: "Laptop Dell Inspiron 15 - Processeur i7, 16GB RAM, 512GB SSD",
+                    prix: 125000,
+                    famille: "Ordinateurs Portables",
+                    description: "Idéal pour le travail et le gaming"
                 },
                 {
                     id: 2,
                     ref: "PC-HP-002",
-                    designation: "PC Bureau HP ProDesk",
-                    prix: 35000,
-                    famille: "Ordinateurs Bureau"
+                    designation: "PC Bureau HP ProDesk - Processeur i5, 8GB RAM, 1TB HDD",
+                    prix: 75000,
+                    famille: "Ordinateurs Bureau",
+                    description: "Parfait pour le bureau et la maison"
                 },
                 {
                     id: 3,
-                    ref: "SOU-LG-003",
-                    designation: "Écran LG 24\" Full HD",
-                    prix: 12000,
-                    famille: "Écrans"
+                    ref: "ECR-LG-003",
+                    designation: "Écran LG 24\" Full HD - Résolution 1920x1080",
+                    prix: 22000,
+                    famille: "Écrans",
+                    description: "Affichage net et précis"
                 },
                 {
                     id: 4,
                     ref: "CLA-LOG-004",
-                    designation: "Clavier Logitech Mécanique",
-                    prix: 3500,
-                    famille: "Périphériques"
+                    designation: "Clavier Logitech Mécanique - Rétroéclairage RGB",
+                    prix: 8500,
+                    famille: "Périphériques",
+                    description: "Tactile et durable"
                 },
                 {
                     id: 5,
                     ref: "SOU-SAM-005",
-                    designation: "Smartphone Samsung Galaxy",
-                    prix: 28000,
-                    famille: "Téléphones"
+                    designation: "Smartphone Samsung Galaxy S23 - 128GB, Double SIM",
+                    prix: 68000,
+                    famille: "Téléphones",
+                    description: "Performant et élégant"
                 },
                 {
                     id: 6,
                     ref: "TAB-APP-006",
-                    designation: "Tablette Apple iPad",
-                    prix: 32000,
-                    famille: "Tablettes"
+                    designation: "Tablette Apple iPad 10.2\" - 64GB, Wi-Fi",
+                    prix: 89000,
+                    famille: "Tablettes",
+                    description: "Parfaite pour la productivité"
+                },
+                {
+                    id: 7,
+                    ref: "IMP-CAN-007",
+                    designation: "Imprimante Canon PIXMA - Multifonction WiFi",
+                    prix: 45000,
+                    famille: "Imprimantes",
+                    description: "Impression, scan, copie"
+                },
+                {
+                    id: 8,
+                    ref: "DIS-SSD-008",
+                    designation: "Disque SSD 1TB - Vitesse de lecture 550MB/s",
+                    prix: 12000,
+                    famille: "Composants",
+                    description: "Améliorez les performances de votre PC"
                 }
             ];
 
@@ -688,8 +1058,6 @@
         }
 
         function processProductsData(productsData) {
-            console.log('🔄 Traitement des données produits:', productsData);
-            
             let rawProducts = [];
             
             if (Array.isArray(productsData.data)) {
@@ -723,9 +1091,7 @@
             filterProducts();
             updateStats();
             updateLastSyncTime(productsData.lastUpdate);
-
-            console.log('✅ Produits traités:', products.length);
-            console.log('✅ Catégories:', categories);
+            generateAIRecommendations();
         }
 
         function showNoDataMessage() {
@@ -753,7 +1119,7 @@
             autoRefreshInterval = setInterval(() => {
                 console.log('🔄 Actualisation automatique...');
                 loadProducts();
-            }, 120000); // 2 minutes
+            }, 120000);
         }
 
         function updateLastSyncTime(timestamp) {
@@ -816,7 +1182,8 @@
                 const matchesSearch = 
                     product.ref.toLowerCase().includes(searchTerm) ||
                     product.designation.toLowerCase().includes(searchTerm) ||
-                    (product.famille && product.famille.toLowerCase().includes(searchTerm));
+                    (product.famille && product.famille.toLowerCase().includes(searchTerm)) ||
+                    (product.description && product.description.toLowerCase().includes(searchTerm));
                 
                 const matchesCategory = !selectedCategory || product.famille === selectedCategory;
                 
@@ -825,6 +1192,7 @@
 
             displayProducts();
             updateProductCount();
+            generateAIRecommendations();
         }
 
         function displayProducts() {
@@ -847,27 +1215,30 @@
                 const isInCart = cart.some(item => item.id === product.id);
                 const famille = product.famille || 'Non catégorisé';
                 const icon = getProductIcon(famille);
+                const description = product.description || 'Produit de qualité professionnelle';
                 
                 html += `
-                    <div class="product-card card">
-                        <div class="card-body d-flex flex-column">
-                            <div class="product-image">
-                                <i class="${icon}"></i>
+                    <div class="product-card">
+                        <div class="product-image">
+                            <i class="${icon}"></i>
+                            <div class="product-badges">
+                                <span class="product-badge bg-secondary">${product.ref}</span>
+                                <span class="product-badge bg-info">${famille}</span>
                             </div>
-                            <div class="d-flex justify-content-between align-items-start mb-2">
-                                <span class="badge bg-secondary">${product.ref}</span>
-                                <span class="badge bg-info">${famille}</span>
-                            </div>
-                            <h6 class="card-title flex-grow-1">${product.designation}</h6>
-                            <div class="mt-auto">
-                                <div class="d-flex justify-content-between align-items-center mt-3">
-                                    <h5 class="text-primary mb-0">${formatPrice(product.prix)}</h5>
-                                    <button class="btn ${isInCart ? 'btn-warning' : 'btn-primary'} btn-sm" 
-                                            onclick="toggleCart(${product.id})">
-                                        <i class="fas ${isInCart ? 'fa-shopping-cart' : 'fa-cart-plus'} me-1"></i>
-                                        ${isInCart ? 'Dans panier' : 'Ajouter'}
-                                    </button>
-                                </div>
+                        </div>
+                        <div class="product-info">
+                            <div class="product-name">${product.designation}</div>
+                            <div class="product-description">${description}</div>
+                            <div class="product-price">${formatPrice(product.prix)}</div>
+                            <div class="product-actions">
+                                <button class="btn ${isInCart ? 'btn-warning' : 'btn-primary'}" 
+                                        onclick="toggleCart(${product.id})">
+                                    <i class="fas ${isInCart ? 'fa-shopping-cart' : 'fa-cart-plus'} me-1"></i>
+                                    ${isInCart ? 'Dans panier' : 'Ajouter'}
+                                </button>
+                                <button class="btn btn-outline-secondary btn-sm" onclick="showProductDetails(${product.id})">
+                                    <i class="fas fa-info"></i>
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -885,9 +1256,26 @@
                 'Écrans': 'fas fa-tv',
                 'Périphériques': 'fas fa-keyboard',
                 'Téléphones': 'fas fa-mobile-alt',
-                'Tablettes': 'fas fa-tablet-alt'
+                'Tablettes': 'fas fa-tablet-alt',
+                'Imprimantes': 'fas fa-print',
+                'Composants': 'fas fa-microchip'
             };
             return icons[category] || 'fas fa-box';
+        }
+
+        function showProductDetails(productId) {
+            const product = products.find(p => p.id === productId);
+            if (!product) return;
+            
+            const details = `
+Référence: ${product.ref}
+Désignation: ${product.designation}
+Catégorie: ${product.famille || 'Non catégorisé'}
+Prix: ${formatPrice(product.prix)}
+${product.description ? `Description: ${product.description}` : ''}
+            `.trim();
+            
+            alert(details);
         }
 
         function updateProductCount() {
@@ -921,6 +1309,7 @@
             updateCartDisplay();
             updateStats();
             updateMobileCartBadge();
+            generateAIRecommendations();
         }
 
         function updateMobileCartBadge() {
@@ -957,41 +1346,31 @@
                 const itemTotal = item.prix * item.quantity;
                 total += itemTotal;
                 cartHTML += `
-                    <div class="cart-item mb-3 pb-3 border-bottom">
-                        <div class="d-flex justify-content-between align-items-start">
-                            <div class="flex-grow-1">
-                                <h6 class="mb-1">${item.designation}</h6>
-                                <small class="text-muted">Ref: ${item.ref}</small>
-                                <div class="mt-2">
-                                    <button class="btn btn-outline-secondary btn-sm" onclick="updateQuantity(${index}, -1)">
-                                        <i class="fas fa-minus"></i>
-                                    </button>
-                                    <span class="mx-2 fw-bold">${item.quantity}</span>
-                                    <button class="btn btn-outline-secondary btn-sm" onclick="updateQuantity(${index}, 1)">
-                                        <i class="fas fa-plus"></i>
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="text-end">
-                                <div class="fw-bold">${formatPrice(itemTotal)}</div>
-                                <small class="text-muted">${formatPrice(item.prix)}/unité</small>
-                                <div class="mt-1">
-                                    <button class="btn btn-outline-danger btn-sm" onclick="removeFromCart(${index})">
-                                        <i class="fas fa-trash"></i>
-                                    </button>
-                                </div>
+                    <div class="cart-item">
+                        <div class="cart-item-info">
+                            <div class="cart-item-name">${item.designation}</div>
+                            <div class="cart-item-ref">${item.ref}</div>
+                            <div class="cart-item-actions mt-2">
+                                <button class="btn btn-outline-secondary btn-sm" onclick="updateQuantity(${index}, -1)">
+                                    <i class="fas fa-minus"></i>
+                                </button>
+                                <span class="cart-item-quantity mx-2">${item.quantity}</span>
+                                <button class="btn btn-outline-secondary btn-sm" onclick="updateQuantity(${index}, 1)">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                                <button class="btn btn-outline-danger btn-sm ms-2" onclick="removeFromCart(${index})">
+                                    <i class="fas fa-trash"></i>
+                                </button>
                             </div>
                         </div>
+                        <div class="cart-item-price">${formatPrice(itemTotal)}</div>
                     </div>
                 `;
             });
 
             cartHTML += `
-                <div class="border-top pt-3">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0">Total:</h5>
-                        <h4 class="text-primary mb-0">${formatPrice(total)}</h4>
-                    </div>
+                <div class="cart-total">
+                    Total: ${formatPrice(total)}
                 </div>
             `;
             
@@ -1061,6 +1440,149 @@
             updateMobileCartBadge();
         }
 
+        function shareViaWhatsApp() {
+            if (cart.length === 0) {
+                showSyncStatus('Votre panier est vide', 'warning');
+                return;
+            }
+
+            const total = cart.reduce((sum, item) => sum + (item.prix * item.quantity), 0);
+            let message = "Bonjour, je souhaite commander les produits suivants:\n\n";
+            
+            cart.forEach(item => {
+                message += `• ${item.designation} (${item.ref})\n`;
+                message += `  Quantité: ${item.quantity} x ${formatPrice(item.prix)}\n\n`;
+            });
+            
+            message += `Total: ${formatPrice(total)}\n\n`;
+            message += `Nom: [VOTRE NOM]\n`;
+            message += `Téléphone: [VOTRE TÉLÉPHONE]\n`;
+            message += `Adresse: [VOTRE ADRESSE]`;
+            
+            const encodedMessage = encodeURIComponent(message);
+            const whatsappUrl = `https://wa.me/213541527561?text=${encodedMessage}`;
+            
+            window.open(whatsappUrl, '_blank');
+        }
+
+        function generatePDF() {
+            if (cart.length === 0) {
+                showSyncStatus('Votre panier est vide', 'warning');
+                return;
+            }
+
+            showSyncStatus('Génération du PDF en cours...', 'warning');
+            
+            // استخدام html2canvas لالتقاط لقطة للبيانات
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            
+            const total = cart.reduce((sum, item) => sum + (item.prix * item.quantity), 0);
+            const currentDate = new Date().toLocaleDateString('fr-FR');
+            
+            // عنوان PDF
+            doc.setFontSize(20);
+            doc.setTextColor(26, 58, 108);
+            doc.text('VARICOM - DEVIS', 105, 20, { align: 'center' });
+            
+            // معلومات الشركة
+            doc.setFontSize(10);
+            doc.setTextColor(100, 100, 100);
+            doc.text('07 Boulevard MIRA Abderahmen Loc N°2, Oran', 105, 30, { align: 'center' });
+            doc.text('Tél: 05 41 52 75 61 | Fax: 041 36 32 57', 105, 35, { align: 'center' });
+            doc.text('Email: contact@varicom-dz.com', 105, 40, { align: 'center' });
+            
+            // تاريخ
+            doc.text(`Date: ${currentDate}`, 20, 50);
+            
+            // جدول المنتجات
+            let yPosition = 70;
+            doc.setFillColor(26, 58, 108);
+            doc.setTextColor(255, 255, 255);
+            doc.rect(20, yPosition, 170, 10, 'F');
+            doc.text('Produit', 25, yPosition + 7);
+            doc.text('Qté', 120, yPosition + 7);
+            doc.text('Prix', 140, yPosition + 7);
+            doc.text('Total', 160, yPosition + 7);
+            
+            yPosition += 10;
+            doc.setTextColor(0, 0, 0);
+            
+            cart.forEach(item => {
+                const itemTotal = item.prix * item.quantity;
+                
+                if (yPosition > 250) {
+                    doc.addPage();
+                    yPosition = 20;
+                }
+                
+                doc.text(item.designation.substring(0, 40) + (item.designation.length > 40 ? '...' : ''), 25, yPosition + 7);
+                doc.text(item.quantity.toString(), 120, yPosition + 7);
+                doc.text(formatPrice(item.prix), 140, yPosition + 7);
+                doc.text(formatPrice(itemTotal), 160, yPosition + 7);
+                
+                yPosition += 10;
+            });
+            
+            // الخط الإجمالي
+            yPosition += 10;
+            doc.setDrawColor(0, 0, 0);
+            doc.line(20, yPosition, 190, yPosition);
+            yPosition += 10;
+            
+            doc.setFontSize(12);
+            doc.setFont(undefined, 'bold');
+            doc.text(`TOTAL: ${formatPrice(total)}`, 160, yPosition, { align: 'right' });
+            
+            // حفظ PDF
+            doc.save(`devis-varicom-${currentDate.replace(/\//g, '-')}.pdf`);
+            showSyncStatus('PDF généré avec succès!', 'success');
+        }
+
+        function generateAIRecommendations() {
+            const aiMessage = document.getElementById('aiMessage');
+            if (!aiMessage) return;
+            
+            let message = "";
+            
+            if (cart.length > 0) {
+                const total = cart.reduce((sum, item) => sum + (item.prix * item.quantity), 0);
+                const categoriesInCart = [...new Set(cart.map(item => item.famille))];
+                
+                message = `Votre panier contient ${cart.length} produit(s) pour un total de ${formatPrice(total)}. `;
+                
+                // توصيات بناءً على المنتجات في السلة
+                if (categoriesInCart.includes('Ordinateurs Portables')) {
+                    message += "Nous vous recommandons d'ajouter une sacoche de protection et une souris sans fil pour compléter votre achat. ";
+                }
+                
+                if (categoriesInCart.includes('Ordinateurs Bureau')) {
+                    message += "Pensez à ajouter un écran et un clavier/souris pour une expérience complète. ";
+                }
+                
+                if (total > 100000) {
+                    message += "Profitez de nos solutions de paiement en plusieurs fois sans frais! ";
+                }
+            } else {
+                // توصيات عامة
+                const popularCategories = products.reduce((acc, product) => {
+                    acc[product.famille] = (acc[product.famille] || 0) + 1;
+                    return acc;
+                }, {});
+                
+                const mostPopularCategory = Object.keys(popularCategories).reduce((a, b) => 
+                    popularCategories[a] > popularCategories[b] ? a : b
+                );
+                
+                message = `Découvrez nos ${products.length} produits de qualité. `;
+                message += `La catégorie "${mostPopularCategory}" est particulièrement populaire en ce moment. `;
+                message += "Utilisez la barre de recherche pour trouver rapidement ce dont vous avez besoin.";
+            }
+            
+            aiMessage.textContent = message;
+            document.getElementById('aiRecommendations').style.display = 'block';
+        }
+
         function formatPrice(price) {
             return new Intl.NumberFormat('fr-FR', {minimumFractionDigits: 2}).format(price) + ' DA';
         }
@@ -1091,7 +1613,6 @@
             }
         });
 
-        // تحسين الأداء على الهواتف
         window.addEventListener('resize', function() {
             setupMobileNav();
         });
