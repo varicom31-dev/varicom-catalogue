@@ -7,7 +7,6 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        /* أنماط CSS تبقى كما هي */
         :root {
             --primary-color: #1a3a6c;
             --secondary-color: #e63946;
@@ -16,12 +15,13 @@
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background-color: #f8f9fa;
+            padding-bottom: 60px; /* مساحة للشريط السفلي في الهواتف */
         }
         
         .company-header {
             background: linear-gradient(135deg, var(--primary-color), #2a4d7a);
             color: white;
-            padding: 20px 0;
+            padding: 15px 0;
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         }
         
@@ -30,6 +30,7 @@
             border-radius: 12px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.08);
             transition: transform 0.2s;
+            margin-bottom: 1rem;
         }
         
         .card:hover {
@@ -42,24 +43,30 @@
             border-radius: 8px;
             padding: 10px 20px;
             font-weight: 600;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            transform: scale(1.05);
         }
         
         .categories-sidebar {
             background: white;
             border-radius: 12px;
-            padding: 25px;
+            padding: 20px;
             height: fit-content;
             position: sticky;
             top: 20px;
         }
         
         .category-item {
-            padding: 12px 18px;
+            padding: 12px 15px;
             margin-bottom: 8px;
             border-radius: 8px;
             cursor: pointer;
             border-left: 4px solid transparent;
             transition: all 0.3s;
+            font-size: 0.9rem;
         }
         
         .category-item:hover, .category-item.active {
@@ -71,8 +78,8 @@
         .cart-sidebar {
             background: white;
             border-radius: 12px;
-            padding: 25px;
-            margin-top: 25px;
+            padding: 20px;
+            margin-top: 20px;
         }
         
         .sync-status {
@@ -84,6 +91,8 @@
             border-radius: 8px;
             display: none;
             box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            max-width: 300px;
+            word-wrap: break-word;
         }
         
         .sync-success { background: linear-gradient(135deg, #28a745, #20c997); color: white; }
@@ -105,6 +114,7 @@
             padding: 12px 20px;
             border: 2px solid #e9ecef;
             transition: all 0.3s;
+            font-size: 0.9rem;
         }
         
         .search-box:focus {
@@ -120,10 +130,215 @@
         .auto-refresh-badge:hover {
             transform: scale(1.05);
         }
+
+        /* تحسينات التجاوب للهواتف */
+        @media (max-width: 768px) {
+            .company-header {
+                padding: 10px 0;
+            }
+            
+            .company-header h2 {
+                font-size: 1.3rem;
+            }
+            
+            .company-header p {
+                font-size: 0.8rem;
+            }
+            
+            .company-info div {
+                font-size: 0.8rem;
+            }
+            
+            .categories-sidebar {
+                position: static;
+                margin-bottom: 1rem;
+            }
+            
+            .cart-sidebar {
+                margin-top: 1rem;
+            }
+            
+            .sync-status {
+                top: 10px;
+                right: 10px;
+                left: 10px;
+                max-width: none;
+                font-size: 0.9rem;
+                padding: 10px 15px;
+            }
+            
+            .search-box {
+                padding: 10px 15px;
+                font-size: 16px; /* منع التكبير في iOS */
+            }
+            
+            .btn-primary {
+                padding: 8px 16px;
+                font-size: 0.9rem;
+            }
+            
+            .card-body {
+                padding: 1rem;
+            }
+            
+            .product-card .card-body {
+                padding: 1rem;
+            }
+            
+            .category-item {
+                padding: 10px 12px;
+                font-size: 0.85rem;
+            }
+            
+            .stats-card .h4 {
+                font-size: 1.2rem;
+            }
+            
+            .stats-card small {
+                font-size: 0.7rem;
+            }
+
+            .container {
+                padding-left: 10px;
+                padding-right: 10px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .company-header .col-md-6 {
+                text-align: center !important;
+                margin-bottom: 10px;
+            }
+            
+            .product-card .card-body {
+                padding: 0.8rem;
+            }
+
+            .btn-primary {
+                padding: 6px 12px;
+                font-size: 0.8rem;
+            }
+        }
+
+        /* تحسينات عامة */
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1rem;
+        }
+
+        .stats-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+
+        .stats-card .h4 {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        /* شريط التنقل السفلي للهواتف */
+        .mobile-bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            display: none;
+            z-index: 1000;
+            padding: 8px 0;
+        }
+
+        .nav-item {
+            flex: 1;
+            text-align: center;
+            padding: 5px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .nav-item.active {
+            color: var(--primary-color);
+        }
+
+        .nav-item i {
+            font-size: 1.2rem;
+            margin-bottom: 2px;
+        }
+
+        .nav-item .small {
+            font-size: 0.7rem;
+        }
+
+        .cart-badge-mobile {
+            position: absolute;
+            top: 0;
+            right: 20%;
+            background: var(--secondary-color);
+            color: white;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            font-size: 0.7rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* تحسينات للأجهزة اللوحية */
+        @media (max-width: 1024px) and (min-width: 769px) {
+            .products-grid {
+                grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            }
+        }
+
+        /* تحسين عرض المنتجات في الشبكة */
+        .product-image {
+            height: 120px;
+            background: #f8f9fa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        .product-image i {
+            font-size: 2rem;
+            color: #6c757d;
+        }
     </style>
 </head>
 <body>
     <div id="syncStatus" class="sync-status"></div>
+
+    <!-- شريط التنقل للهواتف -->
+    <div class="mobile-bottom-nav d-lg-none">
+        <div class="d-flex">
+            <div class="nav-item active" onclick="showSection('products')">
+                <i class="fas fa-th-large"></i>
+                <div class="small">المنتجات</div>
+            </div>
+            <div class="nav-item" onclick="showSection('categories')">
+                <i class="fas fa-list"></i>
+                <div class="small">الفئات</div>
+            </div>
+            <div class="nav-item position-relative" onclick="showSection('cart')">
+                <i class="fas fa-shopping-cart"></i>
+                <div class="small">السلة</div>
+                <span class="cart-badge-mobile" style="display: none;">0</span>
+            </div>
+            <div class="nav-item" onclick="refreshData()">
+                <i class="fas fa-sync-alt"></i>
+                <div class="small">تحديث</div>
+            </div>
+        </div>
+    </div>
 
     <header class="company-header">
         <div class="container">
@@ -133,15 +348,15 @@
                         <h2 class="mb-1"><i class="fas fa-laptop-code me-2"></i>VARICOM</h2>
                         <p class="mb-0 opacity-75">Votre partenaire informatique de confiance</p>
                     </div>
-                    <div class="company-info mt-3">
-                        <div class="mb-1"><i class="fas fa-map-marker-alt me-2"></i>07 Boulevard MIRA Abderahmen Loc N°2, Oran</div>
-                        <div><i class="fas fa-phone me-2"></i>05 41 52 75 61 | <i class="fas fa-fax me-2"></i>041 36 32 57</div>
+                    <div class="company-info mt-2">
+                        <div class="mb-1 small"><i class="fas fa-map-marker-alt me-2"></i>07 Boulevard MIRA Abderahmen Loc N°2, Oran</div>
+                        <div class="small"><i class="fas fa-phone me-2"></i>05 41 52 75 61 | <i class="fas fa-fax me-2"></i>041 36 32 57</div>
                     </div>
                 </div>
                 <div class="col-md-6 text-md-end">
                     <div class="company-info">
-                        <div class="mb-2"><i class="fas fa-envelope me-2"></i>contact@varicom-dz.com</div>
-                        <div class="badge bg-light text-dark fs-6 p-2 auto-refresh-badge" onclick="refreshData()" title="Cliquer pour actualiser">
+                        <div class="mb-2 small"><i class="fas fa-envelope me-2"></i>contact@varicom-dz.com</div>
+                        <div class="badge bg-light text-dark p-2 auto-refresh-badge" onclick="refreshData()" title="Cliquer pour actualiser">
                             <i class="fas fa-sync-alt me-1"></i>
                             <span id="lastSyncTime">Actualiser</span>
                         </div>
@@ -151,11 +366,11 @@
         </div>
     </header>
 
-    <div class="container my-5">
+    <div class="container my-4">
         <div class="row">
-            <!-- Sidebar -->
-            <div class="col-lg-3 mb-4">
-                <!-- Catégories -->
+            <!-- الشريط الجانبي - يظهر فقط في الشاشات الكبيرة -->
+            <div class="col-lg-3 d-none d-lg-block">
+                <!-- الفئات -->
                 <div class="categories-sidebar">
                     <h5><i class="fas fa-list me-2"></i>Catégories</h5>
                     <input type="text" id="categorySearch" class="form-control search-box mb-3" placeholder="🔍 Rechercher catégorie...">
@@ -166,7 +381,7 @@
                     </div>
                 </div>
 
-                <!-- Panier -->
+                <!-- السلة -->
                 <div class="cart-sidebar">
                     <h5><i class="fas fa-shopping-cart me-2"></i>Mon Panier</h5>
                     <div id="cartContent">
@@ -189,17 +404,17 @@
                 </div>
             </div>
 
-            <!-- Contenu principal -->
-            <div class="col-lg-9">
-                <!-- Barre de recherche -->
-                <div class="card mb-4">
-                    <div class="card-body">
-                        <div class="row g-3 align-items-center">
-                            <div class="col-md-8">
+            <!-- المحتوى الرئيسي -->
+            <div class="col-lg-9 col-12">
+                <!-- شريط البحث -->
+                <div class="card mb-3">
+                    <div class="card-body py-3">
+                        <div class="row g-2 align-items-center">
+                            <div class="col-md-8 col-12 mb-2 mb-md-0">
                                 <input type="text" id="searchInput" class="form-control search-box" 
                                        placeholder="🔍 Rechercher un produit...">
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-4 col-12">
                                 <select id="categoryFilter" class="form-select search-box">
                                     <option value="">Toutes les catégories</option>
                                 </select>
@@ -208,40 +423,40 @@
                     </div>
                 </div>
 
-                <!-- Statistiques -->
-                <div class="row mb-4">
-                    <div class="col-12">
-                        <div class="card">
-                            <div class="card-body py-3">
-                                <div class="row text-center">
-                                    <div class="col-md-3">
-                                        <div class="h4 text-primary mb-1" id="totalProducts">0</div>
-                                        <small class="text-muted">Produits</small>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <div class="h4 text-success mb-1" id="totalCategories">0</div>
-                                        <small class="text-muted">Catégories</small>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <div class="h4 text-warning mb-1" id="cartTotal">0</div>
-                                        <small class="text-muted">Panier Total</small>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <div class="h4 text-info mb-1" id="lastUpdate">--:--</div>
-                                        <small class="text-muted">Dernière MAJ</small>
-                                    </div>
-                                </div>
-                            </div>
+                <!-- الإحصائيات -->
+                <div class="row g-2 mb-3">
+                    <div class="col-6 col-md-3">
+                        <div class="stats-card">
+                            <div class="h4" id="totalProducts">0</div>
+                            <small>Produits</small>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="stats-card">
+                            <div class="h4" id="totalCategories">0</div>
+                            <small>Catégories</small>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="stats-card">
+                            <div class="h4" id="cartTotal">0</div>
+                            <small>Panier Total</small>
+                        </div>
+                    </div>
+                    <div class="col-6 col-md-3">
+                        <div class="stats-card">
+                            <div class="h4" id="lastUpdate">--:--</div>
+                            <small>Dernière MAJ</small>
                         </div>
                     </div>
                 </div>
 
-                <!-- Liste des produits -->
+                <!-- قائمة المنتجات -->
                 <div class="card">
                     <div class="card-header text-white" style="background: linear-gradient(135deg, var(--primary-color), #2a4d7a);">
                         <div class="d-flex justify-content-between align-items-center">
                             <h5 class="mb-0"><i class="fas fa-table me-2"></i>Catalogue Produits</h5>
-                            <span class="badge bg-light text-dark fs-6" id="productCount">0 produits</span>
+                            <span class="badge bg-light text-dark" id="productCount">0 produits</span>
                         </div>
                     </div>
                     <div class="card-body">
@@ -258,6 +473,9 @@
     </div>
 
     <script>
+        // الرابط الثابت للبيانات
+        const DEFAULT_GIST_ID = "YOUR_DEFAULT_GIST_ID_HERE"; // ضع معرف الـ Gist الافتراضي هنا
+
         let products = [];
         let filteredProducts = [];
         let categories = [];
@@ -266,6 +484,7 @@
 
         document.addEventListener('DOMContentLoaded', function() {
             initializeApp();
+            setupMobileNav();
         });
 
         function initializeApp() {
@@ -273,6 +492,45 @@
             loadProducts();
             updateCartDisplay();
             startAutoRefresh();
+        }
+
+        function setupMobileNav() {
+            // إظهار شريط التنقل السفلي للهواتف فقط
+            if (window.innerWidth <= 768) {
+                document.querySelector('.mobile-bottom-nav').style.display = 'flex';
+                updateMobileCartBadge();
+            }
+        }
+
+        function showSection(section) {
+            // تحديث النشاط في شريط التنقل
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            event.currentTarget.classList.add('active');
+            
+            if (section === 'cart') {
+                // في الهواتف، يمكن إظهار السلة في modal أو صفحة منفصلة
+                showCartModal();
+            }
+        }
+
+        function showCartModal() {
+            // عرض السلة في نافذة منبثقة على الهواتف
+            const cartItems = cart.map(item => 
+                `${item.designation} (${item.quantity}x) - ${formatPrice(item.prix * item.quantity)}`
+            ).join('\n');
+            
+            const total = cart.reduce((sum, item) => sum + (item.prix * item.quantity), 0);
+            
+            if (cart.length === 0) {
+                alert("Votre panier est vide");
+                return;
+            }
+            
+            const message = `Votre Panier:\n\n${cartItems}\n\nTotal: ${formatPrice(total)}\n\nSouhaitez-vous commander?`;
+            
+            if (confirm(message)) {
+                checkout();
+            }
         }
 
         function setupEventListeners() {
@@ -286,24 +544,27 @@
                     item.style.display = text.includes(searchTerm) ? 'block' : 'none';
                 });
             });
+
+            // تحسين الأداء على الهواتف
+            let searchTimer;
+            document.getElementById('searchInput').addEventListener('input', function() {
+                clearTimeout(searchTimer);
+                searchTimer = setTimeout(filterProducts, 300);
+            });
         }
 
         async function loadProducts() {
             showSyncStatus('Chargement des données...', 'warning');
 
             const urlParams = new URLSearchParams(window.location.search);
-            const gistId = urlParams.get('gist');
-            const dataParam = urlParams.get('data');
+            const gistId = urlParams.get('gist') || DEFAULT_GIST_ID;
 
             try {
                 let productsData = null;
 
-                if (gistId) {
+                if (gistId && gistId !== "YOUR_DEFAULT_GIST_ID_HERE") {
                     // Charger depuis GitHub Gist
                     productsData = await loadFromGitHubGist(gistId);
-                } else if (dataParam) {
-                    // Données encodées dans l'URL
-                    productsData = await loadFromDataParam(dataParam);
                 } else {
                     // Aucune source de données - utiliser données de démonstration
                     productsData = await loadDemoData();
@@ -339,7 +600,8 @@
                 // Chercher le fichier produits.json
                 const productsFile = Object.values(gistData.files).find(file => 
                     file.filename.toLowerCase().includes('produit') || 
-                    file.filename.toLowerCase().includes('product')
+                    file.filename.toLowerCase().includes('product') ||
+                    file.filename.toLowerCase().includes('data')
                 );
 
                 if (!productsFile) {
@@ -348,7 +610,6 @@
                 
                 let productsContent;
                 try {
-                    // GitHub API retourne déjà le contenu décodé
                     productsContent = JSON.parse(productsFile.content);
                 } catch (parseError) {
                     console.error('Erreur parsing JSON:', parseError);
@@ -368,29 +629,6 @@
                 return {
                     success: false,
                     error: error.message
-                };
-            }
-        }
-
-        async function loadFromDataParam(dataParam) {
-            try {
-                console.log('🔗 Chargement depuis paramètre data');
-                
-                // Décoder les données base64
-                const decodedData = atob(dataParam);
-                const jsonData = JSON.parse(decodedData);
-                
-                return {
-                    success: true,
-                    data: jsonData,
-                    lastUpdate: new Date().toISOString()
-                };
-                
-            } catch (error) {
-                console.error('Erreur data param:', error);
-                return {
-                    success: false,
-                    error: 'Format de données invalide'
                 };
             }
         }
@@ -418,6 +656,27 @@
                     designation: "Écran LG 24\" Full HD",
                     prix: 12000,
                     famille: "Écrans"
+                },
+                {
+                    id: 4,
+                    ref: "CLA-LOG-004",
+                    designation: "Clavier Logitech Mécanique",
+                    prix: 3500,
+                    famille: "Périphériques"
+                },
+                {
+                    id: 5,
+                    ref: "SOU-SAM-005",
+                    designation: "Smartphone Samsung Galaxy",
+                    prix: 28000,
+                    famille: "Téléphones"
+                },
+                {
+                    id: 6,
+                    ref: "TAB-APP-006",
+                    designation: "Tablette Apple iPad",
+                    prix: 32000,
+                    famille: "Tablettes"
                 }
             ];
 
@@ -433,7 +692,6 @@
             
             let rawProducts = [];
             
-            // Gérer différents formats de données
             if (Array.isArray(productsData.data)) {
                 rawProducts = productsData.data;
             } else if (productsData.data && Array.isArray(productsData.data.products)) {
@@ -442,7 +700,6 @@
                 throw new Error('Format de données non supporté');
             }
 
-            // Filtrer les produits valides
             products = rawProducts.filter(product => 
                 product && 
                 product.id && 
@@ -456,7 +713,6 @@
                 return;
             }
 
-            // Extraire les catégories uniques
             categories = [...new Set(products
                 .map(p => p.famille || 'Non catégorisé')
                 .filter(famille => famille)
@@ -470,14 +726,6 @@
 
             console.log('✅ Produits traités:', products.length);
             console.log('✅ Catégories:', categories);
-        }
-
-        function validateProductData(product) {
-            return product && 
-                   product.id && 
-                   product.ref && 
-                   product.designation && 
-                   product.prix > 0;
         }
 
         function showNoDataMessage() {
@@ -498,7 +746,6 @@
         }
 
         function startAutoRefresh() {
-            // Actualiser automatiquement toutes les 2 minutes
             if (autoRefreshInterval) {
                 clearInterval(autoRefreshInterval);
             }
@@ -526,6 +773,8 @@
 
         function updateCategoriesDisplay() {
             const categoriesList = document.getElementById('categoriesList');
+            if (!categoriesList) return;
+            
             categoriesList.innerHTML = `
                 <div class="category-item active" data-category="">
                     <i class="fas fa-th-large me-2"></i>Toutes les catégories
@@ -592,30 +841,32 @@
                 return;
             }
 
-            let html = '<div class="row g-4">';
+            let html = '<div class="products-grid">';
             
             filteredProducts.forEach(product => {
                 const isInCart = cart.some(item => item.id === product.id);
                 const famille = product.famille || 'Non catégorisé';
+                const icon = getProductIcon(famille);
                 
                 html += `
-                    <div class="col-xl-4 col-lg-6 col-md-6">
-                        <div class="card product-card h-100">
-                            <div class="card-body d-flex flex-column">
-                                <div class="d-flex justify-content-between align-items-start mb-2">
-                                    <span class="badge bg-secondary">${product.ref}</span>
-                                    <span class="badge bg-info">${famille}</span>
-                                </div>
-                                <h6 class="card-title flex-grow-1">${product.designation}</h6>
-                                <div class="mt-auto">
-                                    <div class="d-flex justify-content-between align-items-center mt-3">
-                                        <h5 class="text-primary mb-0">${formatPrice(product.prix)}</h5>
-                                        <button class="btn ${isInCart ? 'btn-warning' : 'btn-primary'}" 
-                                                onclick="toggleCart(${product.id})">
-                                            <i class="fas ${isInCart ? 'fa-shopping-cart' : 'fa-cart-plus'} me-1"></i>
-                                            ${isInCart ? 'Dans panier' : 'Ajouter'}
-                                        </button>
-                                    </div>
+                    <div class="product-card card">
+                        <div class="card-body d-flex flex-column">
+                            <div class="product-image">
+                                <i class="${icon}"></i>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <span class="badge bg-secondary">${product.ref}</span>
+                                <span class="badge bg-info">${famille}</span>
+                            </div>
+                            <h6 class="card-title flex-grow-1">${product.designation}</h6>
+                            <div class="mt-auto">
+                                <div class="d-flex justify-content-between align-items-center mt-3">
+                                    <h5 class="text-primary mb-0">${formatPrice(product.prix)}</h5>
+                                    <button class="btn ${isInCart ? 'btn-warning' : 'btn-primary'} btn-sm" 
+                                            onclick="toggleCart(${product.id})">
+                                        <i class="fas ${isInCart ? 'fa-shopping-cart' : 'fa-cart-plus'} me-1"></i>
+                                        ${isInCart ? 'Dans panier' : 'Ajouter'}
+                                    </button>
                                 </div>
                             </div>
                         </div>
@@ -625,6 +876,18 @@
             
             html += '</div>';
             container.innerHTML = html;
+        }
+
+        function getProductIcon(category) {
+            const icons = {
+                'Ordinateurs Portables': 'fas fa-laptop',
+                'Ordinateurs Bureau': 'fas fa-desktop',
+                'Écrans': 'fas fa-tv',
+                'Périphériques': 'fas fa-keyboard',
+                'Téléphones': 'fas fa-mobile-alt',
+                'Tablettes': 'fas fa-tablet-alt'
+            };
+            return icons[category] || 'fas fa-box';
         }
 
         function updateProductCount() {
@@ -657,12 +920,24 @@
             displayProducts();
             updateCartDisplay();
             updateStats();
+            updateMobileCartBadge();
+        }
+
+        function updateMobileCartBadge() {
+            const badge = document.querySelector('.cart-badge-mobile');
+            if (badge) {
+                const totalItems = cart.reduce((total, item) => total + item.quantity, 0);
+                badge.textContent = totalItems;
+                badge.style.display = totalItems > 0 ? 'flex' : 'none';
+            }
         }
 
         function updateCartDisplay() {
             const cartItems = document.getElementById('cartItems');
             const emptyMessage = document.getElementById('emptyCartMessage');
             const cartActions = document.getElementById('cartActions');
+
+            if (!cartItems || !emptyMessage || !cartActions) return;
 
             if (cart.length === 0) {
                 cartItems.style.display = 'none';
@@ -734,6 +1009,7 @@
             updateCartDisplay();
             displayProducts();
             updateStats();
+            updateMobileCartBadge();
         }
 
         function removeFromCart(index) {
@@ -743,6 +1019,7 @@
             updateCartDisplay();
             displayProducts();
             updateStats();
+            updateMobileCartBadge();
             showSyncStatus(`${productName} retiré du panier`, 'warning');
         }
 
@@ -753,6 +1030,7 @@
                 updateCartDisplay();
                 displayProducts();
                 updateStats();
+                updateMobileCartBadge();
                 showSyncStatus('Panier vidé', 'success');
             }
         }
@@ -775,12 +1053,12 @@
 
             alert(message);
             
-            // Réinitialiser le panier après commande
             cart = [];
             localStorage.setItem('varicom_cart', JSON.stringify(cart));
             updateCartDisplay();
             displayProducts();
             updateStats();
+            updateMobileCartBadge();
         }
 
         function formatPrice(price) {
@@ -807,11 +1085,15 @@
             }
         }
 
-        // Nettoyer à la fermeture
         window.addEventListener('beforeunload', () => {
             if (autoRefreshInterval) {
                 clearInterval(autoRefreshInterval);
             }
+        });
+
+        // تحسين الأداء على الهواتف
+        window.addEventListener('resize', function() {
+            setupMobileNav();
         });
     </script>
 </body>
