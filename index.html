@@ -559,6 +559,16 @@
             font-weight: 600;
         }
         
+        /* Error Section */
+        .error-section {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            color: #721c24;
+        }
+        
         /* Responsive Design */
         @media (max-width: 768px) {
             .company-header {
@@ -718,6 +728,20 @@
     </header>
 
     <div class="container my-4">
+        <!-- قسم الأخطاء -->
+        <div id="errorSection" class="error-section" style="display: none;">
+            <h5><i class="fas fa-exclamation-triangle me-2"></i>Problème de Chargement</h5>
+            <p id="errorMessage" class="mb-2"></p>
+            <div class="d-flex gap-2">
+                <button class="btn btn-primary btn-sm" onclick="refreshData()">
+                    <i class="fas fa-sync me-1"></i>Réessayer
+                </button>
+                <button class="btn btn-outline-secondary btn-sm" onclick="useDemoData()">
+                    <i class="fas fa-database me-1"></i>Utiliser les données de démonstration
+                </button>
+            </div>
+        </div>
+
         <!-- قسم المنتجات الجديدة -->
         <div class="new-arrivals" id="newArrivalsSection">
             <div class="new-arrivals-header">
@@ -989,6 +1013,31 @@
             displayNotifications();
         }
 
+        function showError(message) {
+            const errorSection = document.getElementById('errorSection');
+            const errorMessage = document.getElementById('errorMessage');
+            
+            errorMessage.textContent = message;
+            errorSection.style.display = 'block';
+            
+            showNotification(message, 'error', 'Erreur de Chargement');
+        }
+
+        function hideError() {
+            const errorSection = document.getElementById('errorSection');
+            errorSection.style.display = 'none';
+        }
+
+        function useDemoData() {
+            hideError();
+            loadDemoData().then(productsData => {
+                if (productsData && productsData.success) {
+                    processProductsData(productsData);
+                    showNotification("Données de démonstration chargées avec succès", "success");
+                }
+            });
+        }
+
         // نظام المنتجات الجديدة
         function displayNewProducts() {
             const grid = document.getElementById('newArrivalsGrid');
@@ -1110,6 +1159,7 @@
 
         async function loadProducts() {
             showNotification("Chargement des données...", "info");
+            hideError();
 
             const urlParams = new URLSearchParams(window.location.search);
             const gistId = urlParams.get('gist') || DEFAULT_GIST_ID;
@@ -1135,7 +1185,9 @@
                 
             } catch (error) {
                 console.error('Erreur détaillée:', error);
-                showNotification("Erreur lors du chargement: " + error.message, "error");
+                const errorMsg = `Erreur lors du chargement: ${error.message}`;
+                showError(errorMsg);
+                showNotification(errorMsg, "error");
                 showNoDataMessage();
             }
         }
@@ -1162,40 +1214,43 @@
         async function loadFromGitHubGist(gistId) {
             try {
                 console.log('Chargement depuis Gist:', gistId);
-                const response = await fetch(`https://api.github.com/gists/${gistId}`);
+                
+                // استخدام CORS proxy لتجنب مشاكل 403
+                const proxyUrl = 'https://cors-anywhere.herokuapp.com/';
+                const targetUrl = `https://api.github.com/gists/${gistId}`;
+                
+                const response = await fetch(proxyUrl + targetUrl, {
+                    headers: {
+                        'Accept': 'application/vnd.github.v3+json',
+                        'User-Agent': 'VARICOM-Catalogue-App'
+                    }
+                });
                 
                 if (!response.ok) {
-                    throw new Error(`Erreur HTTP: ${response.status}`);
+                    if (response.status === 403) {
+                        // محاولة بديلة بدون proxy
+                        const directResponse = await fetch(targetUrl, {
+                            headers: {
+                                'Accept': 'application/vnd.github.v3+json',
+                                'User-Agent': 'VARICOM-Catalogue-App'
+                            }
+                        });
+                        
+                        if (!directResponse.ok) {
+                            throw new Error(`Erreur GitHub API (${directResponse.status}): Accès refusé. Vérifiez que le Gist est public.`);
+                        }
+                        
+                        const gistData = await directResponse.json();
+                        return processGistData(gistData);
+                    } else if (response.status === 404) {
+                        throw new Error('Gist non trouvé. Vérifiez l\'ID du Gist.');
+                    } else {
+                        throw new Error(`Erreur HTTP: ${response.status}`);
+                    }
                 }
-                
-                const gistData = await response.json();
-                console.log('Données Gist reçues:', gistData);
-                
-                // Rechercher le fichier de données
-                const dataFile = Object.values(gistData.files).find(file => 
-                    file.filename.toLowerCase().includes('varicom') || 
-                    file.filename.toLowerCase().includes('produit') || 
-                    file.filename.toLowerCase().includes('data')
-                );
 
-                if (!dataFile) {
-                    throw new Error('Fichier données non trouvé dans le Gist');
-                }
-                
-                let dataContent;
-                try {
-                    dataContent = JSON.parse(dataFile.content);
-                    console.log('Contenu JSON parsé:', dataContent);
-                } catch (parseError) {
-                    console.error('Erreur parsing JSON:', parseError);
-                    throw new Error('Format JSON invalide dans le Gist');
-                }
-                
-                return {
-                    success: true,
-                    data: dataContent,
-                    lastUpdate: gistData.updated_at
-                };
+                const gistData = await response.json();
+                return processGistData(gistData);
                 
             } catch (error) {
                 console.error('Erreur Gist:', error);
@@ -1206,7 +1261,54 @@
             }
         }
 
+        function processGistData(gistData) {
+            console.log('Données Gist reçues:', gistData);
+            
+            // Rechercher le fichier de données
+            const dataFile = Object.values(gistData.files).find(file => 
+                file.filename.toLowerCase().includes('varicom') || 
+                file.filename.toLowerCase().includes('produit') || 
+                file.filename.toLowerCase().includes('data') ||
+                file.filename.toLowerCase().includes('json')
+            );
+
+            if (!dataFile) {
+                throw new Error('Fichier données non trouvé dans le Gist');
+            }
+            
+            let dataContent;
+            try {
+                dataContent = JSON.parse(dataFile.content);
+                console.log('Contenu JSON parsé:', dataContent);
+            } catch (parseError) {
+                console.error('Erreur parsing JSON:', parseError);
+                throw new Error('Format JSON invalide dans le Gist');
+            }
+            
+            return {
+                success: true,
+                data: dataContent,
+                lastUpdate: gistData.updated_at
+            };
+        }
+
         async function loadDemoData() {
+            // محاولة تحميل البيانات من localStorage أولاً
+            try {
+                const savedData = localStorage.getItem('varicom_demo_data');
+                if (savedData) {
+                    const demoData = JSON.parse(savedData);
+                    return {
+                        success: true,
+                        data: demoData,
+                        lastUpdate: new Date().toISOString()
+                    };
+                }
+            } catch (e) {
+                console.log('Aucune donnée sauvegardée trouvée');
+            }
+
+            // البيانات الافتراضية
             const demoData = {
                 products: [
                     {
@@ -1222,12 +1324,33 @@
                         designation: "PC Bureau HP ProDesk - i5, 8GB RAM, 1TB HDD",
                         prix: 75000,
                         famille: "Ordinateurs Bureau"
+                    },
+                    {
+                        id: 3,
+                        ref: "ECR-LG-003",
+                        designation: "Écran LG 24\" Full HD - 1920x1080",
+                        prix: 22000,
+                        famille: "Écrans"
+                    },
+                    {
+                        id: 4,
+                        ref: "TEL-SAM-004",
+                        designation: "Smartphone Samsung Galaxy S23 - 128GB",
+                        prix: 68000,
+                        famille: "Téléphones"
+                    },
+                    {
+                        id: 5,
+                        ref: "CLA-LOG-005",
+                        designation: "Clavier Logitech Mécanique - RGB",
+                        prix: 8500,
+                        famille: "Périphériques"
                     }
                 ],
                 newProducts: [
                     {
                         id: 1001,
-                        name: "Laptop Gaming ASUS ROG Strix",
+                        name: "Laptop Gaming ASUS ROG Strix G15",
                         price: 185000,
                         image: "https://via.placeholder.com/150x150/1a3a6c/ffffff?text=ASUS+ROG",
                         category: "Ordinateurs Portables",
@@ -1239,6 +1362,14 @@
                         price: 45000,
                         image: "https://via.placeholder.com/150x150/e63946/ffffff?text=Samsung+32",
                         category: "Écrans",
+                        timestamp: new Date().toISOString()
+                    },
+                    {
+                        id: 1003,
+                        name: "Souris Gaming Razer DeathAdder",
+                        price: 12000,
+                        image: "https://via.placeholder.com/150x150/2a9d8f/ffffff?text=Razer",
+                        category: "Périphériques",
                         timestamp: new Date().toISOString()
                     }
                 ],
@@ -1256,9 +1387,19 @@
                         message: "Profitez de la livraison gratuite pour toute commande supérieure à 100,000 DA.",
                         type: "success",
                         timestamp: new Date().toISOString()
+                    },
+                    {
+                        id: 3,
+                        title: "Nouveaux Produits",
+                        message: "Découvrez nos nouveaux arrivages de la semaine.",
+                        type: "info",
+                        timestamp: new Date().toISOString()
                     }
                 ]
             };
+
+            // حفظ البيانات في localStorage للاستخدام المستقبلي
+            localStorage.setItem('varicom_demo_data', JSON.stringify(demoData));
 
             return {
                 success: true,
@@ -1334,6 +1475,9 @@
                     <p class="mb-2">Aucun produit valide n'a été trouvé</p>
                     <button class="btn btn-primary btn-sm" onclick="loadProducts()">
                         <i class="fas fa-sync me-1"></i>Réessayer
+                    </button>
+                    <button class="btn btn-outline-secondary btn-sm" onclick="useDemoData()">
+                        <i class="fas fa-database me-1"></i>Données démo
                     </button>
                 </div>
             `;
