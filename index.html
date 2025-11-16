@@ -11,13 +11,24 @@
             --primary-color: #1a3a6c;
             --secondary-color: #e63946;
             --accent-color: #2a9d8f;
+            --dark-color: #2c3e50;
+            --light-color: #ecf0f1;
+        }
+        
+        [data-theme="dark"] {
+            --primary-color: #3498db;
+            --secondary-color: #e74c3c;
+            --accent-color: #1abc9c;
+            --dark-color: #ecf0f1;
+            --light-color: #2c3e50;
         }
         
         body {
             font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            background-color: #f8f9fa;
+            background-color: var(--light-color);
             min-height: 100vh;
-            color: #333;
+            color: var(--dark-color);
+            transition: all 0.3s ease;
         }
 
         .company-header {
@@ -54,6 +65,12 @@
             box-shadow: 0 2px 10px rgba(0,0,0,0.08);
             margin-bottom: 1.5rem;
             overflow: hidden;
+            background: white;
+        }
+
+        [data-theme="dark"] .product-card {
+            background: #34495e;
+            color: var(--dark-color);
         }
 
         .product-card:hover {
@@ -69,6 +86,14 @@
             justify-content: center;
             font-size: 3rem;
             color: var(--primary-color);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .product-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
 
         .product-badge {
@@ -81,6 +106,11 @@
             border-radius: 20px;
             font-size: 0.7rem;
             font-weight: 600;
+            z-index: 2;
+        }
+
+        .new-product-badge {
+            background: #28a745 !important;
         }
 
         /* Live Sync Indicator */
@@ -96,6 +126,12 @@
             display: none;
             align-items: center;
             gap: 10px;
+            border-left: 4px solid var(--accent-color);
+        }
+
+        [data-theme="dark"] .live-sync-indicator {
+            background: #34495e;
+            color: white;
         }
 
         .stats-grid {
@@ -112,14 +148,103 @@
             text-align: center;
             box-shadow: 0 2px 10px rgba(0,0,0,0.08);
             transition: transform 0.3s ease;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        [data-theme="dark"] .stat-card {
+            background: #34495e;
+            color: white;
         }
 
         .stat-card:hover {
             transform: translateY(-5px);
         }
+
+        /* Notifications Section */
+        .notifications-container {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .notification-item {
+            border-left: 4px solid;
+            padding: 12px 15px;
+            margin: 8px 0;
+            background: #f8f9fa;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+
+        [data-theme="dark"] .notification-item {
+            background: #2c3e50;
+        }
+
+        .notification-item:hover {
+            transform: translateX(-5px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .notification-info { border-left-color: #17a2b8; background: #e3f2fd; }
+        .notification-success { border-left-color: #28a745; background: #e8f5e8; }
+        .notification-warning { border-left-color: #ffc107; background: #fff8e1; }
+        .notification-error { border-left-color: #dc3545; background: #ffebee; }
+
+        [data-theme="dark"] .notification-info { background: #1a5276; }
+        [data-theme="dark"] .notification-success { background: #145a32; }
+        [data-theme="dark"] .notification-warning { background: #7d6608; }
+        [data-theme="dark"] .notification-error { background: #78281f; }
+
+        /* Floating Action Button */
+        .fab {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: var(--primary-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            cursor: pointer;
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        .fab:hover {
+            transform: scale(1.1);
+        }
+
+        /* Loading Animation */
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .product-image {
+                height: 150px;
+            }
+        }
     </style>
 </head>
-<body>
+<body data-theme="light">
     <!-- Enhanced Sync Status Bar -->
     <div class="sync-status-bar">
         <div class="container">
@@ -140,6 +265,11 @@
         <span id="liveSyncText">Mise à jour...</span>
     </div>
 
+    <!-- Floating Action Button -->
+    <div class="fab" onclick="scrollToTop()">
+        <i class="fas fa-arrow-up"></i>
+    </div>
+
     <header class="company-header">
         <div class="container">
             <div class="row align-items-center">
@@ -154,7 +284,7 @@
                         <button class="btn btn-sm btn-light" onclick="toggleTheme()">
                             <i class="fas fa-moon"></i>
                         </button>
-                        <button class="btn btn-sm btn-light" onclick="forceRefresh()">
+                        <button class="btn btn-sm btn-light" onclick="forceRefresh()" id="refreshBtn">
                             <i class="fas fa-sync-alt"></i> Actualiser
                         </button>
                         <div class="btn-group">
@@ -201,18 +331,43 @@
             </div>
         </div>
 
+        <!-- Notifications Panel -->
+        <div class="card mb-4" id="notificationsCard" style="display: none;">
+            <div class="card-header bg-warning text-dark d-flex justify-content-between align-items-center">
+                <h5 class="mb-0"><i class="fas fa-bell me-2"></i>Notifications Récentes</h5>
+                <button class="btn btn-sm btn-outline-dark" onclick="hideNotifications()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="card-body">
+                <div class="notifications-container" id="notificationsContainer">
+                    <!-- Notifications will be loaded here -->
+                </div>
+            </div>
+        </div>
+
         <!-- Enhanced Search and Filter -->
         <div class="card mb-4">
             <div class="card-body">
-                <div class="row g-3">
-                    <div class="col-md-8">
-                        <input type="text" id="searchInput" class="form-control form-control-lg" 
-                               placeholder="🔍 Rechercher un produit...">
+                <div class="row g-3 align-items-end">
+                    <div class="col-md-6">
+                        <label class="form-label">Recherche</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-search"></i></span>
+                            <input type="text" id="searchInput" class="form-control" 
+                                   placeholder="Rechercher un produit...">
+                        </div>
                     </div>
                     <div class="col-md-4">
-                        <select id="categoryFilter" class="form-select form-select-lg">
+                        <label class="form-label">Catégorie</label>
+                        <select id="categoryFilter" class="form-select">
                             <option value="">Toutes les catégories</option>
                         </select>
+                    </div>
+                    <div class="col-md-2">
+                        <button class="btn btn-outline-secondary w-100" onclick="clearFilters()">
+                            <i class="fas fa-times"></i> Effacer
+                        </button>
                     </div>
                 </div>
             </div>
@@ -229,18 +384,25 @@
 
         <!-- Sync Information -->
         <div class="card mt-4">
-            <div class="card-header bg-light">
+            <div class="card-header bg-light d-flex justify-content-between align-items-center">
                 <h6 class="mb-0"><i class="fas fa-info-circle me-2"></i>Informations de Synchronisation</h6>
+                <button class="btn btn-sm btn-outline-primary" onclick="toggleSyncDetails()">
+                    <i class="fas fa-chevron-down"></i>
+                </button>
             </div>
-            <div class="card-body">
+            <div class="card-body" id="syncDetails" style="display: none;">
                 <div class="row">
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <small class="text-muted">ID de synchronisation:</small>
                         <div><code id="syncId">N/A</code></div>
                     </div>
-                    <div class="col-md-6">
+                    <div class="col-md-4">
                         <small class="text-muted">Dernière mise à jour:</small>
                         <div id="lastSyncDetails">Non synchronisé</div>
+                    </div>
+                    <div class="col-md-4">
+                        <small class="text-muted">Prochaine synchronisation:</small>
+                        <div id="nextSync">--:--:--</div>
                     </div>
                 </div>
             </div>
@@ -257,17 +419,20 @@
         let lastSyncHash = '';
         let autoRefreshInterval;
         let liveSyncEnabled = true;
+        let nextSyncTime = null;
 
         // Initialize the application
         document.addEventListener('DOMContentLoaded', function() {
             initializeApp();
             setupEventListeners();
             startAutoRefresh();
+            checkForNewNotifications();
         });
 
         function initializeApp() {
             loadFromURL();
             updateSyncStatus('Initialisation...', 'info');
+            updateNextSyncTime();
         }
 
         function setupEventListeners() {
@@ -289,6 +454,17 @@
 
             window.addEventListener('offline', function() {
                 updateSyncStatus('Mode hors ligne', 'warning');
+            });
+
+            // Keyboard shortcuts
+            document.addEventListener('keydown', function(e) {
+                if (e.ctrlKey && e.key === 'r') {
+                    e.preventDefault();
+                    forceRefresh();
+                }
+                if (e.key === 'Escape') {
+                    clearFilters();
+                }
             });
         }
 
@@ -314,6 +490,7 @@
 
         async function loadFromGitHubGist(gistId, isRetry = false) {
             showLiveSync('Chargement des données...');
+            setRefreshButtonLoading(true);
             
             try {
                 console.log('Loading from Gist:', gistId);
@@ -346,6 +523,8 @@
                 } else {
                     showError(`Impossible de charger le catalogue: ${error.message}`);
                 }
+            } finally {
+                setRefreshButtonLoading(false);
             }
         }
 
@@ -358,6 +537,7 @@
                     designation: p.designation || 'Produit sans nom',
                     famille: p.famille || 'Général',
                     prix: parseFloat(p.prix) || 0,
+                    image: p.image || null,
                     timestamp: p.timestamp || new Date().toISOString()
                 }));
             }
@@ -374,7 +554,9 @@
             }
 
             if (completeData.notifications && Array.isArray(completeData.notifications)) {
-                notifications = completeData.notifications;
+                const newNotifications = completeData.notifications;
+                checkForNewNotifications(newNotifications);
+                notifications = newNotifications;
             }
 
             // Update UI
@@ -386,11 +568,78 @@
             // Update sync status
             const newHash = generateDataHash(completeData);
             if (lastSyncHash && lastSyncHash !== newHash) {
-                showNotification('Catalogue mis à jour!', 'success');
+                showEnhancedNotification('Catalogue mis à jour', 'Nouveaux produits et notifications disponibles', 'success');
             }
             lastSyncHash = newHash;
 
             updateSyncStatus('Synchronisé', 'success');
+            updateNextSyncTime();
+        }
+
+        function checkForNewNotifications(newNotifications = null) {
+            const notificationsToCheck = newNotifications || notifications;
+            const lastNotificationCheck = localStorage.getItem('varicom_last_notification_check') || 0;
+            
+            if (notificationsToCheck.length > 0) {
+                const latestNotification = notificationsToCheck[0];
+                if (new Date(latestNotification.timestamp).getTime() > parseInt(lastNotificationCheck)) {
+                    showNotificationsPanel();
+                    localStorage.setItem('varicom_last_notification_check', Date.now().toString());
+                }
+            }
+        }
+
+        function showNotificationsPanel() {
+            const notificationsCard = document.getElementById('notificationsCard');
+            const notificationsContainer = document.getElementById('notificationsContainer');
+            
+            if (notifications.length === 0) {
+                notificationsCard.style.display = 'none';
+                return;
+            }
+
+            let notificationsHTML = '';
+            notifications.slice(0, 5).forEach(notification => {
+                const time = new Date(notification.timestamp).toLocaleString('fr-FR');
+                const icon = getNotificationIcon(notification.type);
+                
+                notificationsHTML += `
+                    <div class="notification-item notification-${notification.type}">
+                        <div class="d-flex align-items-start">
+                            <i class="fas fa-${icon} me-3 mt-1"></i>
+                            <div class="flex-grow-1">
+                                <h6 class="mb-1">${notification.title}</h6>
+                                <p class="mb-1">${notification.message}</p>
+                                <small class="text-muted">${time}</small>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            notificationsContainer.innerHTML = notificationsHTML;
+            notificationsCard.style.display = 'block';
+            
+            // Auto-hide after 10 seconds
+            setTimeout(() => {
+                if (notificationsCard.style.display !== 'none') {
+                    notificationsCard.style.display = 'none';
+                }
+            }, 10000);
+        }
+
+        function hideNotifications() {
+            document.getElementById('notificationsCard').style.display = 'none';
+        }
+
+        function getNotificationIcon(type) {
+            const icons = {
+                'info': 'info-circle',
+                'success': 'check-circle',
+                'warning': 'exclamation-triangle',
+                'error': 'exclamation-circle'
+            };
+            return icons[type] || 'info-circle';
         }
 
         function generateDataHash(data) {
@@ -407,9 +656,9 @@
         }
 
         function updateStats() {
-            document.getElementById('totalProducts').textContent = products.length;
-            document.getElementById('totalNewProducts').textContent = newProducts.length;
-            document.getElementById('totalNotifications').textContent = notifications.length;
+            document.getElementById('totalProducts').textContent = products.length.toLocaleString();
+            document.getElementById('totalNewProducts').textContent = newProducts.length.toLocaleString();
+            document.getElementById('totalNotifications').textContent = notifications.length.toLocaleString();
         }
 
         function updateSyncInfo(data) {
@@ -425,10 +674,17 @@
             }
         }
 
+        function updateNextSyncTime() {
+            const now = new Date();
+            const nextSync = new Date(now.getTime() + 2 * 60 * 1000); // 2 minutes from now
+            document.getElementById('nextSync').textContent = nextSync.toLocaleTimeString('fr-FR');
+            nextSyncTime = nextSync;
+        }
+
         function displayProducts() {
             const grid = document.getElementById('productsGrid');
             
-            if (products.length === 0) {
+            if (products.length === 0 && newProducts.length === 0) {
                 grid.innerHTML = `
                     <div class="col-12 text-center py-5">
                         <i class="fas fa-database fa-3x text-muted mb-3"></i>
@@ -440,38 +696,65 @@
             }
 
             let html = '';
+            
+            // Display new products first
+            newProducts.forEach(product => {
+                html += createProductCard(product, true);
+            });
+
+            // Display regular products
             products.forEach(product => {
-                html += `
-                    <div class="col-md-4 mb-4">
-                        <div class="card product-card h-100">
-                            <div class="product-image position-relative">
-                                <i class="fas fa-box"></i>
-                                ${isNewProduct(product) ? '<div class="product-badge">NOUVEAU</div>' : ''}
-                            </div>
-                            <div class="card-body">
-                                <h6 class="card-title">${product.designation}</h6>
-                                <p class="text-muted small mb-2">Réf: ${product.ref}</p>
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <span class="badge bg-primary">${product.famille}</span>
-                                    <strong class="text-success">${formatPrice(product.prix)}</strong>
-                                </div>
-                            </div>
-                            <div class="card-footer bg-transparent">
-                                <div class="d-grid gap-2">
-                                    <button class="btn btn-primary btn-sm" onclick="addToCart(${product.id})">
-                                        <i class="fas fa-cart-plus me-1"></i>Ajouter
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                `;
+                html += createProductCard(product, false);
             });
 
             grid.innerHTML = html;
         }
 
-        function isNewProduct(product) {
+        function createProductCard(product, isNewProduct = false) {
+            const isNew = isNewProduct || isNewProductTimestamp(product);
+            const productName = isNewProduct ? product.name : product.designation;
+            const productRef = isNewProduct ? 'NOUV-' + product.id : product.ref;
+            const productPrice = isNewProduct ? product.price : product.prix;
+            const productCategory = isNewProduct ? product.category : product.famille;
+            const productImage = product.image || (isNewProduct ? product.image : null);
+            
+            return `
+                <div class="col-md-4 mb-4">
+                    <div class="card product-card h-100">
+                        <div class="product-image position-relative">
+                            ${productImage ? 
+                                `<img src="${productImage}" alt="${productName}" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">` : 
+                                ''
+                            }
+                            <div class="w-100 h-100 d-flex align-items-center justify-content-center ${productImage ? 'd-none' : ''}">
+                                <i class="fas fa-box fa-3x" style="color: var(--primary-color)"></i>
+                            </div>
+                            ${isNew ? 
+                                `<div class="product-badge new-product-badge">NOUVEAU</div>` : 
+                                (isNewProductTimestamp(product) ? `<div class="product-badge">NOUVEAU</div>` : '')
+                            }
+                        </div>
+                        <div class="card-body">
+                            <h6 class="card-title">${productName}</h6>
+                            <p class="text-muted small mb-2">Réf: ${productRef}</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="badge bg-primary">${productCategory}</span>
+                                <strong class="text-success">${formatPrice(productPrice)}</strong>
+                            </div>
+                        </div>
+                        <div class="card-footer bg-transparent">
+                            <div class="d-grid gap-2">
+                                <button class="btn btn-primary btn-sm" onclick="addToCart('${product.id}')">
+                                    <i class="fas fa-cart-plus me-1"></i>Ajouter
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function isNewProductTimestamp(product) {
             if (!product.timestamp) return false;
             const productDate = new Date(product.timestamp);
             const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
@@ -495,24 +778,34 @@
         }
 
         function filterProducts(searchTerm) {
-            const filtered = products.filter(p => 
+            const filteredProducts = products.filter(p => 
                 p.designation.toLowerCase().includes(searchTerm.toLowerCase()) ||
                 p.ref.toLowerCase().includes(searchTerm.toLowerCase())
             );
-            displayFilteredProducts(filtered);
+            
+            const filteredNewProducts = newProducts.filter(np => 
+                np.name.toLowerCase().includes(searchTerm.toLowerCase())
+            );
+            
+            displayFilteredProducts(filteredProducts, filteredNewProducts);
         }
 
         function filterByCategory(category) {
-            const filtered = category ? 
+            const filteredProducts = category ? 
                 products.filter(p => p.famille === category) : 
                 products;
-            displayFilteredProducts(filtered);
+                
+            const filteredNewProducts = category ?
+                newProducts.filter(np => np.category === category) :
+                newProducts;
+                
+            displayFilteredProducts(filteredProducts, filteredNewProducts);
         }
 
-        function displayFilteredProducts(filteredProducts) {
+        function displayFilteredProducts(filteredProducts, filteredNewProducts) {
             const grid = document.getElementById('productsGrid');
             
-            if (filteredProducts.length === 0) {
+            if (filteredProducts.length === 0 && filteredNewProducts.length === 0) {
                 grid.innerHTML = `
                     <div class="col-12 text-center py-5">
                         <i class="fas fa-search fa-3x text-muted mb-3"></i>
@@ -524,28 +817,24 @@
             }
 
             let html = '';
+            
+            // Display filtered new products
+            filteredNewProducts.forEach(product => {
+                html += createProductCard(product, true);
+            });
+
+            // Display filtered regular products
             filteredProducts.forEach(product => {
-                html += `
-                    <div class="col-md-4 mb-4">
-                        <div class="card product-card h-100">
-                            <div class="product-image position-relative">
-                                <i class="fas fa-box"></i>
-                                ${isNewProduct(product) ? '<div class="product-badge">NOUVEAU</div>' : ''}
-                            </div>
-                            <div class="card-body">
-                                <h6 class="card-title">${product.designation}</h6>
-                                <p class="text-muted small mb-2">Réf: ${product.ref}</p>
-                                <div class="d-flex justify-content-between align-items-center">
-                                    <span class="badge bg-primary">${product.famille}</span>
-                                    <strong class="text-success">${formatPrice(product.prix)}</strong>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                `;
+                html += createProductCard(product, false);
             });
 
             grid.innerHTML = html;
+        }
+
+        function clearFilters() {
+            document.getElementById('searchInput').value = '';
+            document.getElementById('categoryFilter').value = '';
+            displayProducts();
         }
 
         function startAutoRefresh() {
@@ -609,27 +898,81 @@
             }
         }
 
+        function setRefreshButtonLoading(loading) {
+            const button = document.getElementById('refreshBtn');
+            const icon = button.querySelector('i');
+            
+            if (loading) {
+                icon.className = 'loading-spinner';
+                button.disabled = true;
+            } else {
+                icon.className = 'fas fa-sync-alt';
+                button.disabled = false;
+            }
+        }
+
         function showError(message) {
             updateSyncStatus(message, 'error');
             showNotification(message, 'error');
         }
 
         function showNotification(message, type) {
-            // Simple notification implementation
+            showEnhancedNotification(
+                type === 'success' ? 'Succès' : 
+                type === 'error' ? 'Erreur' : 
+                type === 'warning' ? 'Attention' : 'Information',
+                message, 
+                type
+            );
+        }
+
+        function showEnhancedNotification(title, message, type) {
             const notification = document.createElement('div');
             notification.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
-            notification.style.cssText = 'top: 20px; right: 20px; z-index: 1000; min-width: 300px;';
+            notification.style.cssText = 'top: 20px; right: 20px; z-index: 1000; min-width: 350px; max-width: 400px;';
             notification.innerHTML = `
-                ${message}
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-${getNotificationIcon(type)} me-2 fa-lg"></i>
+                    <div class="flex-grow-1">
+                        <h6 class="alert-heading mb-1">${title}</h6>
+                        <p class="mb-0 small">${message}</p>
+                    </div>
+                </div>
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             `;
             document.body.appendChild(notification);
-            setTimeout(() => notification.remove(), 5000);
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.remove();
+                }
+            }, 5000);
         }
 
         function toggleTheme() {
-            // Simple theme toggle
-            document.body.style.filter = document.body.style.filter ? '' : 'invert(1) hue-rotate(180deg)';
+            const currentTheme = document.body.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            document.body.setAttribute('data-theme', newTheme);
+            localStorage.setItem('varicom_theme', newTheme);
+            
+            showNotification(`Thème ${newTheme === 'dark' ? 'sombre' : 'clair'} activé`, 'info');
+        }
+
+        function toggleSyncDetails() {
+            const details = document.getElementById('syncDetails');
+            const button = document.querySelector('#syncDetails').previousElementSibling.querySelector('button');
+            const icon = button.querySelector('i');
+            
+            if (details.style.display === 'none') {
+                details.style.display = 'block';
+                icon.className = 'fas fa-chevron-up';
+            } else {
+                details.style.display = 'none';
+                icon.className = 'fas fa-chevron-down';
+            }
+        }
+
+        function scrollToTop() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         function addToCart(productId) {
@@ -639,6 +982,10 @@
         function formatPrice(price) {
             return new Intl.NumberFormat('fr-FR', {minimumFractionDigits: 2}).format(price) + ' DA';
         }
+
+        // Load saved theme
+        const savedTheme = localStorage.getItem('varicom_theme') || 'light';
+        document.body.setAttribute('data-theme', savedTheme);
     </script>
 </body>
 </html>
