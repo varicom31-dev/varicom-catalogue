@@ -222,6 +222,48 @@
             transform: translateY(-2px);
             box-shadow: 0 5px 15px rgba(0,0,0,0.2);
         }
+        
+        .notification-preview {
+            border-left: 4px solid;
+            padding: 20px;
+            margin: 15px 0;
+            background: #f8f9fa;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .notification-info { border-left-color: #17a2b8; background: linear-gradient(135deg, #e3f2fd, #bbdefb); }
+        .notification-success { border-left-color: #28a745; background: linear-gradient(135deg, #e8f5e8, #c8e6c9); }
+        .notification-warning { border-left-color: #ffc107; background: linear-gradient(135deg, #fff8e1, #ffecb3); }
+        .notification-error { border-left-color: #dc3545; background: linear-gradient(135deg, #ffebee, #ffcdd2); }
+        
+        .new-product-card {
+            border: none;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 15px 0;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .new-product-image {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: 10px;
+            margin-right: 20px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .progress-bar {
+            transition: width 0.5s ease;
+            border-radius: 10px;
+        }
     </style>
 </head>
 <body>
@@ -728,6 +770,7 @@
         let activeClients = [];
         let securityUpdates = 0;
 
+        // التهيئة عند تحميل الصفحة
         document.addEventListener('DOMContentLoaded', function() {
             console.log('🚀 Initialisation du Panel Administrateur VARICOM PRO');
             initializeApplication();
@@ -743,6 +786,91 @@
             
             console.log('✅ Application initialisée avec succès');
             showSyncStatus('Système VARICOM PRO prêt - Sécurité Active', 'success');
+        }
+
+        function loadAllData() {
+            loadToken();
+            loadProducts();
+            loadNotifications();
+            loadNewProducts();
+            loadGistId();
+        }
+
+        function setupEventListeners() {
+            setupFileUpload();
+            
+            document.getElementById('githubToken').addEventListener('input', function() {
+                localStorage.setItem('varicom_github_token', this.value);
+            });
+
+            setupRealTimePreviews();
+            setupChangeDetection();
+        }
+
+        function setupFileUpload() {
+            const uploadArea = document.getElementById('excelUploadArea');
+            
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.classList.add('dragover');
+            });
+
+            uploadArea.addEventListener('dragleave', () => {
+                uploadArea.classList.remove('dragover');
+            });
+
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.classList.remove('dragover');
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    handleExcelUpload(files[0]);
+                }
+            });
+        }
+
+        function setupRealTimePreviews() {
+            // تحديث معاينة الإشعارات
+            document.getElementById('notificationTitle').addEventListener('input', updateNotificationPreview);
+            document.getElementById('notificationMessage').addEventListener('input', updateNotificationPreview);
+            document.getElementById('notificationType').addEventListener('change', updateNotificationPreview);
+
+            // تحديث معاينة المنتجات الجديدة
+            document.getElementById('newProductName').addEventListener('input', updateProductPreview);
+            document.getElementById('newProductPrice').addEventListener('input', updateProductPreview);
+            document.getElementById('newProductImage').addEventListener('input', updateProductPreview);
+            document.getElementById('newProductCategory').addEventListener('change', updateProductPreview);
+        }
+
+        function setupChangeDetection() {
+            const inputs = [
+                'newProductName', 'newProductPrice', 'newProductImage',
+                'notificationTitle', 'notificationMessage'
+            ];
+            
+            inputs.forEach(id => {
+                document.getElementById(id).addEventListener('input', markUnsavedChanges);
+            });
+        }
+
+        function setupAutoSave() {
+            setInterval(() => {
+                if (hasUnsavedChanges) {
+                    saveAllData();
+                }
+            }, 30000);
+        }
+
+        function startAutoSync() {
+            const interval = parseInt(document.getElementById('syncInterval').value) * 60000;
+            if (autoSyncInterval) clearInterval(autoSyncInterval);
+            
+            autoSyncInterval = setInterval(() => {
+                if (hasUnsavedChanges && currentGistId) {
+                    console.log('🔄 Synchronisation automatique...');
+                    uploadToGitHubGist();
+                }
+            }, interval);
         }
 
         // 🔒 نظام الأمان المتقدم
@@ -1024,28 +1152,6 @@
         }
 
         // دوال رفع ملف Excel
-        function setupFileUpload() {
-            const uploadArea = document.getElementById('excelUploadArea');
-            
-            uploadArea.addEventListener('dragover', (e) => {
-                e.preventDefault();
-                uploadArea.classList.add('dragover');
-            });
-
-            uploadArea.addEventListener('dragleave', () => {
-                uploadArea.classList.remove('dragover');
-            });
-
-            uploadArea.addEventListener('drop', (e) => {
-                e.preventDefault();
-                uploadArea.classList.remove('dragover');
-                const files = e.dataTransfer.files;
-                if (files.length > 0) {
-                    handleExcelUpload(files[0]);
-                }
-            });
-        }
-
         function handleExcelUpload(file) {
             if (!file) {
                 showSyncStatus('❌ Aucun fichier sélectionné', 'error');
@@ -1201,7 +1307,743 @@
                 .substring(0, 500);
         }
 
-        // دوال مساعدة
+        // دوال التخزين والتحميل
+        function loadToken() {
+            const savedToken = localStorage.getItem('varicom_github_token');
+            if (savedToken) {
+                document.getElementById('githubToken').value = savedToken;
+            }
+        }
+
+        function loadProducts() {
+            const savedProducts = localStorage.getItem('varicom_products');
+            if (savedProducts) {
+                try {
+                    currentProducts = JSON.parse(savedProducts);
+                    console.log(`📦 ${currentProducts.length} produits chargés`);
+                } catch (e) {
+                    console.error('❌ Erreur chargement produits:', e);
+                    currentProducts = [];
+                }
+            }
+        }
+
+        function loadNotifications() {
+            const savedNotifications = localStorage.getItem('varicom_notifications');
+            if (savedNotifications) {
+                try {
+                    currentNotifications = JSON.parse(savedNotifications);
+                    displayActiveNotifications();
+                    console.log(`🔔 ${currentNotifications.length} notifications chargées`);
+                } catch (e) {
+                    console.error('❌ Erreur chargement notifications:', e);
+                    currentNotifications = [];
+                }
+            }
+        }
+
+        function loadNewProducts() {
+            const savedNewProducts = localStorage.getItem('varicom_new_products');
+            if (savedNewProducts) {
+                try {
+                    currentNewProducts = JSON.parse(savedNewProducts);
+                    displayActiveNewProducts();
+                    console.log(`⭐ ${currentNewProducts.length} nouveaux produits chargés`);
+                } catch (e) {
+                    console.error('❌ Erreur chargement nouveaux produits:', e);
+                    currentNewProducts = [];
+                }
+            }
+        }
+
+        function loadGistId() {
+            currentGistId = localStorage.getItem('varicom_gist_id');
+            if (currentGistId) {
+                updateSyncStatus('Gist GitHub chargé - Prêt à synchroniser', 'success');
+            }
+        }
+
+        function saveAllData() {
+            try {
+                localStorage.setItem('varicom_products', JSON.stringify(currentProducts));
+                localStorage.setItem('varicom_notifications', JSON.stringify(currentNotifications));
+                localStorage.setItem('varicom_new_products', JSON.stringify(currentNewProducts));
+                hasUnsavedChanges = false;
+                updateActualiserButton();
+                console.log('💾 Données sauvegardées localement');
+            } catch (e) {
+                console.error('❌ Erreur sauvegarde:', e);
+                if (e.name === 'QuotaExceededError') {
+                    showSyncStatus('❌ Espace de stockage insuffisant', 'error');
+                    cleanupOldData();
+                }
+            }
+        }
+
+        // دوال المنتجات الجديدة
+        function addNewProduct() {
+            const name = document.getElementById('newProductName').value.trim();
+            const price = parseFloat(document.getElementById('newProductPrice').value);
+            const image = document.getElementById('newProductImage').value.trim();
+            const category = document.getElementById('newProductCategory').value;
+            
+            if (!name) {
+                showSyncStatus('❌ Le nom du produit est requis', 'error');
+                return;
+            }
+            
+            if (!price || price <= 0) {
+                showSyncStatus('❌ Le prix doit être supérieur à 0', 'error');
+                return;
+            }
+            
+            const newProduct = {
+                id: `new_${Date.now()}`,
+                name: name,
+                price: price,
+                image: image || 'https://via.placeholder.com/300x200/6c757d/ffffff?text=Produit+VARICOM',
+                category: category,
+                timestamp: new Date().toISOString()
+            };
+            
+            currentNewProducts.unshift(newProduct);
+            saveAllData();
+            
+            displayActiveNewProducts();
+            updateStats();
+            resetNewProductForm();
+            
+            hasUnsavedChanges = true;
+            updateActualiserButton();
+            showSyncStatus('⭐ Produit nouveau ajouté - Prêt à synchroniser', 'success');
+        }
+
+        function displayActiveNewProducts() {
+            const container = document.getElementById('activeNewProducts');
+            const countElement = document.getElementById('newProductsCount');
+            
+            if (currentNewProducts.length === 0) {
+                container.innerHTML = '<p class="text-muted text-center py-4">Aucun produit nouveau actif</p>';
+                countElement.textContent = '0 produits';
+                return;
+            }
+            
+            let html = '';
+            currentNewProducts.forEach((product, index) => {
+                const time = new Date(product.timestamp).toLocaleString('fr-FR');
+                html += `
+                    <div class="new-product-card d-flex align-items-center">
+                        <img src="${product.image}" class="new-product-image" alt="${product.name}" 
+                             onerror="this.src='https://via.placeholder.com/80x80/6c757d/ffffff?text=Image'">
+                        <div class="flex-grow-1">
+                            <strong class="d-block">${product.name}</strong>
+                            <div class="text-success fw-bold">${formatPrice(product.price)}</div>
+                            <small class="text-muted">${product.category} • ${time}</small>
+                        </div>
+                        <button class="btn btn-outline-danger btn-sm" onclick="removeNewProduct(${index})" title="Supprimer">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+            countElement.textContent = `${currentNewProducts.length} produit(s)`;
+        }
+
+        function removeNewProduct(index) {
+            if (confirm('Êtes-vous sûr de vouloir supprimer ce produit nouveau?')) {
+                currentNewProducts.splice(index, 1);
+                saveAllData();
+                displayActiveNewProducts();
+                updateStats();
+                hasUnsavedChanges = true;
+                updateActualiserButton();
+                showSyncStatus('🗑️ Produit supprimé', 'warning');
+            }
+        }
+
+        function clearAllNewProducts() {
+            if (currentNewProducts.length === 0) return;
+            
+            if (confirm(`Êtes-vous sûr de vouloir supprimer les ${currentNewProducts.length} produits nouveaux?`)) {
+                currentNewProducts = [];
+                saveAllData();
+                displayActiveNewProducts();
+                updateStats();
+                hasUnsavedChanges = true;
+                updateActualiserButton();
+                showSyncStatus('🗑️ Tous les produits nouveaux supprimés', 'success');
+            }
+        }
+
+        function resetNewProductForm() {
+            document.getElementById('newProductName').value = '';
+            document.getElementById('newProductPrice').value = '';
+            document.getElementById('newProductImage').value = '';
+            updateProductPreview();
+        }
+
+        // دوال الإشعارات
+        function createNotification() {
+            const title = document.getElementById('notificationTitle').value.trim();
+            const message = document.getElementById('notificationMessage').value.trim();
+            const type = document.getElementById('notificationType').value;
+            
+            if (!title) {
+                showSyncStatus('❌ Le titre de la notification est requis', 'error');
+                return;
+            }
+            
+            if (!message) {
+                showSyncStatus('❌ Le message de la notification est requis', 'error');
+                return;
+            }
+            
+            const notification = {
+                id: `notif_${Date.now()}`,
+                title: title,
+                message: message,
+                type: type,
+                timestamp: new Date().toISOString(),
+                read: false
+            };
+            
+            currentNotifications.unshift(notification);
+            saveAllData();
+            
+            displayActiveNotifications();
+            updateStats();
+            resetNotificationForm();
+            
+            hasUnsavedChanges = true;
+            updateActualiserButton();
+            showSyncStatus('🔔 Notification créée - Prête à synchroniser', 'success');
+        }
+
+        function displayActiveNotifications() {
+            const container = document.getElementById('activeNotifications');
+            const countElement = document.getElementById('notificationsCount');
+            
+            if (currentNotifications.length === 0) {
+                container.innerHTML = '<p class="text-muted text-center py-4">Aucune notification active</p>';
+                countElement.textContent = '0 notifications';
+                return;
+            }
+            
+            let html = '';
+            currentNotifications.forEach(notification => {
+                const time = new Date(notification.timestamp).toLocaleString('fr-FR');
+                html += `
+                    <div class="notification-preview notification-${notification.type} mb-3">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div class="flex-grow-1">
+                                <strong>${notification.title}</strong>
+                                <p class="mb-1 mt-2">${notification.message}</p>
+                                <small class="text-muted">${time} • ${getNotificationTypeText(notification.type)}</small>
+                            </div>
+                            <button class="btn btn-outline-danger btn-sm ms-2" onclick="deleteNotification('${notification.id}')" title="Supprimer">
+                                <i class="fas fa-times"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            container.innerHTML = html;
+            countElement.textContent = `${currentNotifications.length} notification(s)`;
+        }
+
+        function deleteNotification(id) {
+            currentNotifications = currentNotifications.filter(notification => notification.id !== id);
+            saveAllData();
+            displayActiveNotifications();
+            updateStats();
+            hasUnsavedChanges = true;
+            updateActualiserButton();
+            showSyncStatus('🗑️ Notification supprimée', 'warning');
+        }
+
+        function clearAllNotifications() {
+            if (currentNotifications.length === 0) return;
+            
+            if (confirm(`Êtes-vous sûr de vouloir supprimer les ${currentNotifications.length} notifications?`)) {
+                currentNotifications = [];
+                saveAllData();
+                displayActiveNotifications();
+                updateStats();
+                hasUnsavedChanges = true;
+                updateActualiserButton();
+                showSyncStatus('🗑️ Toutes les notifications supprimées', 'success');
+            }
+        }
+
+        function resetNotificationForm() {
+            document.getElementById('notificationTitle').value = '';
+            document.getElementById('notificationMessage').value = '';
+            document.getElementById('notificationType').value = 'info';
+            updateNotificationPreview();
+        }
+
+        // دوال المعاينة
+        function updateNotificationPreview() {
+            const title = document.getElementById('notificationTitle').value || 'Titre de la notification';
+            const message = document.getElementById('notificationMessage').value || 'Message de la notification...';
+            const type = document.getElementById('notificationType').value;
+            
+            const preview = document.getElementById('notificationPreview');
+            preview.className = `notification-preview notification-${type}`;
+            
+            document.getElementById('previewTitle').textContent = title;
+            document.getElementById('previewMessage').textContent = message;
+            document.getElementById('previewType').textContent = `Type: ${getNotificationTypeText(type)}`;
+        }
+
+        function updateProductPreview() {
+            const name = document.getElementById('newProductName').value || 'Nom du produit';
+            const price = document.getElementById('newProductPrice').value || '0';
+            const image = document.getElementById('newProductImage').value || 'https://via.placeholder.com/80x80/6c757d/ffffff?text=Image';
+            const category = document.getElementById('newProductCategory').value;
+            
+            document.getElementById('namePreview').textContent = name;
+            document.getElementById('pricePreview').textContent = formatPrice(price);
+            document.getElementById('categoryPreview').textContent = category;
+            document.getElementById('imagePreview').src = image;
+        }
+
+        function getNotificationTypeText(type) {
+            const types = {
+                'info': 'Information',
+                'success': 'Succès & Promotion',
+                'warning': 'Avertissement Important',
+                'error': 'Urgent & Maintenance'
+            };
+            return types[type] || 'Information';
+        }
+
+        // دوال الواجهة
+        function showPreview() {
+            const previewContent = document.getElementById('previewContent');
+            const previewCount = document.getElementById('previewCount');
+
+            previewCount.textContent = currentProducts.length.toLocaleString();
+
+            if (currentProducts.length === 0) {
+                previewContent.innerHTML = `
+                    <div class="text-center text-muted py-5">
+                        <i class="fas fa-table fa-3x mb-3 opacity-50"></i>
+                        <p>Aucune donnée importée</p>
+                        <small class="text-muted">Importez un fichier Excel pour commencer</small>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = `
+                <div class="alert alert-success">
+                    <i class="fas fa-check-circle me-2"></i>
+                    <strong>${currentProducts.length.toLocaleString()} produits chargés</strong>
+                    <small class="d-block mt-1">Prêts à être synchronisés avec les clients</small>
+                </div>
+                <div class="table-responsive" style="max-height: 500px;">
+                    <table class="table table-striped table-hover">
+                        <thead class="table-dark sticky-top">
+                            <tr>
+                                <th>#</th>
+                                <th>Référence</th>
+                                <th>Désignation</th>
+                                <th>Catégorie</th>
+                                <th>Prix</th>
+                                <th>Image</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+
+            currentProducts.slice(0, 15).forEach((product, index) => {
+                html += `
+                    <tr>
+                        <td><small class="text-muted">${index + 1}</small></td>
+                        <td><strong class="text-primary">${product.ref}</strong></td>
+                        <td>${product.designation}</td>
+                        <td><span class="badge bg-info">${product.famille}</span></td>
+                        <td><strong class="text-success">${formatPrice(product.prix)}</strong></td>
+                        <td>${product.image ? '<i class="fas fa-check text-success"></i>' : '<i class="fas fa-times text-muted"></i>'}</td>
+                    </tr>
+                `;
+            });
+
+            if (currentProducts.length > 15) {
+                html += `
+                    <tr class="table-info">
+                        <td colspan="6" class="text-center fw-bold">
+                            <i class="fas fa-ellipsis-h me-2"></i>
+                            ${currentProducts.length - 15} produits supplémentaires...
+                        </td>
+                    </tr>
+                `;
+            }
+
+            html += `
+                        </tbody>
+                    </table>
+                </div>
+                <div class="row mt-3 text-center">
+                    <div class="col-md-3">
+                        <div class="fw-bold text-primary">${currentProducts.length}</div>
+                        <small>Total Produits</small>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="fw-bold text-info">${[...new Set(currentProducts.map(p => p.famille))].length}</div>
+                        <small>Catégories</small>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="fw-bold text-success">${currentProducts.filter(p => p.image).length}</div>
+                        <small>Avec Images</small>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="fw-bold text-warning">${formatPrice(Math.max(...currentProducts.map(p => p.prix)))}</div>
+                        <small>Prix Maximum</small>
+                    </div>
+                </div>
+            `;
+
+            previewContent.innerHTML = html;
+        }
+
+        function updateUI() {
+            updateStats();
+            showPreview();
+            displayActiveNotifications();
+            displayActiveNewProducts();
+            updateActiveDays();
+        }
+
+        function updateStats() {
+            document.getElementById('statsProducts').textContent = currentProducts.length.toLocaleString();
+            document.getElementById('statsNewProducts').textContent = currentNewProducts.length.toLocaleString();
+            document.getElementById('statsNotifications').textContent = currentNotifications.length.toLocaleString();
+            
+            document.getElementById('quickStatsProducts').textContent = currentProducts.length.toLocaleString();
+            document.getElementById('quickStatsNew').textContent = currentNewProducts.length.toLocaleString();
+            document.getElementById('quickStatsNotif').textContent = currentNotifications.length.toLocaleString();
+        }
+
+        function updateActiveDays() {
+            const firstSync = localStorage.getItem('varicom_first_sync');
+            if (!firstSync) {
+                localStorage.setItem('varicom_first_sync', new Date().toISOString());
+                document.getElementById('statsSync').textContent = '1';
+            } else {
+                const diffTime = Math.abs(new Date() - new Date(firstSync));
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                document.getElementById('statsSync').textContent = diffDays.toString();
+            }
+        }
+
+        // دوال المساعدة
+        function actualiserCatalogue() {
+            if (!hasUnsavedChanges) {
+                showSyncStatus('✅ Aucun changement à synchroniser', 'info');
+                return;
+            }
+            uploadToGitHubGist();
+        }
+
+        function generateClientLink() {
+            if (!currentGistId) {
+                showSyncStatus('❌ Aucun catalogue synchronisé', 'error');
+                return;
+            }
+
+            const clientUrl = `${window.location.origin}${window.location.pathname.replace('admin.html', 'index.html')}?gist=${currentGistId}`;
+            
+            navigator.clipboard.writeText(clientUrl).then(() => {
+                showSyncStatus('🔗 Lien client copié!', 'success');
+                
+                setTimeout(() => {
+                    alert(`🎉 Catalogue VARICOM en ligne!\n\nLien client:\n${clientUrl}\n\nCe lien a été copié dans votre presse-papiers. Partagez-le avec vos clients!`);
+                }, 500);
+            }).catch(() => {
+                prompt('📋 Copiez ce lien et partagez-le avec vos clients:', clientUrl);
+            });
+        }
+
+        function toggleTokenVisibility() {
+            const tokenInput = document.getElementById('githubToken');
+            const icon = tokenInput.nextElementSibling.querySelector('i');
+            
+            if (tokenInput.type === 'password') {
+                tokenInput.type = 'text';
+                icon.className = 'fas fa-eye-slash';
+            } else {
+                tokenInput.type = 'password';
+                icon.className = 'fas fa-eye';
+            }
+        }
+
+        function testImage() {
+            const imageUrl = document.getElementById('newProductImage').value;
+            if (!imageUrl) {
+                showSyncStatus('❌ URL d\'image vide', 'error');
+                return;
+            }
+            
+            showSyncStatus('👁️ Test de l\'image...', 'warning');
+            
+            const img = new Image();
+            img.onload = function() {
+                showSyncStatus('✅ Image valide et chargée', 'success');
+            };
+            img.onerror = function() {
+                showSyncStatus('❌ Image non valide ou non accessible', 'error');
+            };
+            img.src = imageUrl;
+        }
+
+        function testGitHubConnection() {
+            const token = document.getElementById('githubToken').value.trim();
+            if (!token) {
+                showSyncStatus('❌ Token GitHub requis', 'error');
+                return;
+            }
+
+            showSyncStatus('🔌 Test de connexion GitHub...', 'warning');
+
+            fetch('https://api.github.com/user', {
+                headers: {
+                    'Authorization': `token ${token}`
+                }
+            })
+            .then(response => {
+                if (response.ok) {
+                    showSyncStatus('✅ Connexion GitHub réussie', 'success');
+                } else {
+                    throw new Error('Token invalide');
+                }
+            })
+            .catch(error => {
+                showSyncStatus('❌ Échec connexion GitHub', 'error');
+            });
+        }
+
+        function showSystemStats() {
+            const stats = {
+                produits: currentProducts.length,
+                nouveaux: currentNewProducts.length,
+                notifications: currentNotifications.length,
+                categories: [...new Set(currentProducts.map(p => p.famille))].length,
+                prixMoyen: currentProducts.length ? 
+                    currentProducts.reduce((sum, p) => sum + p.prix, 0) / currentProducts.length : 0
+            };
+
+            alert(`📊 Statistiques VARICOM:\n\n` +
+                  `📦 Produits: ${stats.produits.toLocaleString()}\n` +
+                  `⭐ Nouveaux: ${stats.nouveaux}\n` +
+                  `🔔 Notifications: ${stats.notifications}\n` +
+                  `📁 Catégories: ${stats.categories}\n` +
+                  `💰 Prix moyen: ${formatPrice(stats.prixMoyen)}\n` +
+                  `🔄 Dernière sync: ${currentGistId ? 'Active' : 'Jamais'}`);
+        }
+
+        function downloadTemplate() {
+            const templateData = [
+                ['Référence', 'Désignation', 'Famille', 'Prix', 'Image'],
+                ['VAR-001', 'Laptop Gaming ASUS ROG Strix', 'Ordinateurs Portables', '185000.00', 'https://example.com/laptop.jpg'],
+                ['VAR-002', 'Souris Sans Fil Logitech MX Master', 'Périphériques', '4500.00', 'https://example.com/souris.jpg'],
+                ['VAR-003', 'Écran 24\" Samsung Curved', 'Écrans', '75000.00', ''],
+                ['VAR-004', 'Clavier Mécanique RGB Mechanical', 'Accessoires', '12000.00', 'https://example.com/clavier.jpg'],
+                ['VAR-005', 'Webcam HD 1080p Logitech', 'Accessoires', '8500.00', 'https://example.com/webcam.jpg']
+            ];
+            
+            const ws = XLSX.utils.aoa_to_sheet(templateData);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Template VARICOM");
+            XLSX.writeFile(wb, "template_varicom_pro.xlsx");
+            showSyncStatus('📥 Template téléchargé', 'success');
+        }
+
+        function showFormatHelp() {
+            alert(`📋 FORMAT EXCEL VARICOM - GUIDE COMPLET
+
+🎯 COLONNES OBLIGATOIRES:
+• Référence: Code unique du produit (REF-001, SKU123, etc.)
+• Désignation: Nom complet du produit
+• Famille: Catégorie du produit
+• Prix: Prix en Dinars Algériens (DA)
+
+📸 COLONNE OPTIONNELLE:
+• Image: URL complète de l'image du produit
+
+💡 CONSEILS PROFESSIONNELS:
+✓ Utilisez des références uniques
+✓ Les prix doivent être numériques
+✓ Les URLs d'images doivent être complètes
+✓ Évitez les caractères spéciaux dans les références
+
+📊 EXEMPLE DE DONNÉES:
+┌───────────┬──────────────────────────┬──────────────────┬───────────┐
+│ Référence │ Désignation              │ Famille          │ Prix      │
+├───────────┼──────────────────────────┼──────────────────┼───────────┤
+│ VAR-001   │ Laptop Gaming ASUS ROG   │ Ordinateurs      │ 185000.00 │
+│ VAR-002   │ Souris Sans Fil          │ Accessoires      │ 4500.00   │
+└───────────┴──────────────────────────┴──────────────────┴───────────┘
+
+🔄 Le système détecte automatiquement les colonnes!`);
+        }
+
+        function testDataValidation() {
+            if (currentProducts.length === 0) {
+                showSyncStatus('❌ Aucune donnée à valider', 'error');
+                return;
+            }
+
+            const errors = [];
+            const warnings = [];
+
+            currentProducts.forEach((product, index) => {
+                if (!product.ref) errors.push(`Ligne ${index + 1}: Référence manquante`);
+                if (!product.designation) errors.push(`Ligne ${index + 1}: Désignation manquante`);
+                if (product.prix <= 0) errors.push(`Ligne ${index + 1}: Prix invalide`);
+                if (product.designation.length > 100) warnings.push(`Ligne ${index + 1}: Désignation trop longue`);
+            });
+
+            let message = `✅ Validation terminée\n\n`;
+            message += `📊 Produits analysés: ${currentProducts.length}\n`;
+            
+            if (errors.length > 0) {
+                message += `❌ Erreurs: ${errors.length}\n`;
+                errors.slice(0, 5).forEach(error => message += `• ${error}\n`);
+            } else {
+                message += `✅ Aucune erreur critique\n`;
+            }
+            
+            if (warnings.length > 0) {
+                message += `⚠️ Avertissements: ${warnings.length}\n`;
+                warnings.slice(0, 3).forEach(warning => message += `• ${warning}\n`);
+            }
+
+            alert(message);
+        }
+
+        function showProgressBar() {
+            document.getElementById('progressContainer').style.display = 'block';
+            updateProgress(0, 'Initialisation...');
+        }
+
+        function hideProgressBar() {
+            document.getElementById('progressContainer').style.display = 'none';
+        }
+
+        function updateProgress(percent, text) {
+            const progressBar = document.getElementById('uploadProgress');
+            const progressText = document.getElementById('progressText');
+            
+            progressBar.style.width = percent + '%';
+            progressBar.textContent = percent + '%';
+            progressText.textContent = text;
+        }
+
+        function showSyncStatus(message, type) {
+            const syncStatus = document.getElementById('syncStatus');
+            syncStatus.innerHTML = `
+                <i class="fas fa-${getStatusIcon(type)} me-2"></i>
+                ${message}
+            `;
+            syncStatus.className = `sync-status sync-${type}`;
+            syncStatus.style.display = 'block';
+            setTimeout(() => syncStatus.style.display = 'none', 5000);
+        }
+
+        function getStatusIcon(type) {
+            const icons = {
+                'success': 'check-circle',
+                'warning': 'exclamation-triangle',
+                'error': 'exclamation-circle',
+                'info': 'info-circle'
+            };
+            return icons[type] || 'info-circle';
+        }
+
+        function toggleButtonsLoading(loading) {
+            const buttons = ['publishBtn', 'actualiserBtn'];
+            buttons.forEach(btnId => {
+                const btn = document.getElementById(btnId);
+                if (loading) {
+                    btn.disabled = true;
+                    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Chargement...';
+                } else {
+                    btn.disabled = false;
+                    updateActualiserButton();
+                    document.getElementById('publishBtn').innerHTML = '<i class="fab fa-github me-2"></i>Publier';
+                }
+            });
+        }
+
+        function markUnsavedChanges() {
+            hasUnsavedChanges = true;
+            updateActualiserButton();
+        }
+
+        function updateActualiserButton() {
+            const btn = document.getElementById('actualiserBtn');
+            if (hasUnsavedChanges) {
+                btn.classList.remove('btn-warning');
+                btn.classList.add('btn-danger');
+                btn.innerHTML = '<i class="fas fa-exclamation-triangle me-2"></i>Actualiser*';
+                btn.classList.add('pulse-animation');
+            } else {
+                btn.classList.remove('btn-danger', 'pulse-animation');
+                btn.classList.add('btn-warning');
+                btn.innerHTML = '<i class="fas fa-sync-alt me-2"></i>Actualiser';
+            }
+        }
+
+        function formatPrice(price) {
+            return new Intl.NumberFormat('fr-FR', {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+            }).format(price) + ' DA';
+        }
+
+        function generateSyncId() {
+            return `sync_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+        }
+
+        function handleSyncError(error) {
+            console.error('❌ Erreur synchronisation:', error);
+            let errorMessage = 'Erreur de synchronisation: ';
+            
+            if (error.message.includes('401') || error.message.includes('Bad credentials')) {
+                errorMessage = '❌ Token GitHub invalide ou expiré';
+            } else if (error.message.includes('404')) {
+                errorMessage = '❌ Gist non trouvé - Recréation nécessaire';
+                currentGistId = null;
+                localStorage.removeItem('varicom_gist_id');
+            } else if (error.message.includes('403')) {
+                errorMessage = '❌ Accès refusé - Vérifiez les permissions du token';
+            } else if (error.message.includes('422')) {
+                errorMessage = '❌ Données invalides - Vérifiez le format';
+            } else {
+                errorMessage += error.message;
+            }
+            
+            showSyncStatus(errorMessage, 'error');
+        }
+
+        function cleanupOldData() {
+            const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+            
+            currentProducts = currentProducts.filter(p => 
+                new Date(p.timestamp) > thirtyDaysAgo
+            );
+            currentNotifications = currentNotifications.filter(n => 
+                new Date(n.timestamp) > thirtyDaysAgo
+            );
+            
+            saveAllData();
+        }
+
         function prepareSyncData() {
             return {
                 products: currentProducts,
@@ -1233,28 +2075,6 @@
                 }
             };
         }
-
-        // دوال التهيئة الأساسية
-        function loadAllData() {
-            loadToken();
-            loadProducts();
-            loadNotifications();
-            loadNewProducts();
-            loadGistId();
-        }
-
-        function setupEventListeners() {
-            setupFileUpload();
-            
-            document.getElementById('githubToken').addEventListener('input', function() {
-                localStorage.setItem('varicom_github_token', this.value);
-            });
-
-            setupRealTimePreviews();
-            setupChangeDetection();
-        }
-
-        // ... باقي الدوال الأساسية تبقى كما هي ...
 
         // تصدير الدوال للنافذة العالمية
         window.handleExcelUpload = handleExcelUpload;
