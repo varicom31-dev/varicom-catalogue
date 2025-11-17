@@ -60,6 +60,29 @@
             box-shadow: 0 5px 15px rgba(0,0,0,0.2);
         }
         
+        .upload-area {
+            border: 3px dashed rgba(255,255,255,0.5);
+            border-radius: 12px;
+            padding: 40px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(10px);
+        }
+        
+        .upload-area:hover {
+            background: rgba(255,255,255,0.2);
+            border-color: white;
+            transform: translateY(-2px);
+        }
+        
+        .upload-area.dragover {
+            background: rgba(255,255,255,0.3);
+            border-color: white;
+            transform: scale(1.02);
+        }
+        
         .sync-status {
             position: fixed;
             top: 20px;
@@ -71,6 +94,27 @@
             box-shadow: 0 5px 20px rgba(0,0,0,0.15);
             animation: slideInRight 0.5s ease;
             backdrop-filter: blur(10px);
+        }
+        
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        .sync-success { 
+            background: linear-gradient(135deg, #28a745, #20c997); 
+            color: white;
+            border-left: 4px solid #1e7e34;
+        }
+        .sync-warning { 
+            background: linear-gradient(135deg, #ffc107, #fd7e14); 
+            color: black;
+            border-left: 4px solid #e0a800;
+        }
+        .sync-error { 
+            background: linear-gradient(135deg, #dc3545, #c82333); 
+            color: white;
+            border-left: 4px solid #bd2130;
         }
         
         .security-alert {
@@ -89,6 +133,21 @@
             100% { transform: scale(1); }
         }
         
+        .notification-management, .new-products-management {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+            border-left: 4px solid var(--primary-color);
+            transition: all 0.3s ease;
+        }
+        
+        .notification-management:hover, .new-products-management:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+        }
+        
         .link-history-item {
             border-left: 3px solid var(--primary-color);
             padding: 10px;
@@ -103,14 +162,6 @@
             background: #fff0f0;
         }
         
-        .client-monitor {
-            background: linear-gradient(135deg, #2c3e50, #34495e);
-            color: white;
-            border-radius: 10px;
-            padding: 15px;
-            margin: 10px 0;
-        }
-        
         .security-stats {
             background: linear-gradient(135deg, var(--security-color), #B22222);
             color: white;
@@ -118,24 +169,6 @@
             padding: 20px;
             text-align: center;
             margin: 10px;
-        }
-        
-        /* بقية الأنماط تبقى كما هي */
-        .upload-area {
-            border: 3px dashed rgba(255,255,255,0.5);
-            border-radius: 12px;
-            padding: 40px 20px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            background: rgba(255,255,255,0.1);
-            backdrop-filter: blur(10px);
-        }
-        
-        .upload-area:hover {
-            background: rgba(255,255,255,0.2);
-            border-color: white;
-            transform: translateY(-2px);
         }
         
         .feature-card {
@@ -150,6 +183,30 @@
         .feature-card:hover {
             transform: translateY(-5px);
             box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+        }
+        
+        .stats-card {
+            background: linear-gradient(135deg, var(--primary-color), #2a4d7a);
+            color: white;
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            margin: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .quick-actions {
+            background: linear-gradient(135deg, var(--primary-color), #2a4d7a);
+            color: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            position: relative;
+            overflow: hidden;
         }
         
         .btn-advanced {
@@ -275,7 +332,6 @@
             </div>
         </div>
 
-        <!-- بقية الأقسام تبقى كما هي -->
         <div class="quick-actions">
             <div class="row align-items-center">
                 <div class="col-md-8">
@@ -293,19 +349,385 @@
             </div>
         </div>
 
-        <!-- باقي الكود يبقى كما هو -->
-        <!-- ... -->
-        
+        <div class="row m-4">
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <i class="fas fa-box fa-2x mb-2"></i>
+                    <h3 id="statsProducts">0</h3>
+                    <p>Produits Totaux</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <i class="fas fa-star fa-2x mb-2"></i>
+                    <h3 id="statsNewProducts">0</h3>
+                    <p>Nouveautés</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <i class="fas fa-bell fa-2x mb-2"></i>
+                    <h3 id="statsNotifications">0</h3>
+                    <p>Notifications</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <i class="fas fa-sync-alt fa-2x mb-2"></i>
+                    <h3 id="statsSync">0</h3>
+                    <p>Jours Actif</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- قسم رفع ملف Excel -->
+        <div class="upload-section">
+            <h4><i class="fas fa-file-excel me-2"></i>Importation Produits Excel</h4>
+            
+            <div class="upload-area" id="excelUploadArea">
+                <i class="fas fa-file-excel" style="font-size: 64px; margin-bottom: 20px;"></i>
+                <h4>Glissez votre fichier Excel ici</h4>
+                <p class="mb-3">Formats supportés: .xlsx, .xls, .csv</p>
+                <button class="btn btn-light btn-lg" onclick="document.getElementById('excelFile').click()">
+                    <i class="fas fa-upload me-2"></i>Choisir un Fichier
+                </button>
+                <input type="file" id="excelFile" accept=".xlsx, .xls, .csv" style="display: none;" 
+                       onchange="handleExcelUpload(this.files[0])">
+            </div>
+
+            <div class="mt-4" id="progressContainer" style="display: none;">
+                <div class="progress" style="height: 20px; border-radius: 10px;">
+                    <div id="uploadProgress" class="progress-bar progress-bar-striped progress-bar-animated" 
+                         role="progressbar" style="width: 0%; border-radius: 10px;">0%</div>
+                </div>
+                <div class="text-center mt-2">
+                    <small id="progressText" class="text-white">Traitement en cours...</small>
+                </div>
+            </div>
+
+            <div class="row mt-4">
+                <div class="col-md-8">
+                    <h6><i class="fas fa-info-circle me-2"></i>Format Requis:</h6>
+                    <div class="bg-light rounded p-3 text-dark small">
+                        <strong>Colonnes (dans n'importe quel ordre):</strong><br>
+                        • <strong>Référence</strong>: Réf. Art / Ref / Référence / Code / SKU<br>
+                        • <strong>Désignation</strong>: Designation / Désignation / Produit / Article / Nom / Description<br>
+                        • <strong>Famille</strong>: Famille / Catégorie / Category / Type / Family<br>
+                        • <strong>Prix</strong>: Prix / Price / PU / Prix Unitaire / Cost<br>
+                        • <strong>Image</strong>: Image / Photo / URL / Lien (optionnel)<br>
+                        <strong>Important:</strong> La première ligne doit contenir les en-têtes. Les noms de colonnes ne sont pas sensibles à la casse.
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <h6><i class="fas fa-download me-2"></i>Template & Aide</h6>
+                    <button class="btn btn-outline-light w-100 mb-2" onclick="downloadTemplate()">
+                        <i class="fas fa-file-download me-2"></i>Télécharger Template
+                    </button>
+                    <button class="btn btn-outline-light w-100 mb-2" onclick="showFormatHelp()">
+                        <i class="fas fa-question-circle me-2"></i>Aide Format
+                    </button>
+                    <button class="btn btn-outline-light w-100" onclick="testDataValidation()">
+                        <i class="fas fa-check-circle me-2"></i>Tester Données
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- باقي الأقسام -->
+        <div class="new-products-management">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h4 class="mb-1"><i class="fas fa-plus-circle me-2"></i>Gestion des Nouveaux Produits</h4>
+                    <p class="text-muted mb-0">Les nouveaux produits apparaîtront en évidence dans le catalogue client</p>
+                </div>
+                <button class="btn btn-success" onclick="actualiserCatalogue()">
+                    <i class="fas fa-sync-alt me-1"></i>Actualiser
+                </button>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card feature-card h-100">
+                        <div class="card-header bg-success text-white">
+                            <h5 class="mb-0"><i class="fas fa-plus me-2"></i>Ajouter un Nouveau Produit</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label class="form-label">Nom du produit:</label>
+                                <input type="text" class="form-control" id="newProductName" placeholder="Ex: Laptop Gaming ASUS ROG Strix">
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Prix (DA):</label>
+                                <input type="number" class="form-control" id="newProductPrice" placeholder="Ex: 185000" min="0" step="0.01">
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">URL de l'image:</label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" id="newProductImage" placeholder="https://example.com/image.jpg">
+                                    <button class="btn btn-outline-secondary" type="button" onclick="testImage()" title="Tester l'image">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                                <small class="form-text text-muted">Supporte JPG, PNG, WebP. URL complète requise.</small>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Catégorie:</label>
+                                <select class="form-select" id="newProductCategory">
+                                    <option value="Ordinateurs Portables">💻 Ordinateurs Portables</option>
+                                    <option value="Ordinateurs Bureau">🖥️ Ordinateurs Bureau</option>
+                                    <option value="Écrans">📺 Écrans</option>
+                                    <option value="Téléphones">📱 Téléphones</option>
+                                    <option value="Périphériques">⌨️ Périphériques</option>
+                                    <option value="Accessoires">🎧 Accessoires</option>
+                                    <option value="Composants">🔧 Composants</option>
+                                    <option value="Réseau">🌐 Réseau</option>
+                                    <option value="Logiciels">💾 Logiciels</option>
+                                    <option value="Général">📦 Général</option>
+                                </select>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Aperçu instantané:</label>
+                                <div class="new-product-card d-flex align-items-center">
+                                    <img id="imagePreview" src="https://via.placeholder.com/80x80/6c757d/ffffff?text=Image" 
+                                         class="new-product-image" alt="Aperçu">
+                                    <div class="flex-grow-1">
+                                        <strong id="namePreview">Nom du produit</strong>
+                                        <div id="pricePreview" class="text-success fw-bold">0 DA</div>
+                                        <small id="categoryPreview" class="text-muted">Catégorie</small>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <button class="btn btn-success w-100 py-2" onclick="addNewProduct()">
+                                <i class="fas fa-plus-circle me-2"></i>Ajouter le Produit
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="card feature-card h-100">
+                        <div class="card-header bg-info text-white">
+                            <h5 class="mb-0"><i class="fas fa-list me-2"></i>Produits Nouveaux Actifs</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <span class="badge bg-primary" id="newProductsCount">0 produits</span>
+                                <button class="btn btn-outline-danger btn-sm" onclick="clearAllNewProducts()">
+                                    <i class="fas fa-trash me-1"></i>Tout Supprimer
+                                </button>
+                            </div>
+                            <div id="activeNewProducts" style="max-height: 400px; overflow-y: auto;">
+                                <p class="text-muted text-center py-4">Aucun produit nouveau actif</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="notification-management">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h4 class="mb-1"><i class="fas fa-bell me-2"></i>Gestion des Notifications</h4>
+                    <p class="text-muted mb-0">Les notifications s'afficheront automatiquement chez tous les clients</p>
+                </div>
+                <button class="btn btn-warning" onclick="actualiserCatalogue()">
+                    <i class="fas fa-sync-alt me-1"></i>Actualiser
+                </button>
+            </div>
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card feature-card h-100">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0"><i class="fas fa-plus me-2"></i>Créer une Notification</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label class="form-label">Titre de la notification:</label>
+                                <input type="text" class="form-control" id="notificationTitle" placeholder="Ex: Promotion Spéciale Été 2024">
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Message détaillé:</label>
+                                <textarea class="form-control" id="notificationMessage" rows="3" 
+                                          placeholder="Décrivez votre annonce en détail..."></textarea>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Type de notification:</label>
+                                <select class="form-select" id="notificationType">
+                                    <option value="info">ℹ️ Information</option>
+                                    <option value="success">✅ Succès & Promotion</option>
+                                    <option value="warning">⚠️ Avertissement Important</option>
+                                    <option value="error">❌ Urgent & Maintenance</option>
+                                </select>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label class="form-label">Aperçu en temps réel:</label>
+                                <div id="notificationPreview" class="notification-preview notification-info">
+                                    <strong id="previewTitle">Titre de la notification</strong>
+                                    <p id="previewMessage" class="mb-1 mt-2">Message de la notification...</p>
+                                    <small class="text-muted" id="previewType">Type: Information</small>
+                                </div>
+                            </div>
+                            
+                            <button class="btn btn-primary w-100 py-2" onclick="createNotification()">
+                                <i class="fas fa-paper-plane me-2"></i>Publier la Notification
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="col-md-6">
+                    <div class="card feature-card h-100">
+                        <div class="card-header bg-warning text-white">
+                            <h5 class="mb-0"><i class="fas fa-list me-2"></i>Notifications Actives</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <span class="badge bg-primary" id="notificationsCount">0 notifications</span>
+                                <button class="btn btn-outline-danger btn-sm" onclick="clearAllNotifications()">
+                                    <i class="fas fa-trash me-1"></i>Tout Supprimer
+                                </button>
+                            </div>
+                            <div id="activeNotifications" style="max-height: 400px; overflow-y: auto;">
+                                <p class="text-muted text-center py-4">Aucune notification active</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row m-4">
+            <div class="col-12">
+                <div class="card feature-card">
+                    <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i class="fas fa-chart-bar me-2"></i>Aperçu du Catalogue
+                            <span class="badge bg-light text-dark ms-2" id="previewCount">0</span>
+                        </h5>
+                        <div>
+                            <button class="btn btn-success btn-sm me-2" onclick="actualiserCatalogue()">
+                                <i class="fas fa-sync-alt me-1"></i>Actualiser Maintenant
+                            </button>
+                            <button class="btn btn-primary btn-sm me-2" onclick="generateClientLink()">
+                                <i class="fas fa-link me-1"></i>Lien Client
+                            </button>
+                            <button class="btn btn-info btn-sm" onclick="showSystemStats()">
+                                <i class="fas fa-chart-pie me-1"></i>Statistiques
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div id="previewContent" class="text-center text-muted py-5">
+                            <i class="fas fa-table fa-3x mb-3 opacity-50"></i>
+                            <p>Aucune donnée importée</p>
+                            <small class="text-muted">Importez un fichier Excel pour commencer</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row m-4">
+            <div class="col-md-6">
+                <div class="card feature-card h-100">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0"><i class="fas fa-cog me-2"></i>Configuration</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="form-label">Token GitHub:</label>
+                            <div class="input-group">
+                                <input type="password" class="form-control" id="githubToken" 
+                                       placeholder="ghp_xxxxxxxxxxxxxxxxxxxx">
+                                <button class="btn btn-outline-secondary" type="button" onclick="toggleTokenVisibility()">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                            <small class="form-text text-muted">
+                                🔒 Stocké localement - Sécurisé à 100%
+                            </small>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Intervalle de synchronisation:</label>
+                            <select class="form-select" id="syncInterval">
+                                <option value="1">1 minute</option>
+                                <option value="2" selected>2 minutes</option>
+                                <option value="5">5 minutes</option>
+                                <option value="10">10 minutes</option>
+                                <option value="30">30 minutes</option>
+                            </select>
+                        </div>
+                        <button class="btn btn-outline-primary w-100" onclick="testGitHubConnection()">
+                            <i class="fas fa-plug me-2"></i>Tester la Connexion
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card feature-card h-100">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0"><i class="fas fa-rocket me-2"></i>Instructions Rapides</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="alert alert-info">
+                            <h6>🚀 Démarrage Rapide:</h6>
+                            <ol class="small mb-0">
+                                <li>Importez votre Excel</li>
+                                <li>Ajoutez produits/nouveautés</li>
+                                <li>Créez des notifications</li>
+                                <li>Cliquez sur "Actualiser"</li>
+                                <li>Partagez le lien client!</li>
+                            </ol>
+                        </div>
+                        <div class="alert alert-warning">
+                            <h6>📊 Statistiques en Temps Réel:</h6>
+                            <div class="row text-center small">
+                                <div class="col-4">
+                                    <div class="fw-bold" id="quickStatsProducts">0</div>
+                                    <small>Produits</small>
+                                </div>
+                                <div class="col-4">
+                                    <div class="fw-bold" id="quickStatsNew">0</div>
+                                    <small>Nouveaux</small>
+                                </div>
+                                <div class="col-4">
+                                    <div class="fw-bold" id="quickStatsNotif">0</div>
+                                    <small>Notifications</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <script>
+        // 🔒 المتغيرات الأساسية
+        let currentProducts = [];
+        let currentNotifications = [];
+        let currentNewProducts = [];
+        let gistUrl = '';
+        let hasUnsavedChanges = false;
+        let autoSyncInterval = null;
+        let currentGistId = null;
+
         // 🔒 متغيرات نظام الأمان
         let securityMode = false;
         let linkHistory = [];
         let activeClients = [];
         let securityUpdates = 0;
 
-        // التهيئة الأساسية
         document.addEventListener('DOMContentLoaded', function() {
             console.log('🚀 Initialisation du Panel Administrateur VARICOM PRO');
             initializeApplication();
@@ -383,7 +805,6 @@
                 label.className = 'form-check-label fw-bold text-success';
                 info.innerHTML = '🌙 <strong>وضع الأمان مفعل</strong> - كل تغيير في التوكن ينشئ رابط جديد للزبائن';
                 mainHeader.classList.add('security-header');
-                document.querySelector('.security-mode-active').classList.add('security-mode-active');
             } else {
                 label.innerHTML = '<i class="fas fa-shield-alt me-1"></i>معطل';
                 label.className = 'form-check-label fw-bold text-secondary';
@@ -409,6 +830,11 @@
             const token = document.getElementById('githubToken').value.trim();
             if (!token) {
                 showSyncStatus('❌ Token GitHub requis', 'error');
+                return;
+            }
+
+            if (currentProducts.length === 0) {
+                showSyncStatus('❌ Aucun produit à synchroniser', 'error');
                 return;
             }
 
@@ -597,6 +1023,184 @@
             }
         }
 
+        // دوال رفع ملف Excel
+        function setupFileUpload() {
+            const uploadArea = document.getElementById('excelUploadArea');
+            
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.classList.add('dragover');
+            });
+
+            uploadArea.addEventListener('dragleave', () => {
+                uploadArea.classList.remove('dragover');
+            });
+
+            uploadArea.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadArea.classList.remove('dragover');
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    handleExcelUpload(files[0]);
+                }
+            });
+        }
+
+        function handleExcelUpload(file) {
+            if (!file) {
+                showSyncStatus('❌ Aucun fichier sélectionné', 'error');
+                return;
+            }
+
+            const fileName = file.name.toLowerCase();
+            const validExtensions = ['.xlsx', '.xls', '.csv'];
+            const isValidExtension = validExtensions.some(ext => fileName.endsWith(ext));
+            
+            if (!isValidExtension) {
+                showSyncStatus('❌ Format non supporté. Utilisez .xlsx, .xls ou .csv', 'error');
+                return;
+            }
+
+            showSyncStatus('📊 Lecture du fichier Excel en cours...', 'warning');
+            showProgressBar();
+
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+                try {
+                    updateProgress(30, 'Conversion des données...');
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    
+                    updateProgress(60, 'Traitement des feuilles...');
+                    const firstSheetName = workbook.SheetNames[0];
+                    const worksheet = workbook.Sheets[firstSheetName];
+                    
+                    updateProgress(80, 'Extraction des données...');
+                    const jsonData = XLSX.utils.sheet_to_json(worksheet);
+                    
+                    updateProgress(90, 'Validation finale...');
+                    processExcelData(jsonData);
+                    
+                    updateProgress(100, 'Terminé!');
+                    setTimeout(hideProgressBar, 1000);
+                    
+                } catch (error) {
+                    console.error('❌ Erreur lecture Excel:', error);
+                    hideProgressBar();
+                    showSyncStatus('❌ Erreur lors de la lecture du fichier Excel', 'error');
+                }
+            };
+            
+            reader.onerror = function() {
+                hideProgressBar();
+                showSyncStatus('❌ Erreur de lecture du fichier', 'error');
+            };
+            
+            reader.readAsArrayBuffer(file);
+        }
+
+        function processExcelData(excelData) {
+            if (!excelData || excelData.length === 0) {
+                showSyncStatus('❌ Le fichier Excel est vide', 'error');
+                return;
+            }
+
+            const newProducts = [];
+            let skippedRows = 0;
+            let validRows = 0;
+
+            console.log('📋 Traitement de', excelData.length, 'lignes Excel');
+
+            excelData.forEach((row, index) => {
+                const processedRow = processExcelRow(row, index);
+                
+                if (processedRow.valid) {
+                    newProducts.push(processedRow.data);
+                    validRows++;
+                } else {
+                    skippedRows++;
+                }
+            });
+
+            if (newProducts.length === 0) {
+                showSyncStatus('❌ Aucune donnée valide trouvée', 'error');
+                return;
+            }
+
+            currentProducts = newProducts;
+            saveAllData();
+            
+            const successMessage = `✅ ${validRows} produits importés${skippedRows > 0 ? ` (${skippedRows} ignorés)` : ''}`;
+            showSyncStatus(successMessage, 'success');
+            updateStats();
+            showPreview();
+            
+            hasUnsavedChanges = true;
+            updateActualiserButton();
+        }
+
+        function processExcelRow(row, index) {
+            const keys = Object.keys(row);
+            let ref = '', designation = '', famille = 'Général', prix = 0, image = '';
+
+            keys.forEach(key => {
+                const keyLower = key.toLowerCase().trim();
+                const value = row[key];
+
+                if (value === null || value === undefined || value === '') return;
+
+                if (keyLower.includes('réf') || keyLower.includes('ref') || keyLower.includes('reference') || keyLower.includes('code') || keyLower.includes('sku')) {
+                    ref = cleanString(value.toString());
+                }
+                else if (keyLower.includes('designation') || keyLower.includes('désignation') || keyLower.includes('produit') || keyLower.includes('article') || keyLower.includes('nom') || keyLower.includes('description')) {
+                    designation = cleanString(value.toString());
+                }
+                else if (keyLower.includes('famille') || keyLower.includes('catégorie') || keyLower.includes('category') || keyLower.includes('type') || keyLower.includes('family')) {
+                    famille = cleanString(value.toString());
+                }
+                else if (keyLower.includes('prix') || keyLower.includes('price') || keyLower.includes('pu') || keyLower.includes('cost')) {
+                    prix = parsePrice(value);
+                }
+                else if (keyLower.includes('image') || keyLower.includes('photo') || keyLower.includes('url') || keyLower.includes('lien')) {
+                    image = cleanString(value.toString());
+                }
+            });
+
+            const isValid = ref && designation && prix > 0;
+            
+            return {
+                valid: isValid,
+                data: {
+                    id: `prod_${Date.now()}_${index}`,
+                    ref: ref,
+                    designation: designation,
+                    famille: famille,
+                    prix: prix,
+                    image: image,
+                    timestamp: new Date().toISOString()
+                }
+            };
+        }
+
+        function parsePrice(value) {
+            if (typeof value === 'number') return value;
+            
+            let priceStr = value.toString().trim();
+            priceStr = priceStr.replace(/[^\d,.-]/g, '').replace(',', '.');
+            
+            const price = parseFloat(priceStr);
+            return isNaN(price) ? 0 : Math.abs(price);
+        }
+
+        function cleanString(str) {
+            return str.toString()
+                .replace(/[\u0000-\u001F\u007F-\u009F]/g, '')
+                .replace(/\s+/g, ' ')
+                .trim()
+                .substring(0, 500);
+        }
+
         // دوال مساعدة
         function prepareSyncData() {
             return {
@@ -630,10 +1234,46 @@
             };
         }
 
-        // بقية الدوال تبقى كما هي مع التحديثات البسيطة
-        // ... 
+        // دوال التهيئة الأساسية
+        function loadAllData() {
+            loadToken();
+            loadProducts();
+            loadNotifications();
+            loadNewProducts();
+            loadGistId();
+        }
 
-        // تحديث الدوال الأساسية لتدعم الأمان
+        function setupEventListeners() {
+            setupFileUpload();
+            
+            document.getElementById('githubToken').addEventListener('input', function() {
+                localStorage.setItem('varicom_github_token', this.value);
+            });
+
+            setupRealTimePreviews();
+            setupChangeDetection();
+        }
+
+        // ... باقي الدوال الأساسية تبقى كما هي ...
+
+        // تصدير الدوال للنافذة العالمية
+        window.handleExcelUpload = handleExcelUpload;
+        window.uploadToGitHubGist = uploadToGitHubGist;
+        window.generateClientLink = generateClientLink;
+        window.actualiserCatalogue = actualiserCatalogue;
+        window.addNewProduct = addNewProduct;
+        window.removeNewProduct = removeNewProduct;
+        window.clearAllNewProducts = clearAllNewProducts;
+        window.createNotification = createNotification;
+        window.deleteNotification = deleteNotification;
+        window.clearAllNotifications = clearAllNotifications;
+        window.testImage = testImage;
+        window.toggleTokenVisibility = toggleTokenVisibility;
+        window.testGitHubConnection = testGitHubConnection;
+        window.showSystemStats = showSystemStats;
+        window.downloadTemplate = downloadTemplate;
+        window.showFormatHelp = showFormatHelp;
+        window.testDataValidation = testDataValidation;
         window.generateNewLink = generateNewLink;
         window.copyGistId = copyGistId;
         window.clearLinkHistory = clearLinkHistory;
