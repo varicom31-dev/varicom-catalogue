@@ -17,12 +17,6 @@
             --dark: #34495e;
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
         body {
             font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
             background: linear-gradient(135deg, #74b9ff 0%, #0984e3 100%);
@@ -69,12 +63,12 @@
             border-radius: 15px;
             overflow: hidden;
             box-shadow: 0 5px 20px rgba(0,0,0,0.08);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.3s ease;
             border: 1px solid #f8f9fa;
         }
 
         .product-card:hover {
-            transform: translateY(-8px);
+            transform: translateY(-5px);
             box-shadow: 0 15px 40px rgba(0,0,0,0.15);
         }
 
@@ -88,17 +82,6 @@
             overflow: hidden;
         }
 
-        .product-image img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: transform 0.3s ease;
-        }
-
-        .product-card:hover .product-image img {
-            transform: scale(1.05);
-        }
-
         .product-badge {
             position: absolute;
             top: 15px;
@@ -109,10 +92,6 @@
             border-radius: 20px;
             font-size: 0.8em;
             font-weight: 600;
-        }
-
-        .product-content {
-            padding: 20px;
         }
 
         .search-section {
@@ -135,6 +114,7 @@
             align-items: center;
             gap: 10px;
             z-index: 1000;
+            display: none;
         }
 
         .notification-panel {
@@ -158,34 +138,6 @@
             padding: 12px 25px;
             font-weight: 600;
             transition: all 0.3s ease;
-        }
-
-        .btn-modern:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-        }
-
-        .filter-tabs {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-        }
-
-        .filter-tab {
-            background: #f8f9fa;
-            border: 2px solid transparent;
-            padding: 10px 20px;
-            border-radius: 25px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-weight: 500;
-        }
-
-        .filter-tab.active {
-            background: var(--secondary);
-            color: white;
-            border-color: var(--secondary);
         }
 
         .loading-spinner {
@@ -217,7 +169,6 @@
 </head>
 <body>
     <div class="app-container">
-        <!-- En-tête de l'application -->
         <div class="app-header">
             <h1 class="display-5 fw-bold mb-3">
                 <i class="fas fa-shopping-bag me-3"></i>VARICOM BOUTIQUE
@@ -225,29 +176,24 @@
             <p class="lead mb-0">Catalogue produits en temps réel</p>
         </div>
 
-        <!-- Barre de statistiques -->
         <div class="stats-bar">
             <div class="row text-center">
-                <div class="col-md-3">
+                <div class="col-md-4">
                     <div class="fw-bold text-primary fs-2" id="totalProducts">0</div>
                     <small class="text-muted">Produits</small>
                 </div>
-                <div class="col-md-3">
-                    <div class="fw-bold text-success fs-2" id="newProducts">0</div>
-                    <small class="text-muted">Nouveautés</small>
-                </div>
-                <div class="col-md-3">
+                <div class="col-md-4">
                     <div class="fw-bold text-warning fs-2" id="lastUpdate">--:--</div>
                     <small class="text-muted">Mise à jour</small>
                 </div>
-                <div class="col-md-3">
-                    <div class="fw-bold text-info fs-2" id="syncStatus">🟢</div>
-                    <small class="text-muted">Statut</small>
+                <div class="col-md-4">
+                    <button class="btn btn-modern" onclick="refreshCatalogue()" id="refreshBtn">
+                        <i class="fas fa-sync-alt me-2"></i>Actualiser
+                    </button>
                 </div>
             </div>
         </div>
 
-        <!-- Section de recherche et filtres -->
         <div class="search-section">
             <div class="row g-3 align-items-center">
                 <div class="col-md-8">
@@ -265,18 +211,9 @@
                     </select>
                 </div>
             </div>
-
-            <!-- Filtres rapides -->
-            <div class="filter-tabs mt-3">
-                <div class="filter-tab active" data-filter="all">Tous</div>
-                <div class="filter-tab" data-filter="new">Nouveautés</div>
-                <div class="filter-tab" data-filter="promo">Promotions</div>
-            </div>
         </div>
 
-        <!-- Grille des produits -->
         <div class="product-grid" id="productsGrid">
-            <!-- Les produits seront chargés ici -->
             <div class="text-center py-5 w-100">
                 <div class="spinner-border text-primary mb-3"></div>
                 <h5>Chargement du catalogue...</h5>
@@ -284,7 +221,6 @@
             </div>
         </div>
 
-        <!-- Panneau de notifications -->
         <div class="notification-panel" id="notificationPanel">
             <div class="d-flex justify-content-between align-items-center mb-3">
                 <h6 class="mb-0"><i class="fas fa-bell me-2"></i>Notifications</h6>
@@ -296,27 +232,17 @@
         </div>
     </div>
 
-    <!-- Indicateur de synchronisation -->
-    <div class="sync-indicator" id="syncIndicator" style="display: none;">
+    <div class="sync-indicator" id="syncIndicator">
         <i class="fas fa-sync-alt fa-spin text-primary"></i>
         <span id="syncText">Synchronisation...</span>
     </div>
 
     <script>
-        // 🎯 Configuration du client
-        const CLIENT_CONFIG = {
-            currentGistId: null,
-            autoRefresh: true,
-            refreshInterval: 2 * 60 * 1000, // 2 minutes
-            lastUpdate: null
-        };
-
         let products = [];
         let filteredProducts = [];
         let categories = new Set();
-        let currentFilter = 'all';
+        let currentGistId = null;
 
-        // 🚀 Initialisation
         document.addEventListener('DOMContentLoaded', function() {
             initializeClient();
         });
@@ -325,7 +251,6 @@
             loadFromURL();
             setupEventListeners();
             startAutoRefresh();
-            updateClientInfo();
         }
 
         function loadFromURL() {
@@ -333,22 +258,23 @@
             const gistId = urlParams.get('gist');
             
             if (gistId) {
-                CLIENT_CONFIG.currentGistId = gistId;
+                currentGistId = gistId;
                 localStorage.setItem('varicom_client_gist_id', gistId);
                 loadCatalogueData(gistId);
             } else {
                 const savedGistId = localStorage.getItem('varicom_client_gist_id');
                 if (savedGistId) {
-                    CLIENT_CONFIG.currentGistId = savedGistId;
+                    currentGistId = savedGistId;
                     loadCatalogueData(savedGistId);
                 } else {
-                    showError('Catalogue non configuré');
+                    showError('Catalogue non configuré. Contactez l\'administrateur.');
                 }
             }
         }
 
         async function loadCatalogueData(gistId, isRetry = false) {
             showSyncIndicator('Chargement...');
+            setRefreshButtonLoading(true);
             
             try {
                 const response = await fetch(`https://api.github.com/gists/${gistId}?_=${Date.now()}`);
@@ -378,22 +304,22 @@
                 if (!isRetry) {
                     setTimeout(() => loadCatalogueData(gistId, true), 3000);
                 } else {
-                    showError('Impossible de charger le catalogue');
+                    showError('Impossible de charger le catalogue: ' + error.message);
                 }
+            } finally {
+                setRefreshButtonLoading(false);
             }
         }
 
         function cleanJson(jsonString) {
-            // Nettoyer le JSON pour éviter les erreurs de parsing
             return jsonString
                 .replace(/[\u0000-\u001F\u007F-\u009F]/g, '')
-                .replace(/\\\"/g, '"')
+                .replace(/[\\"]/g, '')
                 .replace(/\s+/g, ' ')
                 .trim();
         }
 
         function processCatalogueData(data) {
-            // Traiter les produits
             if (data.products && Array.isArray(data.products)) {
                 products = data.products.map(p => ({
                     id: p.id,
@@ -407,14 +333,15 @@
                 }));
             }
 
-            // Mettre à jour les métadonnées
-            CLIENT_CONFIG.lastUpdate = data.metadata?.lastUpdate || new Date().toISOString();
-            
-            // Mettre à jour l'interface
             updateCategories();
-            applyFilter(currentFilter);
+            filteredProducts = [...products];
+            displayProducts(filteredProducts);
             updateStats();
-            updateClientInfo();
+            
+            if (data.metadata?.lastUpdate) {
+                const lastUpdate = new Date(data.metadata.lastUpdate);
+                document.getElementById('lastUpdate').textContent = lastUpdate.toLocaleTimeString('fr-FR');
+            }
             
             showNotification('Catalogue mis à jour', 'success');
         }
@@ -427,58 +354,31 @@
         }
 
         function setupEventListeners() {
-            // Recherche en temps réel
             document.getElementById('searchInput').addEventListener('input', function(e) {
                 filterProducts(e.target.value);
             });
 
-            // Filtre par catégorie
             document.getElementById('categoryFilter').addEventListener('change', function(e) {
                 filterByCategory(e.target.value);
-            });
-
-            // Filtres rapides
-            document.querySelectorAll('.filter-tab').forEach(tab => {
-                tab.addEventListener('click', function() {
-                    document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
-                    this.classList.add('active');
-                    currentFilter = this.getAttribute('data-filter');
-                    applyFilter(currentFilter);
-                });
-            });
-
-            // Rafraîchissement manuel
-            document.addEventListener('keydown', function(e) {
-                if (e.key === 'F5') {
-                    e.preventDefault();
-                    refreshCatalogue();
-                }
             });
         }
 
         function startAutoRefresh() {
             setInterval(() => {
-                if (CLIENT_CONFIG.autoRefresh && CLIENT_CONFIG.currentGistId) {
+                if (currentGistId) {
                     refreshCatalogue();
                 }
-            }, CLIENT_CONFIG.refreshInterval);
+            }, 2 * 60 * 1000); // 2 minutes
         }
 
         function refreshCatalogue() {
-            if (CLIENT_CONFIG.currentGistId) {
-                loadCatalogueData(CLIENT_CONFIG.currentGistId);
+            if (currentGistId) {
+                loadCatalogueData(currentGistId);
             }
         }
 
-        // 🎨 Mise à jour de l'interface
         function updateStats() {
             document.getElementById('totalProducts').textContent = products.length;
-            document.getElementById('newProducts').textContent = products.filter(p => p.isNew).length;
-            
-            if (CLIENT_CONFIG.lastUpdate) {
-                const lastUpdate = new Date(CLIENT_CONFIG.lastUpdate);
-                document.getElementById('lastUpdate').textContent = lastUpdate.toLocaleTimeString('fr-FR');
-            }
         }
 
         function updateCategories() {
@@ -526,7 +426,7 @@
                             </div>
                             ${product.isNew ? '<div class="product-badge">NOUVEAU</div>' : ''}
                         </div>
-                        <div class="product-content">
+                        <div class="p-3">
                             <h6 class="product-title mb-2">${product.name}</h6>
                             <p class="text-muted small mb-2">Ref: ${product.ref}</p>
                             <div class="d-flex justify-content-between align-items-center">
@@ -544,23 +444,6 @@
             });
 
             grid.innerHTML = html;
-        }
-
-        function applyFilter(filterType) {
-            let filtered = [...products];
-            
-            switch(filterType) {
-                case 'new':
-                    filtered = filtered.filter(p => p.isNew);
-                    break;
-                case 'promo':
-                    // Exemple: produits avec prix réduit
-                    filtered = filtered.filter(p => p.price < 1000);
-                    break;
-            }
-            
-            filteredProducts = filtered;
-            displayProducts(filtered);
         }
 
         function filterProducts(searchTerm) {
@@ -591,42 +474,6 @@
             displayProducts(filtered);
         }
 
-        function updateClientInfo() {
-            const clientId = getClientId();
-            // Optionnel: envoyer des statistiques d'usage
-            trackClientActivity(clientId);
-        }
-
-        function getClientId() {
-            let clientId = localStorage.getItem('varicom_client_id');
-            if (!clientId) {
-                clientId = 'client_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-                localStorage.setItem('varicom_client_id', clientId);
-            }
-            return clientId;
-        }
-
-        function trackClientActivity(clientId) {
-            const activity = {
-                clientId: clientId,
-                gistId: CLIENT_CONFIG.currentGistId,
-                lastAccess: new Date().toISOString(),
-                userAgent: navigator.userAgent,
-                productsViewed: products.length
-            };
-            
-            // Stocker localement (dans un cas réel, envoyer au serveur)
-            const activities = JSON.parse(localStorage.getItem('varicom_client_activities') || '[]');
-            activities.push(activity);
-            
-            if (activities.length > 50) {
-                activities.splice(0, activities.length - 50);
-            }
-            
-            localStorage.setItem('varicom_client_activities', JSON.stringify(activities));
-        }
-
-        // 🔔 Système de notifications
         function showNotification(message, type = 'info') {
             const panel = document.getElementById('notificationPanel');
             const list = document.getElementById('notificationsList');
@@ -644,7 +491,6 @@
             list.insertBefore(notification, list.firstChild);
             panel.style.display = 'block';
             
-            // Limiter à 5 notifications
             if (list.children.length > 5) {
                 list.removeChild(list.lastChild);
             }
@@ -687,27 +533,27 @@
             }
         }
 
-        function showError(message) {
-            showNotification(message, 'error');
-            document.getElementById('syncStatus').textContent = '🔴';
+        function setRefreshButtonLoading(loading) {
+            const button = document.getElementById('refreshBtn');
+            const icon = button.querySelector('i');
+            
+            if (loading) {
+                icon.className = 'loading-spinner';
+                button.disabled = true;
+            } else {
+                icon.className = 'fas fa-sync-alt';
+                button.disabled = false;
+            }
         }
 
-        // 🛒 Fonctionnalités client
+        function showError(message) {
+            showNotification(message, 'error');
+        }
+
         function addToCart(productId) {
             const product = products.find(p => p.id === productId);
             if (product) {
                 showNotification(`${product.name} ajouté au panier`, 'success');
-                
-                // Animation d'ajout au panier
-                const button = event.target;
-                const originalText = button.innerHTML;
-                button.innerHTML = '<i class="fas fa-check me-2"></i>Ajouté';
-                button.disabled = true;
-                
-                setTimeout(() => {
-                    button.innerHTML = originalText;
-                    button.disabled = false;
-                }, 2000);
             }
         }
 
@@ -718,12 +564,9 @@
             }).format(price) + ' DA';
         }
 
-        // 🌐 API globales
         window.addToCart = addToCart;
         window.hideNotifications = hideNotifications;
         window.refreshCatalogue = refreshCatalogue;
-
-        console.log('🎯 Client VARICOM initialisé avec succès');
     </script>
 </body>
 </html>
