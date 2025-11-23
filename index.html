@@ -415,10 +415,25 @@
         async function loadData() {
             try {
                 const response = await fetch(`https://api.github.com/gists/${gistId}`);
-                if (!response.ok) throw new Error('Erreur réseau');
+                if (!response.ok) throw new Error(`Erreur réseau: ${response.status}`);
 
                 const data = await response.json();
-                const fileContent = data.files['varicom_data.json'].content;
+
+                if (!data.files || !data.files['varicom_data.json']) {
+                    throw new Error('Format de données invalide (Fichier manquant)');
+                }
+
+                let fileContent = data.files['varicom_data.json'].content;
+
+                // Handle Truncated Data
+                if (data.files['varicom_data.json'].truncated) {
+                    console.log('Data truncated, fetching raw content...');
+                    const rawUrl = data.files['varicom_data.json'].raw_url;
+                    const rawResponse = await fetch(rawUrl);
+                    if (!rawResponse.ok) throw new Error('Erreur téléchargement contenu brut');
+                    fileContent = await rawResponse.text();
+                }
+
                 const parsed = JSON.parse(fileContent);
 
                 updateApp(parsed);
@@ -427,7 +442,7 @@
             } catch (err) {
                 console.error(err);
                 if (allProducts.length === 0) {
-                    showError("Impossible de charger le catalogue. Vérifiez votre connexion.");
+                    showError(`Impossible de charger le catalogue.<br><small class="text-muted">${err.message}</small>`);
                 }
             }
         }
