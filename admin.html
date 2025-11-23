@@ -14,8 +14,6 @@
             --accent-color: #2a9d8f;
             --dark-color: #2c3e50;
             --light-color: #ecf0f1;
-            --security-color: #8B0000;
-            --security-light: #FF6B6B;
         }
         
         body {
@@ -42,15 +40,6 @@
             overflow: hidden;
         }
         
-        .security-header {
-            background: linear-gradient(135deg, var(--security-color), #B22222) !important;
-        }
-        
-        .security-mode-active {
-            border-left: 4px solid var(--security-color) !important;
-            background: linear-gradient(135deg, #fff, #ffe6e6) !important;
-        }
-        
         .upload-section {
             background: linear-gradient(135deg, #28a745, #20c997);
             color: white;
@@ -68,19 +57,11 @@
             cursor: pointer;
             transition: all 0.3s ease;
             background: rgba(255,255,255,0.1);
-            backdrop-filter: blur(10px);
         }
         
         .upload-area:hover {
             background: rgba(255,255,255,0.2);
             border-color: white;
-            transform: translateY(-2px);
-        }
-        
-        .upload-area.dragover {
-            background: rgba(255,255,255,0.3);
-            border-color: white;
-            transform: scale(1.02);
         }
         
         .sync-status {
@@ -93,7 +74,7 @@
             display: none;
             box-shadow: 0 5px 20px rgba(0,0,0,0.15);
             animation: slideInRight 0.5s ease;
-            backdrop-filter: blur(10px);
+            color: white;
         }
         
         @keyframes slideInRight {
@@ -101,168 +82,37 @@
             to { transform: translateX(0); opacity: 1; }
         }
         
-        .sync-success { 
-            background: linear-gradient(135deg, #28a745, #20c997); 
-            color: white;
-            border-left: 4px solid #1e7e34;
-        }
-        .sync-warning { 
-            background: linear-gradient(135deg, #ffc107, #fd7e14); 
-            color: black;
-            border-left: 4px solid #e0a800;
-        }
-        .sync-error { 
-            background: linear-gradient(135deg, #dc3545, #c82333); 
-            color: white;
-            border-left: 4px solid #bd2130;
+        .sync-success { background: #28a745; border-left: 5px solid #1e7e34; }
+        .sync-warning { background: #ffc107; color: #000; border-left: 5px solid #e0a800; }
+        .sync-error { background: #dc3545; border-left: 5px solid #bd2130; }
+        
+        .stats-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            transition: transform 0.3s;
         }
         
-        .security-alert {
-            background: linear-gradient(135deg, var(--security-color), #B22222) !important;
-            border-left: 4px solid #8B0000 !important;
-        }
+        .stats-card:hover { transform: translateY(-5px); }
         
-        .security-badge {
-            background: var(--security-color) !important;
+        .feature-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .btn-pulse {
             animation: pulse 2s infinite;
         }
         
         @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
-        }
-        
-        .notification-management, .new-products-management {
-            background: white;
-            border-radius: 15px;
-            padding: 25px;
-            margin: 20px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
-            border-left: 4px solid var(--primary-color);
-            transition: all 0.3s ease;
-        }
-        
-        .notification-management:hover, .new-products-management:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.12);
-        }
-        
-        .link-history-item {
-            border-left: 3px solid var(--primary-color);
-            padding: 10px;
-            margin: 5px 0;
-            background: #f8f9fa;
-            border-radius: 5px;
-            transition: all 0.3s ease;
-        }
-        
-        .link-history-item.active {
-            border-left-color: var(--security-color);
-            background: #fff0f0;
-        }
-        
-        .security-stats {
-            background: linear-gradient(135deg, var(--security-color), #B22222);
-            color: white;
-            border-radius: 10px;
-            padding: 20px;
-            text-align: center;
-            margin: 10px;
-        }
-        
-        .feature-card {
-            border: none;
-            border-radius: 15px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
-            transition: all 0.3s ease;
-            margin-bottom: 25px;
-            overflow: hidden;
-        }
-        
-        .feature-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
-        }
-        
-        .stats-card {
-            background: linear-gradient(135deg, var(--primary-color), #2a4d7a);
-            color: white;
-            border-radius: 15px;
-            padding: 25px;
-            text-align: center;
-            margin: 10px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .quick-actions {
-            background: linear-gradient(135deg, var(--primary-color), #2a4d7a);
-            color: white;
-            border-radius: 15px;
-            padding: 25px;
-            margin: 20px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .btn-advanced {
-            background: linear-gradient(135deg, var(--accent-color), #229f8f);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-        }
-        
-        .btn-advanced:hover {
-            background: linear-gradient(135deg, #229f8f, var(--accent-color));
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-        }
-        
-        .notification-preview {
-            border-left: 4px solid;
-            padding: 20px;
-            margin: 15px 0;
-            background: #f8f9fa;
-            border-radius: 10px;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .notification-info { border-left-color: #17a2b8; background: linear-gradient(135deg, #e3f2fd, #bbdefb); }
-        .notification-success { border-left-color: #28a745; background: linear-gradient(135deg, #e8f5e8, #c8e6c9); }
-        .notification-warning { border-left-color: #ffc107; background: linear-gradient(135deg, #fff8e1, #ffecb3); }
-        .notification-error { border-left-color: #dc3545; background: linear-gradient(135deg, #ffebee, #ffcdd2); }
-        
-        .new-product-card {
-            border: none;
-            border-radius: 12px;
-            padding: 20px;
-            margin: 15px 0;
-            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .new-product-image {
-            width: 80px;
-            height: 80px;
-            object-fit: cover;
-            border-radius: 10px;
-            margin-right: 20px;
-            box-shadow: 0 3px 10px rgba(0,0,0,0.1);
-            transition: all 0.3s ease;
-        }
-        
-        .progress-bar {
-            transition: width 0.5s ease;
-            border-radius: 10px;
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.7); }
+            70% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(40, 167, 69, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(40, 167, 69, 0); }
         }
     </style>
 </head>
@@ -270,301 +120,169 @@
     <div id="syncStatus" class="sync-status"></div>
 
     <div class="admin-container">
-        <div class="admin-header text-center" id="mainHeader">
-            <h1><i class="fas fa-user-shield me-3"></i>PANEL ADMINISTRATEUR VARICOM PRO</h1>
+        <div class="admin-header text-center">
+            <h1><i class="fas fa-user-shield me-3"></i>PANEL ADMINISTRATEUR VARICOM</h1>
             <p class="lead mb-0">Solution Professionnelle - Synchronisation Temps Réel</p>
         </div>
 
-        <!-- قسم وضع الأمان المتقدم -->
-        <div class="notification-management security-mode-active">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <div>
-                    <h4 class="mb-1"><i class="fas fa-shield-alt me-2"></i>🌙 وضع الأمان المتقدم</h4>
-                    <p class="text-muted mb-0">تحكم في أمان الروابط وتمديد الزبائن</p>
-                </div>
-                <div class="form-check form-switch">
-                    <input class="form-check-input" type="checkbox" id="securityModeToggle" style="transform: scale(1.5);">
-                    <label class="form-check-label fw-bold" for="securityModeToggle" id="securityModeLabel">وضع الأمان</label>
-                </div>
-            </div>
-            
-            <div class="row">
-                <div class="col-md-4">
-                    <div class="security-stats">
-                        <i class="fas fa-users fa-2x mb-2"></i>
-                        <h3 id="activeClientsCount">0</h3>
-                        <p>زبائن نشطين</p>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="security-stats">
-                        <i class="fas fa-link fa-2x mb-2"></i>
-                        <h3 id="securityLinksCount">0</h3>
-                        <p>روابط نشطة</p>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="security-stats">
-                        <i class="fas fa-history fa-2x mb-2"></i>
-                        <h3 id="securityUpdatesCount">0</h3>
-                        <p>تحديثات أمنية</p>
-                    </div>
-                </div>
-            </div>
-
-            <div class="row mt-4">
+        <!-- Quick Actions -->
+        <div class="p-4 bg-light border-bottom">
+            <div class="row align-items-center">
                 <div class="col-md-6">
-                    <div class="card feature-card h-100">
-                        <div class="card-header bg-dark text-white">
-                            <h5 class="mb-0"><i class="fas fa-key me-2"></i>إعدادات الأمان</h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="mb-3">
-                                <label class="form-label">معرف Gist الحالي:</label>
-                                <div class="input-group">
-                                    <input type="text" class="form-control" id="currentGistId" readonly>
-                                    <button class="btn btn-outline-secondary" type="button" onclick="copyGistId()">
-                                        <i class="fas fa-copy"></i>
-                                    </button>
-                                </div>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label class="form-label">حالة الرابط:</label>
-                                <div class="alert" id="linkStatusAlert">
-                                    <i class="fas fa-info-circle me-2"></i>
-                                    <span id="linkStatusText">غير نشط</span>
-                                </div>
-                            </div>
-                            
-                            <div class="alert alert-warning">
-                                <h6><i class="fas fa-info-circle me-2"></i>معلومات الوضع:</h6>
-                                <small>
-                                    <span id="securityModeInfo">عند التفعيل: كل تغيير في التوكن ينشئ رابط جديد</span>
-                                </small>
-                            </div>
-                        </div>
-                    </div>
+                    <h4 class="mb-0 text-primary"><i class="fas fa-bolt me-2"></i>Tableau de Bord</h4>
                 </div>
-                
-                <div class="col-md-6">
-                    <div class="card feature-card h-100">
-                        <div class="card-header bg-danger text-white">
-                            <h5 class="mb-0"><i class="fas fa-history me-2"></i>سجل الروابط</h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-center mb-3">
-                                <span class="badge bg-primary" id="historyCount">0 روابط</span>
-                                <div>
-                                    <button class="btn btn-outline-success btn-sm me-2" onclick="generateNewLink()" id="newLinkBtn">
-                                        <i class="fas fa-plus me-1"></i>رابط جديد
-                                    </button>
-                                    <button class="btn btn-outline-danger btn-sm" onclick="clearLinkHistory()">
-                                        <i class="fas fa-trash me-1"></i>مسح السجل
-                                    </button>
-                                </div>
-                            </div>
-                            
-                            <div id="linkHistory" style="max-height: 200px; overflow-y: auto;">
-                                <p class="text-muted text-center py-3">لا يوجد سجل للروابط</p>
-                            </div>
-                        </div>
-                    </div>
+                <div class="col-md-6 text-end">
+                    <button class="btn btn-success btn-lg me-2" onclick="uploadToGitHubGist()" id="publishBtn">
+                        <i class="fab fa-github me-2"></i>Publier / Synchroniser
+                    </button>
+                    <button class="btn btn-primary btn-lg" onclick="generateClientLink()">
+                        <i class="fas fa-link me-2"></i>Lien Client
+                    </button>
                 </div>
             </div>
         </div>
 
-        <div class="quick-actions">
-            <div class="row align-items-center">
-                <div class="col-md-8">
-                    <h4><i class="fas fa-bolt me-2"></i>Actions Rapides</h4>
-                    <p class="mb-0">Gérez votre catalogue en temps réel avec synchronisation instantanée</p>
+        <!-- Stats -->
+        <div class="row m-4">
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <i class="fas fa-box fa-2x text-primary mb-2"></i>
+                    <h3 id="statsProducts">0</h3>
+                    <p class="text-muted mb-0">Produits Totaux</p>
                 </div>
-                <div class="col-md-4 text-end">
-                    <button class="btn btn-success btn-lg me-2 pulse-animation" onclick="uploadToGitHubGist()" id="publishBtn">
-                        <i class="fab fa-github me-2"></i>Publier
-                    </button>
-                    <button class="btn btn-warning btn-lg" onclick="actualiserCatalogue()" id="actualiserBtn">
-                        <i class="fas fa-sync-alt me-2"></i>Actualiser
-                    </button>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <i class="fas fa-star fa-2x text-warning mb-2"></i>
+                    <h3 id="statsNewProducts">0</h3>
+                    <p class="text-muted mb-0">Nouveautés</p>
                 </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <i class="fas fa-bell fa-2x text-info mb-2"></i>
+                    <h3 id="statsNotifications">0</h3>
+                    <p class="text-muted mb-0">Notifications</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <i class="fas fa-sync fa-2x text-success mb-2"></i>
+                    <h3 id="statsStatus">Inactif</h3>
+                    <p class="text-muted mb-0">Statut Sync</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Excel Upload -->
+        <div class="upload-section">
+            <h4><i class="fas fa-file-excel me-2"></i>Importation Produits Excel</h4>
+            <div class="upload-area" id="excelUploadArea" onclick="document.getElementById('excelFile').click()">
+                <i class="fas fa-cloud-upload-alt fa-3x mb-3"></i>
+                <h5>Cliquez ou glissez votre fichier Excel ici</h5>
+                <p class="small opacity-75">Supporte .xlsx, .xls, .csv</p>
+                <input type="file" id="excelFile" accept=".xlsx, .xls, .csv" style="display: none;" onchange="handleExcelUpload(this.files[0])">
+            </div>
+            <div class="mt-3 text-center">
+                <button class="btn btn-outline-light btn-sm" onclick="downloadTemplate()">
+                    <i class="fas fa-download me-1"></i>Télécharger Modèle
+                </button>
             </div>
         </div>
 
         <div class="row m-4">
-            <div class="col-md-3">
-                <div class="stats-card">
-                    <i class="fas fa-box fa-2x mb-2"></i>
-                    <h3 id="statsProducts">0</h3>
-                    <p>Produits Totaux</p>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="stats-card">
-                    <i class="fas fa-star fa-2x mb-2"></i>
-                    <h3 id="statsNewProducts">0</h3>
-                    <p>Nouveautés</p>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="stats-card">
-                    <i class="fas fa-bell fa-2x mb-2"></i>
-                    <h3 id="statsNotifications">0</h3>
-                    <p>Notifications</p>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="stats-card">
-                    <i class="fas fa-sync-alt fa-2x mb-2"></i>
-                    <h3 id="statsSync">0</h3>
-                    <p>Jours Actif</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- قسم رفع ملف Excel -->
-        <div class="upload-section">
-            <h4><i class="fas fa-file-excel me-2"></i>Importation Produits Excel</h4>
-            
-            <div class="upload-area" id="excelUploadArea">
-                <i class="fas fa-file-excel" style="font-size: 64px; margin-bottom: 20px;"></i>
-                <h4>Glissez votre fichier Excel ici</h4>
-                <p class="mb-3">Formats supportés: .xlsx, .xls, .csv</p>
-                <button class="btn btn-light btn-lg" onclick="document.getElementById('excelFile').click()">
-                    <i class="fas fa-upload me-2"></i>Choisir un Fichier
-                </button>
-                <input type="file" id="excelFile" accept=".xlsx, .xls, .csv" style="display: none;" 
-                       onchange="handleExcelUpload(this.files[0])">
-            </div>
-
-            <div class="mt-4" id="progressContainer" style="display: none;">
-                <div class="progress" style="height: 20px; border-radius: 10px;">
-                    <div id="uploadProgress" class="progress-bar progress-bar-striped progress-bar-animated" 
-                         role="progressbar" style="width: 0%; border-radius: 10px;">0%</div>
-                </div>
-                <div class="text-center mt-2">
-                    <small id="progressText" class="text-white">Traitement en cours...</small>
-                </div>
-            </div>
-
-            <div class="row mt-4">
-                <div class="col-md-8">
-                    <h6><i class="fas fa-info-circle me-2"></i>Format Requis:</h6>
-                    <div class="bg-light rounded p-3 text-dark small">
-                        <strong>Colonnes (dans n'importe quel ordre):</strong><br>
-                        • <strong>Référence</strong>: Réf. Art / Ref / Référence / Code / SKU<br>
-                        • <strong>Désignation</strong>: Designation / Désignation / Produit / Article / Nom / Description<br>
-                        • <strong>Famille</strong>: Famille / Catégorie / Category / Type / Family<br>
-                        • <strong>Prix</strong>: Prix / Price / PU / Prix Unitaire / Cost<br>
-                        • <strong>Image</strong>: Image / Photo / URL / Lien (optionnel)<br>
-                        <strong>Important:</strong> La première ligne doit contenir les en-têtes. Les noms de colonnes ne sont pas sensibles à la casse.
+            <!-- New Products -->
+            <div class="col-md-6">
+                <div class="feature-card h-100">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0"><i class="fas fa-plus-circle me-2"></i>Ajouter Produit / Nouveauté</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <input type="text" class="form-control mb-2" id="newProductName" placeholder="Nom du produit">
+                            <div class="row g-2">
+                                <div class="col-6">
+                                    <input type="number" class="form-control" id="newProductPrice" placeholder="Prix (DA)">
+                                </div>
+                                <div class="col-6">
+                                    <select class="form-select" id="newProductCategory">
+                                        <option value="Général">Catégorie...</option>
+                                        <option value="Ordinateurs">Ordinateurs</option>
+                                        <option value="Téléphones">Téléphones</option>
+                                        <option value="Accessoires">Accessoires</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <input type="text" class="form-control mt-2" id="newProductImage" placeholder="URL de l'image (https://...)">
+                        </div>
+                        <button class="btn btn-primary w-100" onclick="addNewProduct()">
+                            <i class="fas fa-plus me-2"></i>Ajouter à la liste
+                        </button>
+                        
+                        <hr>
+                        <h6 class="text-muted">Produits Nouveaux Actifs:</h6>
+                        <ul id="activeNewProducts" class="list-group list-group-flush small" style="max-height: 200px; overflow-y: auto;">
+                            <!-- List items -->
+                        </ul>
                     </div>
                 </div>
-                <div class="col-md-4">
-                    <h6><i class="fas fa-download me-2"></i>Template & Aide</h6>
-                    <button class="btn btn-outline-light w-100 mb-2" onclick="downloadTemplate()">
-                        <i class="fas fa-file-download me-2"></i>Télécharger Template
-                    </button>
-                    <button class="btn btn-outline-light w-100 mb-2" onclick="showFormatHelp()">
-                        <i class="fas fa-question-circle me-2"></i>Aide Format
-                    </button>
-                    <button class="btn btn-outline-light w-100" onclick="testDataValidation()">
-                        <i class="fas fa-check-circle me-2"></i>Tester Données
-                    </button>
+            </div>
+
+            <!-- Notifications -->
+            <div class="col-md-6">
+                <div class="feature-card h-100">
+                    <div class="card-header bg-warning text-dark">
+                        <h5 class="mb-0"><i class="fas fa-bullhorn me-2"></i>Gérer Notifications</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <input type="text" class="form-control mb-2" id="notifTitle" placeholder="Titre (ex: Promo)">
+                            <textarea class="form-control mb-2" id="notifMessage" rows="2" placeholder="Message..."></textarea>
+                            <select class="form-select" id="notifType">
+                                <option value="info">Information ℹ️</option>
+                                <option value="success">Succès ✅</option>
+                                <option value="warning">Attention ⚠️</option>
+                                <option value="error">Urgent ❌</option>
+                            </select>
+                        </div>
+                        <button class="btn btn-warning w-100" onclick="createNotification()">
+                            <i class="fas fa-paper-plane me-2"></i>Publier Notification
+                        </button>
+
+                        <hr>
+                        <h6 class="text-muted">Notifications Actives:</h6>
+                        <ul id="activeNotifications" class="list-group list-group-flush small" style="max-height: 200px; overflow-y: auto;">
+                            <!-- List items -->
+                        </ul>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- باقي الأقسام -->
-        <div class="new-products-management">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <div>
-                    <h4 class="mb-1"><i class="fas fa-plus-circle me-2"></i>Gestion des Nouveaux Produits</h4>
-                    <p class="text-muted mb-0">Les nouveaux produits apparaîtront en évidence dans le catalogue client</p>
-                </div>
-                <button class="btn btn-success" onclick="actualiserCatalogue()">
-                    <i class="fas fa-sync-alt me-1"></i>Actualiser
-                </button>
-            </div>
-            
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="card feature-card h-100">
-                        <div class="card-header bg-success text-white">
-                            <h5 class="mb-0"><i class="fas fa-plus me-2"></i>Ajouter un Nouveau Produit</h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="mb-3">
-                                <label class="form-label">Nom du produit:</label>
-                                <input type="text" class="form-control" id="newProductName" placeholder="Ex: Laptop Gaming ASUS ROG Strix">
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label class="form-label">Prix (DA):</label>
-                                <input type="number" class="form-control" id="newProductPrice" placeholder="Ex: 185000" min="0" step="0.01">
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label class="form-label">URL de l'image:</label>
+        <!-- Settings -->
+        <div class="row m-4">
+            <div class="col-12">
+                <div class="feature-card">
+                    <div class="card-header bg-dark text-white">
+                        <h5 class="mb-0"><i class="fas fa-cogs me-2"></i>Configuration</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row align-items-end">
+                            <div class="col-md-8">
+                                <label class="form-label">Token GitHub (Personnel Access Token)</label>
                                 <div class="input-group">
-                                    <input type="text" class="form-control" id="newProductImage" placeholder="https://example.com/image.jpg">
-                                    <button class="btn btn-outline-secondary" type="button" onclick="testImage()" title="Tester l'image">
+                                    <span class="input-group-text"><i class="fab fa-github"></i></span>
+                                    <input type="password" class="form-control" id="githubToken" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx">
+                                    <button class="btn btn-outline-secondary" type="button" onclick="toggleToken()">
                                         <i class="fas fa-eye"></i>
                                     </button>
                                 </div>
-                                <small class="form-text text-muted">Supporte JPG, PNG, WebP. URL complète requise.</small>
+                                <small class="text-muted">Nécessaire pour la synchronisation. Stocké localement.</small>
                             </div>
-                            
-                            <div class="mb-3">
-                                <label class="form-label">Catégorie:</label>
-                                <select class="form-select" id="newProductCategory">
-                                    <option value="Ordinateurs Portables">💻 Ordinateurs Portables</option>
-                                    <option value="Ordinateurs Bureau">🖥️ Ordinateurs Bureau</option>
-                                    <option value="Écrans">📺 Écrans</option>
-                                    <option value="Téléphones">📱 Téléphones</option>
-                                    <option value="Périphériques">⌨️ Périphériques</option>
-                                    <option value="Accessoires">🎧 Accessoires</option>
-                                    <option value="Composants">🔧 Composants</option>
-                                    <option value="Réseau">🌐 Réseau</option>
-                                    <option value="Logiciels">💾 Logiciels</option>
-                                    <option value="Général">📦 Général</option>
-                                </select>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label class="form-label">Aperçu instantané:</label>
-                                <div class="new-product-card d-flex align-items-center">
-                                    <img id="imagePreview" src="https://via.placeholder.com/80x80/6c757d/ffffff?text=Image" 
-                                         class="new-product-image" alt="Aperçu">
-                                    <div class="flex-grow-1">
-                                        <strong id="namePreview">Nom du produit</strong>
-                                        <div id="pricePreview" class="text-success fw-bold">0 DA</div>
-                                        <small id="categoryPreview" class="text-muted">Catégorie</small>
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <button class="btn btn-success w-100 py-2" onclick="addNewProduct()">
-                                <i class="fas fa-plus-circle me-2"></i>Ajouter le Produit
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="col-md-6">
-                    <div class="card feature-card h-100">
-                        <div class="card-header bg-info text-white">
-                            <h5 class="mb-0"><i class="fas fa-list me-2"></i>Produits Nouveaux Actifs</h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-center mb-3">
-                                <span class="badge bg-primary" id="newProductsCount">0 produits</span>
-                                <button class="btn btn-outline-danger btn-sm" onclick="clearAllNewProducts()">
-                                    <i class="fas fa-trash me-1"></i>Tout Supprimer
+                            <div class="col-md-4">
+                                <button class="btn btn-danger w-100" onclick="resetSync()">
+                                    <i class="fas fa-trash-alt me-2"></i>Réinitialiser Sync
                                 </button>
-                            </div>
-                            <div id="activeNewProducts" style="max-height: 400px; overflow-y: auto;">
-                                <p class="text-muted text-center py-4">Aucun produit nouveau actif</p>
                             </div>
                         </div>
                     </div>
@@ -572,1533 +290,286 @@
             </div>
         </div>
 
-        <div class="notification-management">
-            <div class="d-flex justify-content-between align-items-center mb-4">
-                <div>
-                    <h4 class="mb-1"><i class="fas fa-bell me-2"></i>Gestion des Notifications</h4>
-                    <p class="text-muted mb-0">Les notifications s'afficheront automatiquement chez tous les clients</p>
-                </div>
-                <button class="btn btn-warning" onclick="actualiserCatalogue()">
-                    <i class="fas fa-sync-alt me-1"></i>Actualiser
-                </button>
-            </div>
-            
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="card feature-card h-100">
-                        <div class="card-header bg-primary text-white">
-                            <h5 class="mb-0"><i class="fas fa-plus me-2"></i>Créer une Notification</h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="mb-3">
-                                <label class="form-label">Titre de la notification:</label>
-                                <input type="text" class="form-control" id="notificationTitle" placeholder="Ex: Promotion Spéciale Été 2024">
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label class="form-label">Message détaillé:</label>
-                                <textarea class="form-control" id="notificationMessage" rows="3" 
-                                          placeholder="Décrivez votre annonce en détail..."></textarea>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label class="form-label">Type de notification:</label>
-                                <select class="form-select" id="notificationType">
-                                    <option value="info">ℹ️ Information</option>
-                                    <option value="success">✅ Succès & Promotion</option>
-                                    <option value="warning">⚠️ Avertissement Important</option>
-                                    <option value="error">❌ Urgent & Maintenance</option>
-                                </select>
-                            </div>
-                            
-                            <div class="mb-3">
-                                <label class="form-label">Aperçu en temps réel:</label>
-                                <div id="notificationPreview" class="notification-preview notification-info">
-                                    <strong id="previewTitle">Titre de la notification</strong>
-                                    <p id="previewMessage" class="mb-1 mt-2">Message de la notification...</p>
-                                    <small class="text-muted" id="previewType">Type: Information</small>
-                                </div>
-                            </div>
-                            
-                            <button class="btn btn-primary w-100 py-2" onclick="createNotification()">
-                                <i class="fas fa-paper-plane me-2"></i>Publier la Notification
-                            </button>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="col-md-6">
-                    <div class="card feature-card h-100">
-                        <div class="card-header bg-warning text-white">
-                            <h5 class="mb-0"><i class="fas fa-list me-2"></i>Notifications Actives</h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="d-flex justify-content-between align-items-center mb-3">
-                                <span class="badge bg-primary" id="notificationsCount">0 notifications</span>
-                                <button class="btn btn-outline-danger btn-sm" onclick="clearAllNotifications()">
-                                    <i class="fas fa-trash me-1"></i>Tout Supprimer
-                                </button>
-                            </div>
-                            <div id="activeNotifications" style="max-height: 400px; overflow-y: auto;">
-                                <p class="text-muted text-center py-4">Aucune notification active</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="row m-4">
-            <div class="col-12">
-                <div class="card feature-card">
-                    <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0">
-                            <i class="fas fa-chart-bar me-2"></i>Aperçu du Catalogue
-                            <span class="badge bg-light text-dark ms-2" id="previewCount">0</span>
-                        </h5>
-                        <div>
-                            <button class="btn btn-success btn-sm me-2" onclick="actualiserCatalogue()">
-                                <i class="fas fa-sync-alt me-1"></i>Actualiser Maintenant
-                            </button>
-                            <button class="btn btn-primary btn-sm me-2" onclick="generateClientLink()">
-                                <i class="fas fa-link me-1"></i>Lien Client
-                            </button>
-                            <button class="btn btn-info btn-sm" onclick="showSystemStats()">
-                                <i class="fas fa-chart-pie me-1"></i>Statistiques
-                            </button>
-                        </div>
-                    </div>
-                    <div class="card-body">
-                        <div id="previewContent" class="text-center text-muted py-5">
-                            <i class="fas fa-table fa-3x mb-3 opacity-50"></i>
-                            <p>Aucune donnée importée</p>
-                            <small class="text-muted">Importez un fichier Excel pour commencer</small>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <div class="row m-4">
-            <div class="col-md-6">
-                <div class="card feature-card h-100">
-                    <div class="card-header bg-info text-white">
-                        <h5 class="mb-0"><i class="fas fa-cog me-2"></i>Configuration</h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="mb-3">
-                            <label class="form-label">Token GitHub:</label>
-                            <div class="input-group">
-                                <input type="password" class="form-control" id="githubToken" 
-                                       placeholder="ghp_xxxxxxxxxxxxxxxxxxxx">
-                                <button class="btn btn-outline-secondary" type="button" onclick="toggleTokenVisibility()">
-                                    <i class="fas fa-eye"></i>
-                                </button>
-                            </div>
-                            <small class="form-text text-muted">
-                                🔒 Stocké localement - Sécurisé à 100%
-                            </small>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Intervalle de synchronisation:</label>
-                            <select class="form-select" id="syncInterval">
-                                <option value="1">1 minute</option>
-                                <option value="2" selected>2 minutes</option>
-                                <option value="5">5 minutes</option>
-                                <option value="10">10 minutes</option>
-                                <option value="30">30 minutes</option>
-                            </select>
-                        </div>
-                        <button class="btn btn-outline-primary w-100" onclick="testGitHubConnection()">
-                            <i class="fas fa-plug me-2"></i>Tester la Connexion
-                        </button>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <div class="card feature-card h-100">
-                    <div class="card-header bg-success text-white">
-                        <h5 class="mb-0"><i class="fas fa-rocket me-2"></i>Instructions Rapides</h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="alert alert-info">
-                            <h6>🚀 Démarrage Rapide:</h6>
-                            <ol class="small mb-0">
-                                <li>Importez votre Excel</li>
-                                <li>Ajoutez produits/nouveautés</li>
-                                <li>Créez des notifications</li>
-                                <li>Cliquez sur "Actualiser"</li>
-                                <li>Partagez le lien client!</li>
-                            </ol>
-                        </div>
-                        <div class="alert alert-warning">
-                            <h6>📊 Statistiques en Temps Réel:</h6>
-                            <div class="row text-center small">
-                                <div class="col-4">
-                                    <div class="fw-bold" id="quickStatsProducts">0</div>
-                                    <small>Produits</small>
-                                </div>
-                                <div class="col-4">
-                                    <div class="fw-bold" id="quickStatsNew">0</div>
-                                    <small>Nouveaux</small>
-                                </div>
-                                <div class="col-4">
-                                    <div class="fw-bold" id="quickStatsNotif">0</div>
-                                    <small>Notifications</small>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
     </div>
 
     <script>
-        // 🔒 المتغيرات الأساسية
-        let currentProducts = [];
-        let currentNotifications = [];
-        let currentNewProducts = [];
-        let gistUrl = '';
-        let hasUnsavedChanges = false;
-        let autoSyncInterval = null;
-        let currentGistId = null;
+        // State
+        let state = {
+            products: [],
+            newProducts: [],
+            notifications: [],
+            gistId: localStorage.getItem('varicom_gist_id') || null,
+            lastSync: localStorage.getItem('varicom_last_sync') || null
+        };
 
-        // 🔒 متغيرات نظام الأمان
-        let securityMode = false;
-        let linkHistory = [];
-        let activeClients = [];
-        let securityUpdates = 0;
-
-        // التهيئة عند تحميل الصفحة
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('🚀 Initialisation du Panel Administrateur VARICOM PRO');
-            initializeApplication();
-        });
-
-        function initializeApplication() {
-            loadAllData();
-            setupEventListeners();
-            setupAutoSave();
-            startAutoSync();
-            initializeSecurityMode();
+        // Initialization
+        document.addEventListener('DOMContentLoaded', () => {
+            loadLocalData();
             updateUI();
             
-            console.log('✅ Application initialisée avec succès');
-            showSyncStatus('Système VARICOM PRO prêt - Sécurité Active', 'success');
-        }
+            // Token listener
+            const tokenInput = document.getElementById('githubToken');
+            tokenInput.value = localStorage.getItem('varicom_github_token') || '';
+            tokenInput.addEventListener('input', (e) => localStorage.setItem('varicom_github_token', e.target.value));
+        });
 
-        function loadAllData() {
-            loadToken();
-            loadProducts();
-            loadNotifications();
-            loadNewProducts();
-            loadGistId();
-        }
-
-        function setupEventListeners() {
-            setupFileUpload();
-            
-            document.getElementById('githubToken').addEventListener('input', function() {
-                localStorage.setItem('varicom_github_token', this.value);
-            });
-
-            setupRealTimePreviews();
-            setupChangeDetection();
-        }
-
-        function setupFileUpload() {
-            const uploadArea = document.getElementById('excelUploadArea');
-            
-            uploadArea.addEventListener('dragover', (e) => {
-                e.preventDefault();
-                uploadArea.classList.add('dragover');
-            });
-
-            uploadArea.addEventListener('dragleave', () => {
-                uploadArea.classList.remove('dragover');
-            });
-
-            uploadArea.addEventListener('drop', (e) => {
-                e.preventDefault();
-                uploadArea.classList.remove('dragover');
-                const files = e.dataTransfer.files;
-                if (files.length > 0) {
-                    handleExcelUpload(files[0]);
-                }
-            });
-        }
-
-        function setupRealTimePreviews() {
-            // تحديث معاينة الإشعارات
-            document.getElementById('notificationTitle').addEventListener('input', updateNotificationPreview);
-            document.getElementById('notificationMessage').addEventListener('input', updateNotificationPreview);
-            document.getElementById('notificationType').addEventListener('change', updateNotificationPreview);
-
-            // تحديث معاينة المنتجات الجديدة
-            document.getElementById('newProductName').addEventListener('input', updateProductPreview);
-            document.getElementById('newProductPrice').addEventListener('input', updateProductPreview);
-            document.getElementById('newProductImage').addEventListener('input', updateProductPreview);
-            document.getElementById('newProductCategory').addEventListener('change', updateProductPreview);
-        }
-
-        function setupChangeDetection() {
-            const inputs = [
-                'newProductName', 'newProductPrice', 'newProductImage',
-                'notificationTitle', 'notificationMessage'
-            ];
-            
-            inputs.forEach(id => {
-                document.getElementById(id).addEventListener('input', markUnsavedChanges);
-            });
-        }
-
-        function setupAutoSave() {
-            setInterval(() => {
-                if (hasUnsavedChanges) {
-                    saveAllData();
-                }
-            }, 30000);
-        }
-
-        function startAutoSync() {
-            const interval = parseInt(document.getElementById('syncInterval').value) * 60000;
-            if (autoSyncInterval) clearInterval(autoSyncInterval);
-            
-            autoSyncInterval = setInterval(() => {
-                if (hasUnsavedChanges && currentGistId) {
-                    console.log('🔄 Synchronisation automatique...');
-                    uploadToGitHubGist();
-                }
-            }, interval);
-        }
-
-        // 🔒 نظام الأمان المتقدم
-        function initializeSecurityMode() {
-            loadSecuritySettings();
-            setupSecurityEventListeners();
-            updateSecurityUI();
-        }
-
-        function loadSecuritySettings() {
-            securityMode = localStorage.getItem('varicom_security_mode') === 'true';
-            document.getElementById('securityModeToggle').checked = securityMode;
-            
-            const savedHistory = localStorage.getItem('varicom_link_history');
-            if (savedHistory) {
-                linkHistory = JSON.parse(savedHistory);
-            }
-            
-            const savedClients = localStorage.getItem('varicom_active_clients');
-            if (savedClients) {
-                activeClients = JSON.parse(savedClients);
-            }
-            
-            securityUpdates = parseInt(localStorage.getItem('varicom_security_updates')) || 0;
-            
-            updateSecurityUI();
-        }
-
-        function setupSecurityEventListeners() {
-            document.getElementById('securityModeToggle').addEventListener('change', function() {
-                securityMode = this.checked;
-                localStorage.setItem('varicom_security_mode', securityMode);
-                updateSecurityUI();
-                
-                if (securityMode) {
-                    showSyncStatus('🔒 وضع الأمان المتقدم مفعل - الروابط الجديدة ستكون آمنة', 'success');
-                    securityUpdates++;
-                    localStorage.setItem('varicom_security_updates', securityUpdates);
-                } else {
-                    showSyncStatus('🔓 وضع الأمان المتقدم معطل - نفس الرابط للجميع', 'warning');
-                }
-            });
-            
-            document.getElementById('githubToken').addEventListener('input', function() {
-                if (securityMode) {
-                    showSyncStatus('⚠️ تغيير التوكن مع تفعيل الأمان سينشئ رابط جديد', 'warning');
-                }
-            });
-        }
-
-        function updateSecurityUI() {
-            const toggle = document.getElementById('securityModeToggle');
-            const label = document.getElementById('securityModeLabel');
-            const info = document.getElementById('securityModeInfo');
-            const currentGistInput = document.getElementById('currentGistId');
-            const mainHeader = document.getElementById('mainHeader');
-            
-            if (securityMode) {
-                label.innerHTML = '<i class="fas fa-shield-alt me-1"></i>مفعل';
-                label.className = 'form-check-label fw-bold text-success';
-                info.innerHTML = '🌙 <strong>وضع الأمان مفعل</strong> - كل تغيير في التوكن ينشئ رابط جديد للزبائن';
-                mainHeader.classList.add('security-header');
-            } else {
-                label.innerHTML = '<i class="fas fa-shield-alt me-1"></i>معطل';
-                label.className = 'form-check-label fw-bold text-secondary';
-                info.innerHTML = '🔓 <strong>وضع الأمان معطل</strong> - نفس الرابط يبقى ثابت للجميع';
-                mainHeader.classList.remove('security-header');
-            }
-            
-            if (currentGistId) {
-                currentGistInput.value = currentGistId;
-                document.getElementById('linkStatusText').textContent = 'نشط - ' + currentGistId;
-                document.getElementById('linkStatusAlert').className = 'alert alert-success';
-            }
-            
-            document.getElementById('activeClientsCount').textContent = activeClients.length;
-            document.getElementById('securityLinksCount').textContent = linkHistory.length;
-            document.getElementById('securityUpdatesCount').textContent = securityUpdates;
-            
-            displayLinkHistory();
-        }
-
-        // 🔒 دوال الأمان
-        async function uploadToGitHubGist() {
-            const token = document.getElementById('githubToken').value.trim();
-            if (!token) {
-                showSyncStatus('❌ Token GitHub requis', 'error');
-                return;
-            }
-
-            if (currentProducts.length === 0) {
-                showSyncStatus('❌ Aucun produit à synchroniser', 'error');
-                return;
-            }
-
-            showSyncStatus('🔄 Synchronisation avec GitHub...', 'warning');
-            toggleButtonsLoading(true);
-
+        function loadLocalData() {
             try {
-                const completeData = prepareSyncData();
-                let shouldCreateNewGist = false;
-                
-                if (securityMode) {
-                    const currentToken = token;
-                    const lastToken = localStorage.getItem('varicom_last_token');
-                    
-                    if (lastToken && lastToken !== currentToken) {
-                        shouldCreateNewGist = true;
-                        showSyncStatus('🔒 تغيير التوكن - إنشاء رابط جديد...', 'warning');
-                    }
-                    
-                    localStorage.setItem('varicom_last_token', currentToken);
+                const saved = localStorage.getItem('varicom_data');
+                if (saved) {
+                    const data = JSON.parse(saved);
+                    state.products = data.products || [];
+                    state.newProducts = data.newProducts || [];
+                    state.notifications = data.notifications || [];
                 }
-
-                const response = await performGitHubRequest(token, completeData, shouldCreateNewGist);
-
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.message || `HTTP ${response.status}`);
-                }
-
-                const result = await response.json();
-                await handleSyncSuccess(result, shouldCreateNewGist);
-                
-            } catch (error) {
-                handleSyncError(error);
-            } finally {
-                toggleButtonsLoading(false);
-            }
+            } catch (e) { console.error('Error loading local data', e); }
         }
 
-        async function performGitHubRequest(token, completeData, forceNewGist = false) {
-            const gistData = {
-                description: `VARICOM Catalogue - ${new Date().toLocaleDateString('fr-FR')} - ${completeData.totalProducts} produits - SECURITY:${securityMode ? 'ON' : 'OFF'}`,
-                public: true,
-                files: {
-                    "varicom_data.json": {
-                        content: JSON.stringify(completeData, null, 2)
-                    }
-                }
-            };
-
-            let url, method;
-            
-            if (currentGistId && !forceNewGist) {
-                url = `https://api.github.com/gists/${currentGistId}`;
-                method = 'PATCH';
-            } else {
-                url = 'https://api.github.com/gists';
-                method = 'POST';
-            }
-
-            return await fetch(url, {
-                method: method,
-                headers: {
-                    'Authorization': `token ${token}`,
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(gistData)
-            });
+        function saveData() {
+            localStorage.setItem('varicom_data', JSON.stringify({
+                products: state.products,
+                newProducts: state.newProducts,
+                notifications: state.notifications
+            }));
+            updateUI();
         }
 
-        async function handleSyncSuccess(result, isNewGist = false) {
-            const oldGistId = currentGistId;
-            currentGistId = result.id;
-            localStorage.setItem('varicom_gist_id', currentGistId);
-            gistUrl = result.html_url;
-
-            if (isNewGist || !oldGistId) {
-                addToLinkHistory(currentGistId, gistUrl);
-                
-                if (oldGistId && securityMode) {
-                    showSyncStatus('🔒 تم إنشاء رابط جديد - الزبائن القدامى لن يروا التحديثات', 'success');
-                    securityUpdates++;
-                    localStorage.setItem('varicom_security_updates', securityUpdates);
-                }
-            }
-
-            hasUnsavedChanges = false;
-            updateActualiserButton();
-            
-            const successMessage = `✅ Synchronisé! ${currentProducts.length} produits - Sécurité: ${securityMode ? '🔒' : '🔓'}`;
-            showSyncStatus(successMessage, 'success');
-            
-            updateActiveDays();
-            updateSecurityUI();
-        }
-
-        function addToLinkHistory(gistId, gistUrl) {
-            const newLink = {
-                id: gistId,
-                url: gistUrl,
-                timestamp: new Date().toISOString(),
-                productsCount: currentProducts.length,
-                newProductsCount: currentNewProducts.length,
-                active: true,
-                securityMode: securityMode
-            };
-            
-            if (securityMode) {
-                linkHistory.forEach(link => link.active = false);
-            }
-            
-            linkHistory.unshift(newLink);
-            
-            if (linkHistory.length > 10) {
-                linkHistory = linkHistory.slice(0, 10);
-            }
-            
-            localStorage.setItem('varicom_link_history', JSON.stringify(linkHistory));
-            displayLinkHistory();
-        }
-
-        function displayLinkHistory() {
-            const container = document.getElementById('linkHistory');
-            const countElement = document.getElementById('historyCount');
-            
-            if (linkHistory.length === 0) {
-                container.innerHTML = '<p class="text-muted text-center py-3">لا يوجد سجل للروابط</p>';
-                countElement.textContent = '0 روابط';
-                return;
-            }
-            
-            let html = '';
-            linkHistory.forEach((link, index) => {
-                const time = new Date(link.timestamp).toLocaleString('fr-FR');
-                const isActive = link.active && link.id === currentGistId;
-                
-                html += `
-                    <div class="link-history-item ${isActive ? 'active' : ''}">
-                        <div class="d-flex justify-content-between align-items-center">
-                            <div class="flex-grow-1">
-                                <small class="d-block text-truncate" style="max-width: 200px;">
-                                    <i class="fas fa-link me-1 ${isActive ? 'text-success' : 'text-muted'}"></i>
-                                    ${link.id.substring(0, 8)}...
-                                </small>
-                                <small class="text-muted">${time}</small>
-                            </div>
-                            <div class="text-end">
-                                <small class="badge ${isActive ? 'bg-success' : 'bg-secondary'}">${link.productsCount}</small>
-                                ${link.securityMode ? '<i class="fas fa-shield-alt text-warning ms-1"></i>' : ''}
-                            </div>
-                        </div>
-                    </div>
-                `;
-            });
-            
-            container.innerHTML = html;
-            countElement.textContent = `${linkHistory.length} رابط`;
-        }
-
-        function generateNewLink() {
-            if (!securityMode) {
-                showSyncStatus('❌ هذه الميزة متاحة فقط في وضع الأمان المتقدم', 'error');
-                return;
-            }
-            
-            if (confirm('⚠️ هل تريد إنشاء رابط جديد؟ الزبائن الحاليون لن يتمكنوا من رؤية التحديثات الجديدة.')) {
-                localStorage.setItem('varicom_force_new_gist', 'true');
-                uploadToGitHubGist();
-            }
-        }
-
-        function copyGistId() {
-            if (currentGistId) {
-                navigator.clipboard.writeText(currentGistId).then(() => {
-                    showSyncStatus('✅ تم نسخ معرف الرابط', 'success');
-                });
-            }
-        }
-
-        function clearLinkHistory() {
-            if (confirm('هل تريد مسح سجل الروابط؟ لا يمكن التراجع عن هذا الإجراء.')) {
-                linkHistory = [];
-                localStorage.removeItem('varicom_link_history');
-                displayLinkHistory();
-                showSyncStatus('🗑️ تم مسح سجل الروابط', 'success');
-            }
-        }
-
-        // دوال رفع ملف Excel
+        // Excel Handling
         function handleExcelUpload(file) {
-            if (!file) {
-                showSyncStatus('❌ Aucun fichier sélectionné', 'error');
-                return;
-            }
-
-            const fileName = file.name.toLowerCase();
-            const validExtensions = ['.xlsx', '.xls', '.csv'];
-            const isValidExtension = validExtensions.some(ext => fileName.endsWith(ext));
+            if (!file) return;
             
-            if (!isValidExtension) {
-                showSyncStatus('❌ Format non supporté. Utilisez .xlsx, .xls ou .csv', 'error');
-                return;
-            }
-
-            showSyncStatus('📊 Lecture du fichier Excel en cours...', 'warning');
-            showProgressBar();
-
+            showStatus('Lecture du fichier...', 'info');
             const reader = new FileReader();
             
-            reader.onload = function(e) {
+            reader.onload = (e) => {
                 try {
-                    updateProgress(30, 'Conversion des données...');
                     const data = new Uint8Array(e.target.result);
                     const workbook = XLSX.read(data, { type: 'array' });
+                    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const jsonData = XLSX.utils.sheet_to_json(firstSheet);
                     
-                    updateProgress(60, 'Traitement des feuilles...');
-                    const firstSheetName = workbook.SheetNames[0];
-                    const worksheet = workbook.Sheets[firstSheetName];
-                    
-                    updateProgress(80, 'Extraction des données...');
-                    const jsonData = XLSX.utils.sheet_to_json(worksheet);
-                    
-                    updateProgress(90, 'Validation finale...');
                     processExcelData(jsonData);
-                    
-                    updateProgress(100, 'Terminé!');
-                    setTimeout(hideProgressBar, 1000);
-                    
-                } catch (error) {
-                    console.error('❌ Erreur lecture Excel:', error);
-                    hideProgressBar();
-                    showSyncStatus('❌ Erreur lors de la lecture du fichier Excel', 'error');
+                } catch (err) {
+                    showStatus('Erreur lecture Excel: ' + err.message, 'error');
                 }
             };
-            
-            reader.onerror = function() {
-                hideProgressBar();
-                showSyncStatus('❌ Erreur de lecture du fichier', 'error');
-            };
-            
             reader.readAsArrayBuffer(file);
         }
 
-        function processExcelData(excelData) {
-            if (!excelData || excelData.length === 0) {
-                showSyncStatus('❌ Le fichier Excel est vide', 'error');
-                return;
-            }
+        function processExcelData(data) {
+            const processed = data.map((row, idx) => ({
+                id: `prod_${Date.now()}_${idx}`,
+                ref: row['Ref'] || row['Référence'] || row['Code'] || 'N/A',
+                designation: row['Designation'] || row['Désignation'] || row['Nom'] || 'Produit sans nom',
+                famille: row['Famille'] || row['Categorie'] || 'Général',
+                prix: parseFloat(row['Prix'] || row['Price'] || 0),
+                image: row['Image'] || row['Photo'] || ''
+            })).filter(p => p.prix > 0); // Filter invalid
 
-            const newProducts = [];
-            let skippedRows = 0;
-            let validRows = 0;
-
-            console.log('📋 Traitement de', excelData.length, 'lignes Excel');
-
-            excelData.forEach((row, index) => {
-                const processedRow = processExcelRow(row, index);
-                
-                if (processedRow.valid) {
-                    newProducts.push(processedRow.data);
-                    validRows++;
-                } else {
-                    skippedRows++;
-                }
-            });
-
-            if (newProducts.length === 0) {
-                showSyncStatus('❌ Aucune donnée valide trouvée', 'error');
-                return;
-            }
-
-            currentProducts = newProducts;
-            saveAllData();
-            
-            const successMessage = `✅ ${validRows} produits importés${skippedRows > 0 ? ` (${skippedRows} ignorés)` : ''}`;
-            showSyncStatus(successMessage, 'success');
-            updateStats();
-            showPreview();
-            
-            hasUnsavedChanges = true;
-            updateActualiserButton();
+            state.products = processed;
+            saveData();
+            showStatus(`${processed.length} produits importés avec succès!`, 'success');
         }
 
-        function processExcelRow(row, index) {
-            const keys = Object.keys(row);
-            let ref = '', designation = '', famille = 'Général', prix = 0, image = '';
-
-            keys.forEach(key => {
-                const keyLower = key.toLowerCase().trim();
-                const value = row[key];
-
-                if (value === null || value === undefined || value === '') return;
-
-                if (keyLower.includes('réf') || keyLower.includes('ref') || keyLower.includes('reference') || keyLower.includes('code') || keyLower.includes('sku')) {
-                    ref = cleanString(value.toString());
-                }
-                else if (keyLower.includes('designation') || keyLower.includes('désignation') || keyLower.includes('produit') || keyLower.includes('article') || keyLower.includes('nom') || keyLower.includes('description')) {
-                    designation = cleanString(value.toString());
-                }
-                else if (keyLower.includes('famille') || keyLower.includes('catégorie') || keyLower.includes('category') || keyLower.includes('type') || keyLower.includes('family')) {
-                    famille = cleanString(value.toString());
-                }
-                else if (keyLower.includes('prix') || keyLower.includes('price') || keyLower.includes('pu') || keyLower.includes('cost')) {
-                    prix = parsePrice(value);
-                }
-                else if (keyLower.includes('image') || keyLower.includes('photo') || keyLower.includes('url') || keyLower.includes('lien')) {
-                    image = cleanString(value.toString());
-                }
-            });
-
-            const isValid = ref && designation && prix > 0;
-            
-            return {
-                valid: isValid,
-                data: {
-                    id: `prod_${Date.now()}_${index}`,
-                    ref: ref,
-                    designation: designation,
-                    famille: famille,
-                    prix: prix,
-                    image: image,
-                    timestamp: new Date().toISOString()
-                }
-            };
-        }
-
-        function parsePrice(value) {
-            if (typeof value === 'number') return value;
-            
-            let priceStr = value.toString().trim();
-            priceStr = priceStr.replace(/[^\d,.-]/g, '').replace(',', '.');
-            
-            const price = parseFloat(priceStr);
-            return isNaN(price) ? 0 : Math.abs(price);
-        }
-
-        function cleanString(str) {
-            return str.toString()
-                .replace(/[\u0000-\u001F\u007F-\u009F]/g, '')
-                .replace(/\s+/g, ' ')
-                .trim()
-                .substring(0, 500);
-        }
-
-        // دوال التخزين والتحميل
-        function loadToken() {
-            const savedToken = localStorage.getItem('varicom_github_token');
-            if (savedToken) {
-                document.getElementById('githubToken').value = savedToken;
-            }
-        }
-
-        function loadProducts() {
-            const savedProducts = localStorage.getItem('varicom_products');
-            if (savedProducts) {
-                try {
-                    currentProducts = JSON.parse(savedProducts);
-                    console.log(`📦 ${currentProducts.length} produits chargés`);
-                } catch (e) {
-                    console.error('❌ Erreur chargement produits:', e);
-                    currentProducts = [];
-                }
-            }
-        }
-
-        function loadNotifications() {
-            const savedNotifications = localStorage.getItem('varicom_notifications');
-            if (savedNotifications) {
-                try {
-                    currentNotifications = JSON.parse(savedNotifications);
-                    displayActiveNotifications();
-                    console.log(`🔔 ${currentNotifications.length} notifications chargées`);
-                } catch (e) {
-                    console.error('❌ Erreur chargement notifications:', e);
-                    currentNotifications = [];
-                }
-            }
-        }
-
-        function loadNewProducts() {
-            const savedNewProducts = localStorage.getItem('varicom_new_products');
-            if (savedNewProducts) {
-                try {
-                    currentNewProducts = JSON.parse(savedNewProducts);
-                    displayActiveNewProducts();
-                    console.log(`⭐ ${currentNewProducts.length} nouveaux produits chargés`);
-                } catch (e) {
-                    console.error('❌ Erreur chargement nouveaux produits:', e);
-                    currentNewProducts = [];
-                }
-            }
-        }
-
-        function loadGistId() {
-            currentGistId = localStorage.getItem('varicom_gist_id');
-            if (currentGistId) {
-                updateSyncStatus('Gist GitHub chargé - Prêt à synchroniser', 'success');
-            }
-        }
-
-        function saveAllData() {
-            try {
-                localStorage.setItem('varicom_products', JSON.stringify(currentProducts));
-                localStorage.setItem('varicom_notifications', JSON.stringify(currentNotifications));
-                localStorage.setItem('varicom_new_products', JSON.stringify(currentNewProducts));
-                hasUnsavedChanges = false;
-                updateActualiserButton();
-                console.log('💾 Données sauvegardées localement');
-            } catch (e) {
-                console.error('❌ Erreur sauvegarde:', e);
-                if (e.name === 'QuotaExceededError') {
-                    showSyncStatus('❌ Espace de stockage insuffisant', 'error');
-                    cleanupOldData();
-                }
-            }
-        }
-
-        // دوال المنتجات الجديدة
+        // Product & Notification Management
         function addNewProduct() {
-            const name = document.getElementById('newProductName').value.trim();
-            const price = parseFloat(document.getElementById('newProductPrice').value);
-            const image = document.getElementById('newProductImage').value.trim();
-            const category = document.getElementById('newProductCategory').value;
-            
-            if (!name) {
-                showSyncStatus('❌ Le nom du produit est requis', 'error');
-                return;
-            }
-            
-            if (!price || price <= 0) {
-                showSyncStatus('❌ Le prix doit être supérieur à 0', 'error');
-                return;
-            }
-            
-            const newProduct = {
-                id: `new_${Date.now()}`,
-                name: name,
-                price: price,
-                image: image || 'https://via.placeholder.com/300x200/6c757d/ffffff?text=Produit+VARICOM',
-                category: category,
-                timestamp: new Date().toISOString()
-            };
-            
-            currentNewProducts.unshift(newProduct);
-            saveAllData();
-            
-            displayActiveNewProducts();
-            updateStats();
-            resetNewProductForm();
-            
-            hasUnsavedChanges = true;
-            updateActualiserButton();
-            showSyncStatus('⭐ Produit nouveau ajouté - Prêt à synchroniser', 'success');
-        }
+            const name = document.getElementById('newProductName').value;
+            const price = document.getElementById('newProductPrice').value;
+            const cat = document.getElementById('newProductCategory').value;
+            const img = document.getElementById('newProductImage').value;
 
-        function displayActiveNewProducts() {
-            const container = document.getElementById('activeNewProducts');
-            const countElement = document.getElementById('newProductsCount');
-            
-            if (currentNewProducts.length === 0) {
-                container.innerHTML = '<p class="text-muted text-center py-4">Aucun produit nouveau actif</p>';
-                countElement.textContent = '0 produits';
-                return;
-            }
-            
-            let html = '';
-            currentNewProducts.forEach((product, index) => {
-                const time = new Date(product.timestamp).toLocaleString('fr-FR');
-                html += `
-                    <div class="new-product-card d-flex align-items-center">
-                        <img src="${product.image}" class="new-product-image" alt="${product.name}" 
-                             onerror="this.src='https://via.placeholder.com/80x80/6c757d/ffffff?text=Image'">
-                        <div class="flex-grow-1">
-                            <strong class="d-block">${product.name}</strong>
-                            <div class="text-success fw-bold">${formatPrice(product.price)}</div>
-                            <small class="text-muted">${product.category} • ${time}</small>
-                        </div>
-                        <button class="btn btn-outline-danger btn-sm" onclick="removeNewProduct(${index})" title="Supprimer">
-                            <i class="fas fa-times"></i>
-                        </button>
-                    </div>
-                `;
+            if (!name || !price) return showStatus('Nom et Prix requis', 'warning');
+
+            state.newProducts.unshift({
+                id: `new_${Date.now()}`,
+                name,
+                price: parseFloat(price),
+                category: cat,
+                image: img,
+                timestamp: new Date().toISOString()
             });
             
-            container.innerHTML = html;
-            countElement.textContent = `${currentNewProducts.length} produit(s)`;
-        }
-
-        function removeNewProduct(index) {
-            if (confirm('Êtes-vous sûr de vouloir supprimer ce produit nouveau?')) {
-                currentNewProducts.splice(index, 1);
-                saveAllData();
-                displayActiveNewProducts();
-                updateStats();
-                hasUnsavedChanges = true;
-                updateActualiserButton();
-                showSyncStatus('🗑️ Produit supprimé', 'warning');
-            }
-        }
-
-        function clearAllNewProducts() {
-            if (currentNewProducts.length === 0) return;
-            
-            if (confirm(`Êtes-vous sûr de vouloir supprimer les ${currentNewProducts.length} produits nouveaux?`)) {
-                currentNewProducts = [];
-                saveAllData();
-                displayActiveNewProducts();
-                updateStats();
-                hasUnsavedChanges = true;
-                updateActualiserButton();
-                showSyncStatus('🗑️ Tous les produits nouveaux supprimés', 'success');
-            }
-        }
-
-        function resetNewProductForm() {
+            // Reset inputs
             document.getElementById('newProductName').value = '';
             document.getElementById('newProductPrice').value = '';
-            document.getElementById('newProductImage').value = '';
-            updateProductPreview();
+            
+            saveData();
+            showStatus('Nouveau produit ajouté', 'success');
         }
 
-        // دوال الإشعارات
         function createNotification() {
-            const title = document.getElementById('notificationTitle').value.trim();
-            const message = document.getElementById('notificationMessage').value.trim();
-            const type = document.getElementById('notificationType').value;
-            
-            if (!title) {
-                showSyncStatus('❌ Le titre de la notification est requis', 'error');
-                return;
-            }
-            
-            if (!message) {
-                showSyncStatus('❌ Le message de la notification est requis', 'error');
-                return;
-            }
-            
-            const notification = {
+            const title = document.getElementById('notifTitle').value;
+            const msg = document.getElementById('notifMessage').value;
+            const type = document.getElementById('notifType').value;
+
+            if (!title || !msg) return showStatus('Titre et Message requis', 'warning');
+
+            state.notifications.unshift({
                 id: `notif_${Date.now()}`,
-                title: title,
-                message: message,
-                type: type,
-                timestamp: new Date().toISOString(),
-                read: false
-            };
-            
-            currentNotifications.unshift(notification);
-            saveAllData();
-            
-            displayActiveNotifications();
-            updateStats();
-            resetNotificationForm();
-            
-            hasUnsavedChanges = true;
-            updateActualiserButton();
-            showSyncStatus('🔔 Notification créée - Prête à synchroniser', 'success');
-        }
-
-        function displayActiveNotifications() {
-            const container = document.getElementById('activeNotifications');
-            const countElement = document.getElementById('notificationsCount');
-            
-            if (currentNotifications.length === 0) {
-                container.innerHTML = '<p class="text-muted text-center py-4">Aucune notification active</p>';
-                countElement.textContent = '0 notifications';
-                return;
-            }
-            
-            let html = '';
-            currentNotifications.forEach(notification => {
-                const time = new Date(notification.timestamp).toLocaleString('fr-FR');
-                html += `
-                    <div class="notification-preview notification-${notification.type} mb-3">
-                        <div class="d-flex justify-content-between align-items-start">
-                            <div class="flex-grow-1">
-                                <strong>${notification.title}</strong>
-                                <p class="mb-1 mt-2">${notification.message}</p>
-                                <small class="text-muted">${time} • ${getNotificationTypeText(notification.type)}</small>
-                            </div>
-                            <button class="btn btn-outline-danger btn-sm ms-2" onclick="deleteNotification('${notification.id}')" title="Supprimer">
-                                <i class="fas fa-times"></i>
-                            </button>
-                        </div>
-                    </div>
-                `;
-            });
-            
-            container.innerHTML = html;
-            countElement.textContent = `${currentNotifications.length} notification(s)`;
-        }
-
-        function deleteNotification(id) {
-            currentNotifications = currentNotifications.filter(notification => notification.id !== id);
-            saveAllData();
-            displayActiveNotifications();
-            updateStats();
-            hasUnsavedChanges = true;
-            updateActualiserButton();
-            showSyncStatus('🗑️ Notification supprimée', 'warning');
-        }
-
-        function clearAllNotifications() {
-            if (currentNotifications.length === 0) return;
-            
-            if (confirm(`Êtes-vous sûr de vouloir supprimer les ${currentNotifications.length} notifications?`)) {
-                currentNotifications = [];
-                saveAllData();
-                displayActiveNotifications();
-                updateStats();
-                hasUnsavedChanges = true;
-                updateActualiserButton();
-                showSyncStatus('🗑️ Toutes les notifications supprimées', 'success');
-            }
-        }
-
-        function resetNotificationForm() {
-            document.getElementById('notificationTitle').value = '';
-            document.getElementById('notificationMessage').value = '';
-            document.getElementById('notificationType').value = 'info';
-            updateNotificationPreview();
-        }
-
-        // دوال المعاينة
-        function updateNotificationPreview() {
-            const title = document.getElementById('notificationTitle').value || 'Titre de la notification';
-            const message = document.getElementById('notificationMessage').value || 'Message de la notification...';
-            const type = document.getElementById('notificationType').value;
-            
-            const preview = document.getElementById('notificationPreview');
-            preview.className = `notification-preview notification-${type}`;
-            
-            document.getElementById('previewTitle').textContent = title;
-            document.getElementById('previewMessage').textContent = message;
-            document.getElementById('previewType').textContent = `Type: ${getNotificationTypeText(type)}`;
-        }
-
-        function updateProductPreview() {
-            const name = document.getElementById('newProductName').value || 'Nom du produit';
-            const price = document.getElementById('newProductPrice').value || '0';
-            const image = document.getElementById('newProductImage').value || 'https://via.placeholder.com/80x80/6c757d/ffffff?text=Image';
-            const category = document.getElementById('newProductCategory').value;
-            
-            document.getElementById('namePreview').textContent = name;
-            document.getElementById('pricePreview').textContent = formatPrice(price);
-            document.getElementById('categoryPreview').textContent = category;
-            document.getElementById('imagePreview').src = image;
-        }
-
-        function getNotificationTypeText(type) {
-            const types = {
-                'info': 'Information',
-                'success': 'Succès & Promotion',
-                'warning': 'Avertissement Important',
-                'error': 'Urgent & Maintenance'
-            };
-            return types[type] || 'Information';
-        }
-
-        // دوال الواجهة
-        function showPreview() {
-            const previewContent = document.getElementById('previewContent');
-            const previewCount = document.getElementById('previewCount');
-
-            previewCount.textContent = currentProducts.length.toLocaleString();
-
-            if (currentProducts.length === 0) {
-                previewContent.innerHTML = `
-                    <div class="text-center text-muted py-5">
-                        <i class="fas fa-table fa-3x mb-3 opacity-50"></i>
-                        <p>Aucune donnée importée</p>
-                        <small class="text-muted">Importez un fichier Excel pour commencer</small>
-                    </div>
-                `;
-                return;
-            }
-
-            let html = `
-                <div class="alert alert-success">
-                    <i class="fas fa-check-circle me-2"></i>
-                    <strong>${currentProducts.length.toLocaleString()} produits chargés</strong>
-                    <small class="d-block mt-1">Prêts à être synchronisés avec les clients</small>
-                </div>
-                <div class="table-responsive" style="max-height: 500px;">
-                    <table class="table table-striped table-hover">
-                        <thead class="table-dark sticky-top">
-                            <tr>
-                                <th>#</th>
-                                <th>Référence</th>
-                                <th>Désignation</th>
-                                <th>Catégorie</th>
-                                <th>Prix</th>
-                                <th>Image</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-            `;
-
-            currentProducts.slice(0, 15).forEach((product, index) => {
-                html += `
-                    <tr>
-                        <td><small class="text-muted">${index + 1}</small></td>
-                        <td><strong class="text-primary">${product.ref}</strong></td>
-                        <td>${product.designation}</td>
-                        <td><span class="badge bg-info">${product.famille}</span></td>
-                        <td><strong class="text-success">${formatPrice(product.prix)}</strong></td>
-                        <td>${product.image ? '<i class="fas fa-check text-success"></i>' : '<i class="fas fa-times text-muted"></i>'}</td>
-                    </tr>
-                `;
+                title,
+                message: msg,
+                type,
+                timestamp: new Date().toISOString()
             });
 
-            if (currentProducts.length > 15) {
-                html += `
-                    <tr class="table-info">
-                        <td colspan="6" class="text-center fw-bold">
-                            <i class="fas fa-ellipsis-h me-2"></i>
-                            ${currentProducts.length - 15} produits supplémentaires...
-                        </td>
-                    </tr>
-                `;
-            }
-
-            html += `
-                        </tbody>
-                    </table>
-                </div>
-                <div class="row mt-3 text-center">
-                    <div class="col-md-3">
-                        <div class="fw-bold text-primary">${currentProducts.length}</div>
-                        <small>Total Produits</small>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="fw-bold text-info">${[...new Set(currentProducts.map(p => p.famille))].length}</div>
-                        <small>Catégories</small>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="fw-bold text-success">${currentProducts.filter(p => p.image).length}</div>
-                        <small>Avec Images</small>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="fw-bold text-warning">${formatPrice(Math.max(...currentProducts.map(p => p.prix)))}</div>
-                        <small>Prix Maximum</small>
-                    </div>
-                </div>
-            `;
-
-            previewContent.innerHTML = html;
-        }
-
-        function updateUI() {
-            updateStats();
-            showPreview();
-            displayActiveNotifications();
-            displayActiveNewProducts();
-            updateActiveDays();
-        }
-
-        function updateStats() {
-            document.getElementById('statsProducts').textContent = currentProducts.length.toLocaleString();
-            document.getElementById('statsNewProducts').textContent = currentNewProducts.length.toLocaleString();
-            document.getElementById('statsNotifications').textContent = currentNotifications.length.toLocaleString();
+            document.getElementById('notifTitle').value = '';
+            document.getElementById('notifMessage').value = '';
             
-            document.getElementById('quickStatsProducts').textContent = currentProducts.length.toLocaleString();
-            document.getElementById('quickStatsNew').textContent = currentNewProducts.length.toLocaleString();
-            document.getElementById('quickStatsNotif').textContent = currentNotifications.length.toLocaleString();
+            saveData();
+            showStatus('Notification créée', 'success');
         }
 
-        function updateActiveDays() {
-            const firstSync = localStorage.getItem('varicom_first_sync');
-            if (!firstSync) {
-                localStorage.setItem('varicom_first_sync', new Date().toISOString());
-                document.getElementById('statsSync').textContent = '1';
-            } else {
-                const diffTime = Math.abs(new Date() - new Date(firstSync));
-                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-                document.getElementById('statsSync').textContent = diffDays.toString();
-            }
+        function removeNewProduct(id) {
+            state.newProducts = state.newProducts.filter(p => p.id !== id);
+            saveData();
         }
 
-        // دوال المساعدة
-        function actualiserCatalogue() {
-            if (!hasUnsavedChanges) {
-                showSyncStatus('✅ Aucun changement à synchroniser', 'info');
-                return;
-            }
-            uploadToGitHubGist();
+        function removeNotification(id) {
+            state.notifications = state.notifications.filter(n => n.id !== id);
+            saveData();
         }
 
-        function generateClientLink() {
-            if (!currentGistId) {
-                showSyncStatus('❌ Aucun catalogue synchronisé', 'error');
-                return;
-            }
+        // GitHub Sync
+        async function uploadToGitHubGist() {
+            const token = document.getElementById('githubToken').value;
+            if (!token) return showStatus('Token GitHub manquant!', 'error');
 
-            const clientUrl = `${window.location.origin}${window.location.pathname.replace('admin.html', 'index.html')}?gist=${currentGistId}`;
-            
-            navigator.clipboard.writeText(clientUrl).then(() => {
-                showSyncStatus('🔗 Lien client copié!', 'success');
-                
-                setTimeout(() => {
-                    alert(`🎉 Catalogue VARICOM en ligne!\n\nLien client:\n${clientUrl}\n\nCe lien a été copié dans votre presse-papiers. Partagez-le avec vos clients!`);
-                }, 500);
-            }).catch(() => {
-                prompt('📋 Copiez ce lien et partagez-le avec vos clients:', clientUrl);
-            });
-        }
+            const btn = document.getElementById('publishBtn');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Synchronisation...';
+            btn.disabled = true;
 
-        function toggleTokenVisibility() {
-            const tokenInput = document.getElementById('githubToken');
-            const icon = tokenInput.nextElementSibling.querySelector('i');
-            
-            if (tokenInput.type === 'password') {
-                tokenInput.type = 'text';
-                icon.className = 'fas fa-eye-slash';
-            } else {
-                tokenInput.type = 'password';
-                icon.className = 'fas fa-eye';
-            }
-        }
-
-        function testImage() {
-            const imageUrl = document.getElementById('newProductImage').value;
-            if (!imageUrl) {
-                showSyncStatus('❌ URL d\'image vide', 'error');
-                return;
-            }
-            
-            showSyncStatus('👁️ Test de l\'image...', 'warning');
-            
-            const img = new Image();
-            img.onload = function() {
-                showSyncStatus('✅ Image valide et chargée', 'success');
-            };
-            img.onerror = function() {
-                showSyncStatus('❌ Image non valide ou non accessible', 'error');
-            };
-            img.src = imageUrl;
-        }
-
-        function testGitHubConnection() {
-            const token = document.getElementById('githubToken').value.trim();
-            if (!token) {
-                showSyncStatus('❌ Token GitHub requis', 'error');
-                return;
-            }
-
-            showSyncStatus('🔌 Test de connexion GitHub...', 'warning');
-
-            fetch('https://api.github.com/user', {
-                headers: {
-                    'Authorization': `token ${token}`
-                }
-            })
-            .then(response => {
-                if (response.ok) {
-                    showSyncStatus('✅ Connexion GitHub réussie', 'success');
-                } else {
-                    throw new Error('Token invalide');
-                }
-            })
-            .catch(error => {
-                showSyncStatus('❌ Échec connexion GitHub', 'error');
-            });
-        }
-
-        function showSystemStats() {
-            const stats = {
-                produits: currentProducts.length,
-                nouveaux: currentNewProducts.length,
-                notifications: currentNotifications.length,
-                categories: [...new Set(currentProducts.map(p => p.famille))].length,
-                prixMoyen: currentProducts.length ? 
-                    currentProducts.reduce((sum, p) => sum + p.prix, 0) / currentProducts.length : 0
-            };
-
-            alert(`📊 Statistiques VARICOM:\n\n` +
-                  `📦 Produits: ${stats.produits.toLocaleString()}\n` +
-                  `⭐ Nouveaux: ${stats.nouveaux}\n` +
-                  `🔔 Notifications: ${stats.notifications}\n` +
-                  `📁 Catégories: ${stats.categories}\n` +
-                  `💰 Prix moyen: ${formatPrice(stats.prixMoyen)}\n` +
-                  `🔄 Dernière sync: ${currentGistId ? 'Active' : 'Jamais'}`);
-        }
-
-        function downloadTemplate() {
-            const templateData = [
-                ['Référence', 'Désignation', 'Famille', 'Prix', 'Image'],
-                ['VAR-001', 'Laptop Gaming ASUS ROG Strix', 'Ordinateurs Portables', '185000.00', 'https://example.com/laptop.jpg'],
-                ['VAR-002', 'Souris Sans Fil Logitech MX Master', 'Périphériques', '4500.00', 'https://example.com/souris.jpg'],
-                ['VAR-003', 'Écran 24\" Samsung Curved', 'Écrans', '75000.00', ''],
-                ['VAR-004', 'Clavier Mécanique RGB Mechanical', 'Accessoires', '12000.00', 'https://example.com/clavier.jpg'],
-                ['VAR-005', 'Webcam HD 1080p Logitech', 'Accessoires', '8500.00', 'https://example.com/webcam.jpg']
-            ];
-            
-            const ws = XLSX.utils.aoa_to_sheet(templateData);
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "Template VARICOM");
-            XLSX.writeFile(wb, "template_varicom_pro.xlsx");
-            showSyncStatus('📥 Template téléchargé', 'success');
-        }
-
-        function showFormatHelp() {
-            alert(`📋 FORMAT EXCEL VARICOM - GUIDE COMPLET
-
-🎯 COLONNES OBLIGATOIRES:
-• Référence: Code unique du produit (REF-001, SKU123, etc.)
-• Désignation: Nom complet du produit
-• Famille: Catégorie du produit
-• Prix: Prix en Dinars Algériens (DA)
-
-📸 COLONNE OPTIONNELLE:
-• Image: URL complète de l'image du produit
-
-💡 CONSEILS PROFESSIONNELS:
-✓ Utilisez des références uniques
-✓ Les prix doivent être numériques
-✓ Les URLs d'images doivent être complètes
-✓ Évitez les caractères spéciaux dans les références
-
-📊 EXEMPLE DE DONNÉES:
-┌───────────┬──────────────────────────┬──────────────────┬───────────┐
-│ Référence │ Désignation              │ Famille          │ Prix      │
-├───────────┼──────────────────────────┼──────────────────┼───────────┤
-│ VAR-001   │ Laptop Gaming ASUS ROG   │ Ordinateurs      │ 185000.00 │
-│ VAR-002   │ Souris Sans Fil          │ Accessoires      │ 4500.00   │
-└───────────┴──────────────────────────┴──────────────────┴───────────┘
-
-🔄 Le système détecte automatiquement les colonnes!`);
-        }
-
-        function testDataValidation() {
-            if (currentProducts.length === 0) {
-                showSyncStatus('❌ Aucune donnée à valider', 'error');
-                return;
-            }
-
-            const errors = [];
-            const warnings = [];
-
-            currentProducts.forEach((product, index) => {
-                if (!product.ref) errors.push(`Ligne ${index + 1}: Référence manquante`);
-                if (!product.designation) errors.push(`Ligne ${index + 1}: Désignation manquante`);
-                if (product.prix <= 0) errors.push(`Ligne ${index + 1}: Prix invalide`);
-                if (product.designation.length > 100) warnings.push(`Ligne ${index + 1}: Désignation trop longue`);
-            });
-
-            let message = `✅ Validation terminée\n\n`;
-            message += `📊 Produits analysés: ${currentProducts.length}\n`;
-            
-            if (errors.length > 0) {
-                message += `❌ Erreurs: ${errors.length}\n`;
-                errors.slice(0, 5).forEach(error => message += `• ${error}\n`);
-            } else {
-                message += `✅ Aucune erreur critique\n`;
-            }
-            
-            if (warnings.length > 0) {
-                message += `⚠️ Avertissements: ${warnings.length}\n`;
-                warnings.slice(0, 3).forEach(warning => message += `• ${warning}\n`);
-            }
-
-            alert(message);
-        }
-
-        function showProgressBar() {
-            document.getElementById('progressContainer').style.display = 'block';
-            updateProgress(0, 'Initialisation...');
-        }
-
-        function hideProgressBar() {
-            document.getElementById('progressContainer').style.display = 'none';
-        }
-
-        function updateProgress(percent, text) {
-            const progressBar = document.getElementById('uploadProgress');
-            const progressText = document.getElementById('progressText');
-            
-            progressBar.style.width = percent + '%';
-            progressBar.textContent = percent + '%';
-            progressText.textContent = text;
-        }
-
-        function showSyncStatus(message, type) {
-            const syncStatus = document.getElementById('syncStatus');
-            syncStatus.innerHTML = `
-                <i class="fas fa-${getStatusIcon(type)} me-2"></i>
-                ${message}
-            `;
-            syncStatus.className = `sync-status sync-${type}`;
-            syncStatus.style.display = 'block';
-            setTimeout(() => syncStatus.style.display = 'none', 5000);
-        }
-
-        function getStatusIcon(type) {
-            const icons = {
-                'success': 'check-circle',
-                'warning': 'exclamation-triangle',
-                'error': 'exclamation-circle',
-                'info': 'info-circle'
-            };
-            return icons[type] || 'info-circle';
-        }
-
-        function toggleButtonsLoading(loading) {
-            const buttons = ['publishBtn', 'actualiserBtn'];
-            buttons.forEach(btnId => {
-                const btn = document.getElementById(btnId);
-                if (loading) {
-                    btn.disabled = true;
-                    btn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Chargement...';
-                } else {
-                    btn.disabled = false;
-                    updateActualiserButton();
-                    document.getElementById('publishBtn').innerHTML = '<i class="fab fa-github me-2"></i>Publier';
-                }
-            });
-        }
-
-        function markUnsavedChanges() {
-            hasUnsavedChanges = true;
-            updateActualiserButton();
-        }
-
-        function updateActualiserButton() {
-            const btn = document.getElementById('actualiserBtn');
-            if (hasUnsavedChanges) {
-                btn.classList.remove('btn-warning');
-                btn.classList.add('btn-danger');
-                btn.innerHTML = '<i class="fas fa-exclamation-triangle me-2"></i>Actualiser*';
-                btn.classList.add('pulse-animation');
-            } else {
-                btn.classList.remove('btn-danger', 'pulse-animation');
-                btn.classList.add('btn-warning');
-                btn.innerHTML = '<i class="fas fa-sync-alt me-2"></i>Actualiser';
-            }
-        }
-
-        function formatPrice(price) {
-            return new Intl.NumberFormat('fr-FR', {
-                minimumFractionDigits: 2,
-                maximumFractionDigits: 2
-            }).format(price) + ' DA';
-        }
-
-        function generateSyncId() {
-            return `sync_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-        }
-
-        function handleSyncError(error) {
-            console.error('❌ Erreur synchronisation:', error);
-            let errorMessage = 'Erreur de synchronisation: ';
-            
-            if (error.message.includes('401') || error.message.includes('Bad credentials')) {
-                errorMessage = '❌ Token GitHub invalide ou expiré';
-            } else if (error.message.includes('404')) {
-                errorMessage = '❌ Gist non trouvé - Recréation nécessaire';
-                currentGistId = null;
-                localStorage.removeItem('varicom_gist_id');
-            } else if (error.message.includes('403')) {
-                errorMessage = '❌ Accès refusé - Vérifiez les permissions du token';
-            } else if (error.message.includes('422')) {
-                errorMessage = '❌ Données invalides - Vérifiez le format';
-            } else {
-                errorMessage += error.message;
-            }
-            
-            showSyncStatus(errorMessage, 'error');
-        }
-
-        function cleanupOldData() {
-            const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
-            
-            currentProducts = currentProducts.filter(p => 
-                new Date(p.timestamp) > thirtyDaysAgo
-            );
-            currentNotifications = currentNotifications.filter(n => 
-                new Date(n.timestamp) > thirtyDaysAgo
-            );
-            
-            saveAllData();
-        }
-
-        function prepareSyncData() {
-            return {
-                products: currentProducts,
-                newProducts: currentNewProducts,
-                notifications: currentNotifications,
-                lastUpdate: new Date().toISOString(),
-                totalProducts: currentProducts.length,
-                totalNotifications: currentNotifications.length,
-                totalNewProducts: currentNewProducts.length,
-                securityMode: securityMode,
-                gistId: currentGistId,
-                metadata: {
-                    source: "VARICOM Admin Panel Pro",
-                    version: "3.0",
-                    generatedAt: new Date().toISOString(),
-                    syncId: generateSyncId(),
-                    security: {
-                        enabled: securityMode,
-                        gistHistory: linkHistory.length,
-                        updates: securityUpdates
-                    },
-                    stats: {
-                        categories: [...new Set(currentProducts.map(p => p.famille))].length,
-                        priceRange: {
-                            min: Math.min(...currentProducts.map(p => p.prix)),
-                            max: Math.max(...currentProducts.map(p => p.prix))
-                        }
+            const payload = {
+                description: "VARICOM Catalog Data",
+                public: true,
+                files: {
+                    "varicom_data.json": {
+                        content: JSON.stringify({
+                            products: state.products,
+                            newProducts: state.newProducts,
+                            notifications: state.notifications,
+                            lastUpdate: new Date().toISOString(),
+                            meta: { version: "2.0", source: "VaricomAdmin" }
+                        })
                     }
                 }
             };
+
+            try {
+                let url = 'https://api.github.com/gists';
+                let method = 'POST';
+
+                // If we have an ID, try to update (PATCH) instead of create
+                if (state.gistId) {
+                    url += `/${state.gistId}`;
+                    method = 'PATCH';
+                }
+
+                const response = await fetch(url, {
+                    method: method,
+                    headers: {
+                        'Authorization': `token ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    if (response.status === 404 && state.gistId) {
+                        // Gist deleted or invalid, retry as new
+                        state.gistId = null;
+                        return uploadToGitHubGist(); 
+                    }
+                    throw new Error(`Erreur GitHub: ${response.status}`);
+                }
+
+                const result = await response.json();
+                state.gistId = result.id;
+                state.lastSync = new Date().toISOString();
+                
+                localStorage.setItem('varicom_gist_id', state.gistId);
+                localStorage.setItem('varicom_last_sync', state.lastSync);
+                
+                showStatus('✅ Synchronisation réussie!', 'success');
+                updateUI();
+
+            } catch (err) {
+                showStatus('Erreur Sync: ' + err.message, 'error');
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
         }
 
-        // تصدير الدوال للنافذة العالمية
-        window.handleExcelUpload = handleExcelUpload;
-        window.uploadToGitHubGist = uploadToGitHubGist;
-        window.generateClientLink = generateClientLink;
-        window.actualiserCatalogue = actualiserCatalogue;
-        window.addNewProduct = addNewProduct;
-        window.removeNewProduct = removeNewProduct;
-        window.clearAllNewProducts = clearAllNewProducts;
-        window.createNotification = createNotification;
-        window.deleteNotification = deleteNotification;
-        window.clearAllNotifications = clearAllNotifications;
-        window.testImage = testImage;
-        window.toggleTokenVisibility = toggleTokenVisibility;
-        window.testGitHubConnection = testGitHubConnection;
-        window.showSystemStats = showSystemStats;
-        window.downloadTemplate = downloadTemplate;
-        window.showFormatHelp = showFormatHelp;
-        window.testDataValidation = testDataValidation;
-        window.generateNewLink = generateNewLink;
-        window.copyGistId = copyGistId;
-        window.clearLinkHistory = clearLinkHistory;
+        // UI Updates
+        function updateUI() {
+            // Stats
+            document.getElementById('statsProducts').textContent = state.products.length;
+            document.getElementById('statsNewProducts').textContent = state.newProducts.length;
+            document.getElementById('statsNotifications').textContent = state.notifications.length;
+            document.getElementById('statsStatus').textContent = state.gistId ? 'Actif' : 'Inactif';
+            document.getElementById('statsStatus').className = state.gistId ? 'text-success' : 'text-danger';
 
-        console.log('🎯 Panel Administrateur VARICOM PRO avec Sécurité Avancée chargé avec succès!');
+            // Lists
+            const npList = document.getElementById('activeNewProducts');
+            npList.innerHTML = state.newProducts.map(p => `
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <div><strong>${p.name}</strong> - ${p.price} DA</div>
+                    <button class="btn btn-sm btn-outline-danger" onclick="removeNewProduct('${p.id}')"><i class="fas fa-times"></i></button>
+                </li>
+            `).join('');
+
+            const notifList = document.getElementById('activeNotifications');
+            notifList.innerHTML = state.notifications.map(n => `
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <div><span class="badge bg-${getBadgeClass(n.type)}">${n.type}</span> ${n.title}</div>
+                    <button class="btn btn-sm btn-outline-danger" onclick="removeNotification('${n.id}')"><i class="fas fa-times"></i></button>
+                </li>
+            `).join('');
+        }
+
+        function getBadgeClass(type) {
+            return { info: 'info', success: 'success', warning: 'warning', error: 'danger' }[type] || 'secondary';
+        }
+
+        function showStatus(msg, type) {
+            const el = document.getElementById('syncStatus');
+            el.textContent = msg;
+            el.className = `sync-status sync-${type}`;
+            el.style.display = 'block';
+            setTimeout(() => el.style.display = 'none', 4000);
+        }
+
+        function generateClientLink() {
+            if (!state.gistId) return showStatus('Veuillez d\'abord synchroniser!', 'warning');
+            const url = `${window.location.href.replace('admin.html', 'index.html')}?gist=${state.gistId}`;
+            navigator.clipboard.writeText(url);
+            alert('Lien copié dans le presse-papier:\n' + url);
+        }
+
+        function toggleToken() {
+            const el = document.getElementById('githubToken');
+            el.type = el.type === 'password' ? 'text' : 'password';
+        }
+
+        function resetSync() {
+            if(confirm('Oublier l\'ID de synchronisation actuel?')) {
+                state.gistId = null;
+                localStorage.removeItem('varicom_gist_id');
+                updateUI();
+                showStatus('Sync réinitialisée', 'info');
+            }
+        }
+
+        function downloadTemplate() {
+            const data = [
+                { "Référence": "REF001", "Désignation": "Exemple Produit", "Famille": "Général", "Prix": 1000, "Image": "" }
+            ];
+            const ws = XLSX.utils.json_to_sheet(data);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Template");
+            XLSX.writeFile(wb, "template_varicom.xlsx");
+        }
     </script>
 </body>
 </html>
