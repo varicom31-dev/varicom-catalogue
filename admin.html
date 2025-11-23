@@ -1,4 +1,4 @@
-!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="fr" dir="ltr">
 
 <head>
@@ -328,448 +328,505 @@
                                 </button>
                             </div>
                         </div>
-                        text-align: center;
-                        box-shadow: 0 5px 15px rgba(0,0,0,0.05);
-                        transition: transform 0.3s;
-                        }
+                    </div>
+                </div>
+            </div>
+        </div>
 
-                        .stats-card:hover { transform: translateY(-5px); }
+        <!-- Catalog Management -->
+        <div class="row m-4">
+            <div class="col-12">
+                <div class="feature-card">
+                    <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="fas fa-boxes me-2"></i>Gestion du Catalogue</h5>
+                        <button class="btn btn-light btn-sm text-primary fw-bold" onclick="openBulkImageModal()">
+                            <i class="fas fa-magic me-2"></i>Générateur de Liens Images
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive" style="max-height: 500px;">
+                            <table class="table table-hover align-middle">
+                                <thead class="table-light sticky-top">
+                                    <tr>
+                                        <th>Ref</th>
+                                        <th>Désignation</th>
+                                        <th>Prix</th>
+                                        <th style="width: 40%;">Image URL</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="catalogTableBody">
+                                    <!-- Products rendered here -->
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="text-center mt-3">
+                            <small class="text-muted">Affichage limité aux 100 premiers produits pour la
+                                performance.</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-                        .feature-card {
-                        background: white;
-                        border-radius: 15px;
-                        box-shadow: 0 5px 15px rgba(0,0,0,0.05);
-                        margin-bottom: 20px;
-                        overflow: hidden;
-                        }
+    </div>
 
-                        .btn-pulse {
-                        animation: pulse 2s infinite;
-                        }
+    <!-- Bulk Image Modal -->
+    <div class="modal fade" id="bulkImageModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title"><i class="fas fa-magic me-2"></i>Générateur de Liens Images</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <ul class="nav nav-tabs mb-3" id="bulkTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="mode-hosted-tab" data-bs-toggle="tab"
+                                data-bs-target="#mode-hosted" type="button" role="tab">📂 Hébergement Propre</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="mode-magic-tab" data-bs-toggle="tab"
+                                data-bs-target="#mode-magic" type="button" role="tab">✨ Recherche Magique</button>
+                        </li>
+                    </ul>
 
-                        @keyframes pulse {
-                        0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.7); }
-                        70% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(40, 167, 69, 0); }
-                        100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(40, 167, 69, 0); }
-                        }
-                        </style>
-                        </head>
-
-                        <body>
-                            <div id="syncStatus" class="sync-status"></div>
-
-                            <div class="admin-container">
-                                <div class="admin-header text-center">
-                                    <h1><i class="fas fa-user-shield me-3"></i>PANEL ADMINISTRATEUR VARICOM</h1>
-                                    <p class="lead mb-0">Solution Professionnelle - Synchronisation Temps Réel</p>
+                    <div class="tab-content" id="bulkTabsContent">
+                        <!-- Hosted Mode -->
+                        <div class="tab-pane fade show active" id="mode-hosted" role="tabpanel">
+                            <p class="small text-muted">
+                                Utilisez ce mode si vous avez vos propres images hébergées (ex: GitHub Pages, Imgur).
+                            </p>
+                            <div class="mb-3">
+                                <label class="form-label">Base URL</label>
+                                <input type="text" class="form-control" id="bulkBaseUrl"
+                                    placeholder="ex: https://monsite.com/images/">
+                            </div>
+                            <div class="row g-2 mb-3">
+                                <div class="col-6">
+                                    <label class="form-label">Champ</label>
+                                    <select class="form-select" id="bulkField">
+                                        <option value="ref">Référence</option>
+                                        <option value="designation">Désignation</option>
+                                    </select>
                                 </div>
-
-                                <!-- Quick Actions -->
-                                <div class="p-4 bg-light border-bottom">
-                                    <div class="row align-items-center">
-                                        <div class="col-md-6">
-                                            <h4 class="mb-0 text-primary"><i class="fas fa-bolt me-2"></i>Tableau de
-                                                Bord</h4>
-                                        </div>
-                                        <div class="col-md-6 text-end">
-                                            <button class="btn btn-success btn-lg me-2" onclick="uploadToGitHubGist()"
-                                                id="publishBtn">
-                                                <i class="fab fa-github me-2"></i>Publier / Synchroniser
-                                            </button>
-                                            <button class="btn btn-primary btn-lg" onclick="generateClientLink()">
-                                                <i class="fas fa-link me-2"></i>Lien Client
-                                            </button>
-                                        </div>
-                                    </div>
+                                <div class="col-6">
+                                    <label class="form-label">Extension</label>
+                                    <select class="form-select" id="bulkExt">
+                                        <option value=".jpg">.jpg</option>
+                                        <option value=".png">.png</option>
+                                        <option value=".webp">.webp</option>
+                                        <option value="">(Aucune)</option>
+                                    </select>
                                 </div>
+                            </div>
+                        </div>
 
-                                <!-- Stats -->
-                                <div class="row m-4">
-                                    <div class="col-md-3">
-                                        <div class="stats-card">
-                                            <i class="fas fa-box fa-2x text-primary mb-2"></i>
-                                            <h3 id="statsProducts">0</h3>
-                                            <p class="text-muted mb-0">Produits Totaux</p>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <div class="stats-card">
-                                            <i class="fas fa-star fa-2x text-warning mb-2"></i>
-                                            <h3 id="statsNewProducts">0</h3>
-                                            <p class="text-muted mb-0">Nouveautés</p>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <div class="stats-card">
-                                            <i class="fas fa-bell fa-2x text-info mb-2"></i>
-                                            <h3 id="statsNotifications">0</h3>
-                                            <p class="text-muted mb-0">Notifications</p>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-3">
-                                        <div class="stats-card">
-                                            <i class="fas fa-sync fa-2x text-success mb-2"></i>
-                                            <h3 id="statsStatus">Inactif</h3>
-                                            <p class="text-muted mb-0">Statut Sync</p>
-                                        </div>
-                                    </div>
-                                </div>
+                        <!-- Magic Mode -->
+                        <div class="tab-pane fade" id="mode-magic" role="tabpanel">
+                            <div class="alert alert-warning small">
+                                <i class="fas fa-exclamation-triangle me-2"></i><strong>Attention:</strong> Ce mode
+                                utilise un service de recherche externe (Bing). Les résultats sont automatiques et
+                                peuvent parfois ne pas correspondre exactement.
+                            </div>
+                            <p class="small text-muted">
+                                Ce mode va chercher automatiquement une image sur internet correspondant à la
+                                <strong>Désignation</strong> du produit.
+                            </p>
+                        </div>
+                    </div>
 
-                                <!-- Excel Upload -->
-                                <div class="upload-section">
-                                    <h4><i class="fas fa-file-excel me-2"></i>Importation Produits Excel</h4>
-                                    <div class="upload-area" id="excelUploadArea"
-                                        onclick="document.getElementById('excelFile').click()">
-                                        <i class="fas fa-cloud-upload-alt fa-3x mb-3"></i>
-                                        <h5>Cliquez ou glissez votre fichier Excel ici</h5>
-                                        <p class="small opacity-75">Supporte .xlsx, .xls, .csv</p>
-                                        <input type="file" id="excelFile" accept=".xlsx, .xls, .csv"
-                                            style="display: none;" onchange="handleExcelUpload(this.files[0])">
-                                    </div>
-                                    <div class="mt-3 text-center">
-                                        <button class="btn btn-outline-light btn-sm" onclick="downloadTemplate()">
-                                            <i class="fas fa-download me-1"></i>Télécharger Modèle
-                                        </button>
-                                    </div>
-                                </div>
+                    <div class="alert alert-info small mt-3">
+                        <strong>Aperçu:</strong> <span id="bulkPreview" class="text-break">...</span>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="button" class="btn btn-primary" onclick="applyBulkImages()">Appliquer à tous</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-                                <div class="row m-4">
-                                    <!-- New Products -->
-                                    <div class="col-md-6">
-                                        <div class="feature-card h-100">
-                                            <div class="card-header bg-primary text-white">
-                                                <h5 class="mb-0"><i class="fas fa-plus-circle me-2"></i>Ajouter Produit
-                                                    / Nouveauté</h5>
-                                            </div>
-                                            <div class="card-body">
-                                                <div class="mb-3">
-                                                    <input type="text" class="form-control mb-2" id="newProductName"
-                                                        placeholder="Nom du produit">
-                                                    <div class="row g-2">
-                                                        <div class="col-6">
-                                                            <input type="number" class="form-control"
-                                                                id="newProductPrice" placeholder="Prix (DA)">
-                                                        </div>
-                                                        <div class="col-6">
-                                                            <select class="form-select" id="newProductCategory">
-                                                                <option value="Général">Catégorie...</option>
-                                                                <option value="Ordinateurs">Ordinateurs</option>
-                                                                <option value="Téléphones">Téléphones</option>
-                                                                <option value="Accessoires">Accessoires</option>
-                                                            </select>
-                                                        </div>
-                                                    </div>
-                                                    <input type="text" class="form-control mt-2" id="newProductImage"
-                                                        placeholder="URL de l'image (https://...)">
-                                                </div>
-                                                <button class="btn btn-primary w-100" onclick="addNewProduct()">
-                                                    <i class="fas fa-plus me-2"></i>Ajouter à la liste
-                                                </button>
+    <script>
+        // State
+        let state = {
+            products: [],
+            newProducts: [],
+            notifications: [],
+            gistId: localStorage.getItem('varicom_gist_id') || null,
+            lastSync: localStorage.getItem('varicom_last_sync') || null
+        };
 
-                                                <hr>
-                                                <h6 class="text-muted">Produits Nouveaux Actifs:</h6>
-                                                <ul id="activeNewProducts" class="list-group list-group-flush small"
-                                                    style="max-height: 200px; overflow-y: auto;">
-                                                    <!-- List items -->
-                                                </ul>
-                                            </div>
-                                        </div>
-                                    </div>
+        // Initialization
+        document.addEventListener('DOMContentLoaded', () => {
+            loadLocalData();
+            updateUI();
 
-                                    <!-- Notifications -->
-                                    <div class="col-md-6">
-                                        <div class="feature-card h-100">
-                                            <div class="card-header bg-warning text-dark">
-                                                <h5 class="mb-0"><i class="fas fa-bullhorn me-2"></i>Gérer Notifications
-                                                </h5>
-                                            </div>
-                                            <div class="card-body">
-                                                <div class="mb-3">
-                                                    <input type="text" class="form-control mb-2" id="notifTitle"
-                                                        placeholder="Titre (ex: Promo)">
-                                                    <textarea class="form-control mb-2" id="notifMessage" rows="2"
-                                                        placeholder="Message..."></textarea>
-                                                    <select class="form-select" id="notifType">
-                                                        <option value="info">Information ℹ️</option>
-                                                        <option value="success">Succès ✅</option>
-                                                        <option value="warning">Attention ⚠️</option>
-                                                        <option value="error">Urgent ❌</option>
-                                                    </select>
-                                                </div>
-                                                <button class="btn btn-warning w-100" onclick="createNotification()">
-                                                    <i class="fas fa-paper-plane me-2"></i>Publier Notification
-                                                </button>
+            // Token listener
+            const tokenInput = document.getElementById('githubToken');
+            tokenInput.value = localStorage.getItem('varicom_github_token') || '';
+            tokenInput.addEventListener('input', (e) => localStorage.setItem('varicom_github_token', e.target.value));
 
-                                                <hr>
-                                                <h6 class="text-muted">Notifications Actives:</h6>
-                                                <ul id="activeNotifications" class="list-group list-group-flush small"
-                                                    style="max-height: 200px; overflow-y: auto;">
-                                                    <!-- List items -->
-                                                </ul>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+            // Bulk Preview Listener
+            ['bulkBaseUrl', 'bulkField', 'bulkExt'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.addEventListener('input', updateBulkPreview);
+            });
 
-                                <!-- Settings -->
-                                <div class="row m-4">
-                                    <div class="col-12">
-                                        <div class="feature-card">
-                                            <div class="card-header bg-dark text-white">
-                                                <h5 class="mb-0"><i class="fas fa-cogs me-2"></i>Configuration</h5>
-                                            </div>
-                                            <div class="card-body">
-                                                <div class="row align-items-end">
-                                                    <div class="col-md-8">
-                                                        <label class="form-label">Token GitHub (Personnel Access
-                                                            Token)</label>
-                                                        <div class="input-group">
-                                                            <span class="input-group-text"><i
-                                                                    class="fab fa-github"></i></span>
-                                                            <input type="password" class="form-control" id="githubToken"
-                                                                placeholder="ghp_xxxxxxxxxxxxxxxxxxxx">
-                                                            <button class="btn btn-outline-secondary" type="button"
-                                                                onclick="toggleToken()">
-                                                                <i class="fas fa-eye"></i>
-                                                            </button>
-                                                        </div>
-                                                        <small class="text-muted">Nécessaire pour la synchronisation.
-                                                            Stocké localement.</small>
-                                                    </div>
-                                                    <div class="col-md-4">
-                                                        <button class="btn btn-danger w-100" onclick="resetSync()">
-                                                            <i class="fas fa-trash-alt me-2"></i>Réinitialiser Sync
-                                                        </button>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+            // Tab Change Listener
+            const tabEls = document.querySelectorAll('button[data-bs-toggle="tab"]');
+            tabEls.forEach(tab => {
+                tab.addEventListener('shown.bs.tab', updateBulkPreview);
+            });
+        });
 
-                                <!-- Catalog Management -->
-                                <div class="row m-4">
-                                    <div class="col-12">
-                                        <div class="feature-card">
-                                            <div
-                                                class="card-header bg-info text-white d-flex justify-content-between align-items-center">
-                                                <h5 class="mb-0"><i class="fas fa-boxes me-2"></i>Gestion du Catalogue
-                                                </h5>
-                                                <button class="btn btn-light btn-sm text-primary fw-bold"
-                                                    onclick="openBulkImageModal()">
-                                                    <i class="fas fa-magic me-2"></i>Générateur de Liens Images
-                                                </button>
-                                            </div>
-                                            <div class="card-body">
-                                                <div class="table-responsive" style="max-height: 500px;">
-                                                    <table class="table table-hover align-middle">
-                                                        <thead class="table-light sticky-top">
-                                                            <tr>
-                                                                <th>Ref</th>
-                                                                <th>Désignation</th>
-                                                                <th>Prix</th>
-                                                                <th style="width: 40%;">Image URL</th>
-                                                                <th>Actions</th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody id="catalogTableBody">
-                                                            <!-- Products rendered here -->
-                                                        </tbody>
-                                                    </table>
-                                                </div>
-                                                <div class="text-center mt-3">
-                                                    <small class="text-muted">Affichage limité aux 100 premiers produits
-                                                        pour la performance.</small>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        function updateProductImage(id, newUrl) {
-                                        const p = state.products.find(p => p.id === id);
-                                        if (p) {
-                                        p.image = newUrl;
-                                        saveData(); // This triggers UI update
-                                        }
-                                        }
+        function loadLocalData() {
+            try {
+                const saved = localStorage.getItem('varicom_data');
+                if (saved) {
+                    const data = JSON.parse(saved);
+                    state.products = data.products || [];
+                    state.newProducts = data.newProducts || [];
+                    state.notifications = data.notifications || [];
+                }
+            } catch (e) { console.error('Error loading local data', e); }
+        }
 
-                                        // GitHub Sync
-                                        async function uploadToGitHubGist() {
-                                        const token = document.getElementById('githubToken').value;
-                                        if (!token) return showStatus('Token GitHub manquant!', 'error');
+        function saveData() {
+            localStorage.setItem('varicom_data', JSON.stringify({
+                products: state.products,
+                newProducts: state.newProducts,
+                notifications: state.notifications
+            }));
+            updateUI();
+        }
 
-                                        const btn = document.getElementById('publishBtn');
-                                        const originalText = btn.innerHTML;
-                                        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Synchronisation...';
-                                        btn.disabled = true;
+        // Excel Handling
+        function handleExcelUpload(file) {
+            if (!file) return;
 
-                                        const payload = {
-                                        description: "VARICOM Catalog Data",
-                                        public: true,
-                                        files: {
-                                        "varicom_data.json": {
-                                        content: JSON.stringify({
-                                        products: state.products,
-                                        newProducts: state.newProducts,
-                                        notifications: state.notifications,
-                                        lastUpdate: new Date().toISOString(),
-                                        meta: { version: "2.0", source: "VaricomAdmin" }
-                                        })
-                                        }
-                                        }
-                                        };
+            showStatus('Lecture du fichier...', 'info');
+            const reader = new FileReader();
 
-                                        try {
-                                        let url = 'https://api.github.com/gists';
-                                        let method = 'POST';
+            reader.onload = (e) => {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const jsonData = XLSX.utils.sheet_to_json(firstSheet);
 
-                                        // If we have an ID, try to update (PATCH) instead of create
-                                        if (state.gistId) {
-                                        url += `/${state.gistId}`;
-                                        method = 'PATCH';
-                                        }
+                    processExcelData(jsonData);
+                } catch (err) {
+                    showStatus('Erreur lecture Excel: ' + err.message, 'error');
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
 
-                                        const response = await fetch(url, {
-                                        method: method,
-                                        headers: {
-                                        'Authorization': `token ${token}`,
-                                        'Content-Type': 'application/json'
-                                        },
-                                        body: JSON.stringify(payload)
-                                        });
+        function processExcelData(data) {
+            const processed = data.map((row, idx) => ({
+                id: `prod_${Date.now()}_${idx}`,
+                ref: row['Ref'] || row['Référence'] || row['Code'] || 'N/A',
+                designation: row['Designation'] || row['Désignation'] || row['Nom'] || 'Produit sans nom',
+                famille: row['Famille'] || row['Categorie'] || 'Général',
+                prix: parseFloat(row['Prix'] || row['Price'] || 0),
+                image: row['Image'] || row['Photo'] || ''
+            })).filter(p => p.prix > 0); // Filter invalid
 
-                                        if (!response.ok) {
-                                        if (response.status === 404 && state.gistId) {
-                                        // Gist deleted or invalid, retry as new
-                                        state.gistId = null;
-                                        return uploadToGitHubGist();
-                                        }
-                                        throw new Error(`Erreur GitHub: ${response.status}`);
-                                        }
+            state.products = processed;
+            saveData();
+            showStatus(`${processed.length} produits importés avec succès!`, 'success');
+        }
 
-                                        const result = await response.json();
-                                        state.gistId = result.id;
-                                        state.lastSync = new Date().toISOString();
+        // Product & Notification Management
+        function addNewProduct() {
+            const name = document.getElementById('newProductName').value;
+            const price = document.getElementById('newProductPrice').value;
+            const cat = document.getElementById('newProductCategory').value;
+            const img = document.getElementById('newProductImage').value;
 
-                                        localStorage.setItem('varicom_gist_id', state.gistId);
-                                        localStorage.setItem('varicom_last_sync', state.lastSync);
+            if (!name || !price) return showStatus('Nom et Prix requis', 'warning');
 
-                                        showStatus('✅ Synchronisation réussie!', 'success');
-                                        updateUI();
+            state.newProducts.unshift({
+                id: `new_${Date.now()}`,
+                name,
+                price: parseFloat(price),
+                category: cat,
+                image: img,
+                timestamp: new Date().toISOString()
+            });
 
-                                        } catch (err) {
-                                        showStatus('Erreur Sync: ' + err.message, 'error');
-                                        } finally {
-                                        btn.innerHTML = originalText;
-                                        btn.disabled = false;
-                                        }
-                                        }
+            // Reset inputs
+            document.getElementById('newProductName').value = '';
+            document.getElementById('newProductPrice').value = '';
 
-                                        // UI Updates
-                                        function updateUI() {
-                                        // Stats
-                                        document.getElementById('statsProducts').textContent = state.products.length;
-                                        document.getElementById('statsNewProducts').textContent =
-                                        state.newProducts.length;
-                                        document.getElementById('statsNotifications').textContent =
-                                        state.notifications.length;
-                                        document.getElementById('statsStatus').textContent = state.gistId ? 'Actif' :
-                                        'Inactif';
-                                        document.getElementById('statsStatus').className = state.gistId ? 'text-success'
-                                        : 'text-danger';
+            saveData();
+            showStatus('Nouveau produit ajouté', 'success');
+        }
 
-                                        // Lists
-                                        const npList = document.getElementById('activeNewProducts');
-                                        npList.innerHTML = state.newProducts.map(p => `
-                                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                                            <div><strong>${p.name}</strong> - ${p.price} DA</div>
-                                            <button class="btn btn-sm btn-outline-danger"
-                                                onclick="removeNewProduct('${p.id}')"><i
-                                                    class="fas fa-times"></i></button>
-                                        </li>
-                                        `).join('');
+        function createNotification() {
+            const title = document.getElementById('notifTitle').value;
+            const msg = document.getElementById('notifMessage').value;
+            const type = document.getElementById('notifType').value;
 
-                                        const notifList = document.getElementById('activeNotifications');
-                                        notifList.innerHTML = state.notifications.map(n => `
-                                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                                            <div><span class="badge bg-${getBadgeClass(n.type)}">${n.type}</span>
-                                                ${n.title}</div>
-                                            <button class="btn btn-sm btn-outline-danger"
-                                                onclick="removeNotification('${n.id}')"><i
-                                                    class="fas fa-times"></i></button>
-                                        </li>
-                                        `).join('');
+            if (!title || !msg) return showStatus('Titre et Message requis', 'warning');
 
-                                        // Catalog Table (Limit to 100 for performance)
-                                        const tableBody = document.getElementById('catalogTableBody');
-                                        tableBody.innerHTML = state.products.slice(0, 100).map(p => `
-                                        <tr>
-                                            <td><small>${p.ref}</small></td>
-                                            <td class="text-truncate" style="max-width: 150px;"
-                                                title="${p.designation}">${p.designation}</td>
-                                            <td>${p.prix}</td>
-                                            <td>
-                                                <input type="text" class="form-control form-control-sm"
-                                                    value="${p.image || ''}"
-                                                    onchange="updateProductImage('${p.id}', this.value)"
-                                                    placeholder="URL Image...">
-                                            </td>
-                                            <td>
-                                                <button class="btn btn-sm btn-outline-primary"
-                                                    onclick="searchGoogleImage('${p.designation}')"
-                                                    title="Chercher sur Google">
-                                                    <i class="fab fa-google"></i>
-                                                </button>
-                                            </td>
-                                        </tr>
-                                        `).join('');
-                                        }
+            state.notifications.unshift({
+                id: `notif_${Date.now()}`,
+                title,
+                message: msg,
+                type,
+                timestamp: new Date().toISOString()
+            });
 
-                                        function getBadgeClass(type) {
-                                        return { info: 'info', success: 'success', warning: 'warning', error: 'danger'
-                                        }[type] || 'secondary';
-                                        }
+            document.getElementById('notifTitle').value = '';
+            document.getElementById('notifMessage').value = '';
 
-                                        function showStatus(msg, type) {
-                                        const el = document.getElementById('syncStatus');
-                                        el.textContent = msg;
-                                        el.className = `sync-status sync-${type}`;
-                                        el.style.display = 'block';
-                                        setTimeout(() => el.style.display = 'none', 4000);
-                                        }
+            saveData();
+            showStatus('Notification créée', 'success');
+        }
 
-                                        function generateClientLink() {
-                                        if (!state.gistId) return showStatus('Veuillez d\'abord synchroniser!',
-                                        'warning');
-                                        const url = `${window.location.href.replace('admin.html',
-                                        'index.html')}?gist=${state.gistId}`;
-                                        navigator.clipboard.writeText(url);
-                                        alert('Lien copié dans le presse-papier:\n' + url);
-                                        }
+        function removeNewProduct(id) {
+            state.newProducts = state.newProducts.filter(p => p.id !== id);
+            saveData();
+        }
 
-                                        function toggleToken() {
-                                        const el = document.getElementById('githubToken');
-                                        el.type = el.type === 'password' ? 'text' : 'password';
-                                        }
+        function removeNotification(id) {
+            state.notifications = state.notifications.filter(n => n.id !== id);
+            saveData();
+        }
 
-                                        function resetSync() {
-                                        if (confirm('Oublier l\'ID de synchronisation actuel?')) {
-                                        state.gistId = null;
-                                        localStorage.removeItem('varicom_gist_id');
-                                        updateUI();
-                                        showStatus('Sync réinitialisée', 'info');
-                                        }
-                                        }
+        // --- Bulk Image Functions ---
+        function openBulkImageModal() {
+            new bootstrap.Modal(document.getElementById('bulkImageModal')).show();
+            updateBulkPreview();
+        }
 
-                                        function downloadTemplate() {
-                                        const data = [
-                                        { "Référence": "REF001", "Désignation": "Exemple Produit", "Famille": "Général",
-                                        "Prix": 1000, "Image": "" }
-                                        ];
-                                        const ws = XLSX.utils.json_to_sheet(data);
-                                        const wb = XLSX.utils.book_new();
-                                        XLSX.utils.book_append_sheet(wb, ws, "Template");
-                                        XLSX.writeFile(wb, "template_varicom.xlsx");
-                                        }
-                                        </script>
-                                        <script
-                                            src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-                        </body>
+        function updateBulkPreview() {
+            const isMagic = document.getElementById('mode-magic-tab').classList.contains('active');
+
+            if (isMagic) {
+                document.getElementById('bulkPreview').textContent = `https://tse2.mm.bing.net/th?q=Exemple%20Produit...`;
+            } else {
+                const baseUrl = document.getElementById('bulkBaseUrl').value || 'https://site.com/img/';
+                const field = document.getElementById('bulkField').value;
+                const ext = document.getElementById('bulkExt').value;
+                const example = field === 'ref' ? 'REF123' : 'Produit_Exemple';
+                document.getElementById('bulkPreview').textContent = `${baseUrl}${example}${ext}`;
+            }
+        }
+
+        function applyBulkImages() {
+            const isMagic = document.getElementById('mode-magic-tab').classList.contains('active');
+
+            if (confirm(`Cela va modifier les images de ${state.products.length} produits. Continuer?`)) {
+
+                if (isMagic) {
+                    state.products = state.products.map(p => ({
+                        ...p,
+                        image: `https://tse2.mm.bing.net/th?q=${encodeURIComponent(p.designation)}&w=500&h=500&c=7&rs=1&p=0`
+                    }));
+                } else {
+                    const baseUrl = document.getElementById('bulkBaseUrl').value;
+                    const field = document.getElementById('bulkField').value;
+                    const ext = document.getElementById('bulkExt').value;
+
+                    if (!baseUrl) return alert('Veuillez entrer une URL de base');
+
+                    state.products = state.products.map(p => {
+                        const val = p[field] ? p[field].toString().trim() : '';
+                        const safeVal = field === 'designation' ? val.replace(/[^a-zA-Z0-9-_]/g, '_') : val;
+                        return {
+                            ...p,
+                            image: `${baseUrl}${safeVal}${ext}`
+                        };
+                    });
+                }
+
+                saveData();
+                bootstrap.Modal.getInstance(document.getElementById('bulkImageModal')).hide();
+                showStatus('Images mises à jour avec succès!', 'success');
+            }
+        }
+
+        function searchGoogleImage(term) {
+            const query = encodeURIComponent(term);
+            window.open(`https://www.google.com/search?tbm=isch&q=${query}`, '_blank');
+        }
+
+        function updateProductImage(id, newUrl) {
+            const p = state.products.find(p => p.id === id);
+            if (p) {
+                p.image = newUrl;
+                saveData(); // This triggers UI update
+            }
+        }
+
+        // GitHub Sync
+        async function uploadToGitHubGist() {
+            const token = document.getElementById('githubToken').value;
+            if (!token) return showStatus('Token GitHub manquant!', 'error');
+
+            const btn = document.getElementById('publishBtn');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Synchronisation...';
+            btn.disabled = true;
+
+            const payload = {
+                description: "VARICOM Catalog Data",
+                public: true,
+                files: {
+                    "varicom_data.json": {
+                        content: JSON.stringify({
+                            products: state.products,
+                            newProducts: state.newProducts,
+                            notifications: state.notifications,
+                            lastUpdate: new Date().toISOString(),
+                            meta: { version: "2.0", source: "VaricomAdmin" }
+                        })
+                    }
+                }
+            };
+
+            try {
+                let url = 'https://api.github.com/gists';
+                let method = 'POST';
+
+                // If we have an ID, try to update (PATCH) instead of create
+                if (state.gistId) {
+                    url += `/${state.gistId}`;
+                    method = 'PATCH';
+                }
+
+                const response = await fetch(url, {
+                    method: method,
+                    headers: {
+                        'Authorization': `token ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    if (response.status === 404 && state.gistId) {
+                        // Gist deleted or invalid, retry as new
+                        state.gistId = null;
+                        return uploadToGitHubGist();
+                    }
+                    throw new Error(`Erreur GitHub: ${response.status}`);
+                }
+
+                const result = await response.json();
+                state.gistId = result.id;
+                state.lastSync = new Date().toISOString();
+
+                localStorage.setItem('varicom_gist_id', state.gistId);
+                localStorage.setItem('varicom_last_sync', state.lastSync);
+
+                showStatus('✅ Synchronisation réussie!', 'success');
+                updateUI();
+
+            } catch (err) {
+                showStatus('Erreur Sync: ' + err.message, 'error');
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        }
+
+        // UI Updates
+        function updateUI() {
+            // Stats
+            document.getElementById('statsProducts').textContent = state.products.length;
+            document.getElementById('statsNewProducts').textContent = state.newProducts.length;
+            document.getElementById('statsNotifications').textContent = state.notifications.length;
+            document.getElementById('statsStatus').textContent = state.gistId ? 'Actif' : 'Inactif';
+            document.getElementById('statsStatus').className = state.gistId ? 'text-success' : 'text-danger';
+
+            // Lists
+            const npList = document.getElementById('activeNewProducts');
+            npList.innerHTML = state.newProducts.map(p => `
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <div><strong>${p.name}</strong> - ${p.price} DA</div>
+                    <button class="btn btn-sm btn-outline-danger" onclick="removeNewProduct('${p.id}')"><i class="fas fa-times"></i></button>
+                </li>
+            `).join('');
+
+            const notifList = document.getElementById('activeNotifications');
+            notifList.innerHTML = state.notifications.map(n => `
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <div><span class="badge bg-${getBadgeClass(n.type)}">${n.type}</span> ${n.title}</div>
+                    <button class="btn btn-sm btn-outline-danger" onclick="removeNotification('${n.id}')"><i class="fas fa-times"></i></button>
+                </li>
+            `).join('');
+
+            // Catalog Table (Limit to 100 for performance)
+            const tableBody = document.getElementById('catalogTableBody');
+            tableBody.innerHTML = state.products.slice(0, 100).map(p => `
+                <tr>
+                    <td><small>${p.ref}</small></td>
+                    <td class="text-truncate" style="max-width: 150px;" title="${p.designation}">${p.designation}</td>
+                    <td>${p.prix}</td>
+                    <td>
+                        <input type="text" class="form-control form-control-sm" 
+                               value="${p.image || ''}" 
+                               onchange="updateProductImage('${p.id}', this.value)"
+                               placeholder="URL Image...">
+                    </td>
+                    <td>
+                        <button class="btn btn-sm btn-outline-primary" onclick="searchGoogleImage('${p.designation}')" title="Chercher sur Google">
+                            <i class="fab fa-google"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function getBadgeClass(type) {
+            return { info: 'info', success: 'success', warning: 'warning', error: 'danger' }[type] || 'secondary';
+        }
+
+        function showStatus(msg, type) {
+            const el = document.getElementById('syncStatus');
+            el.textContent = msg;
+            el.className = `sync-status sync-${type}`;
+            el.style.display = 'block';
+            setTimeout(() => el.style.display = 'none', 4000);
+        }
+
+        function generateClientLink() {
+            if (!state.gistId) return showStatus('Veuillez d\'abord synchroniser!', 'warning');
+            const url = `${window.location.href.replace('admin.html', 'index.html')}?gist=${state.gistId}`;
+            navigator.clipboard.writeText(url);
+            alert('Lien copié dans le presse-papier:\n' + url);
+        }
+
+        function toggleToken() {
+            const el = document.getElementById('githubToken');
+            el.type = el.type === 'password' ? 'text' : 'password';
+        }
+
+        function resetSync() {
+            if (confirm('Oublier l\'ID de synchronisation actuel?')) {
+                state.gistId = null;
+                localStorage.removeItem('varicom_gist_id');
+                updateUI();
+                showStatus('Sync réinitialisée', 'info');
+            }
+        }
+
+        function downloadTemplate() {
+            const data = [
+                { "Référence": "REF001", "Désignation": "Exemple Produit", "Famille": "Général", "Prix": 1000, "Image": "" }
+            ];
+            const ws = XLSX.utils.json_to_sheet(data);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Template");
+            XLSX.writeFile(wb, "template_varicom.xlsx");
+        }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>
