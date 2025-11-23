@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+!DOCTYPE html>
 <html lang="fr" dir="ltr">
 
 <head>
@@ -7,6 +7,10 @@
     <title>VARICOM - Catalogue Client</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- PDF Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.28/jspdf.plugin.autotable.min.js"></script>
+
     <style>
         :root {
             --primary-color: #1a3a6c;
@@ -74,6 +78,45 @@
             z-index: 1050;
             min-width: 300px;
         }
+
+        /* Cart Floating Button */
+        .cart-float-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            background: var(--accent-color);
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            cursor: pointer;
+            z-index: 1000;
+            transition: transform 0.3s;
+        }
+
+        .cart-float-btn:hover {
+            transform: scale(1.1);
+        }
+
+        .cart-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #dc3545;
+            color: white;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid white;
+        }
     </style>
 </head>
 
@@ -139,25 +182,79 @@
         </div>
     </div>
 
+    <!-- Cart Floating Button -->
+    <div class="cart-float-btn" onclick="openCart()">
+        <i class="fas fa-shopping-cart fa-lg"></i>
+        <span class="cart-badge" id="cartCount">0</span>
+    </div>
+
+    <!-- Cart Modal -->
+    <div class="modal fade" id="cartModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-light">
+                    <h5 class="modal-title"><i class="fas fa-shopping-cart me-2"></i>Votre Panier</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="cartItems" class="mb-3">
+                        <div class="text-center py-5 text-muted">Votre panier est vide</div>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center border-top pt-3">
+                        <h5>Total:</h5>
+                        <h4 class="text-primary" id="cartTotal">0.00 DA</h4>
+                    </div>
+
+                    <!-- Client Info for PDF -->
+                    <div class="mt-4 p-3 bg-light rounded">
+                        <h6><i class="fas fa-file-invoice me-2"></i>Informations pour le Devis (Optionnel)</h6>
+                        <div class="row g-2">
+                            <div class="col-md-6">
+                                <input type="text" class="form-control" id="clientName"
+                                    placeholder="Nom du Client / Entreprise">
+                            </div>
+                            <div class="col-md-6">
+                                <input type="text" class="form-control" id="clientPhone" placeholder="Téléphone">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                    <button type="button" class="btn btn-danger" onclick="clearCart()">Vider</button>
+                    <button type="button" class="btn btn-success" onclick="generatePDF()">
+                        <i class="fas fa-file-pdf me-2"></i>Télécharger Devis PDF
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         let allProducts = [];
         let gistId = null;
+        let cart = [];
 
         document.addEventListener('DOMContentLoaded', () => {
-            // Get Gist ID from URL or Storage
+            // Load Cart from Storage
+            const savedCart = localStorage.getItem('varicom_cart');
+            if (savedCart) {
+                cart = JSON.parse(savedCart);
+                updateCartUI();
+            }
+
+            // Get Gist ID
             const params = new URLSearchParams(window.location.search);
             gistId = params.get('gist') || localStorage.getItem('varicom_client_gist_id');
 
             if (gistId) {
                 localStorage.setItem('varicom_client_gist_id', gistId);
                 loadData();
-                // Auto refresh every 2 minutes
                 setInterval(loadData, 120000);
             } else {
                 showError("Aucun catalogue connecté. Veuillez utiliser le lien fourni par l'administrateur.");
             }
 
-            // Filters
             document.getElementById('searchInput').addEventListener('input', filterProducts);
             document.getElementById('categoryFilter').addEventListener('change', filterProducts);
         });
@@ -176,7 +273,6 @@
 
             } catch (err) {
                 console.error(err);
-                // Don't show error on auto-refresh failure to avoid annoyance, only on initial load if empty
                 if (allProducts.length === 0) {
                     showError("Impossible de charger le catalogue. Vérifiez votre connexion.");
                 }
@@ -184,7 +280,6 @@
         }
 
         function updateApp(data) {
-            // Merge regular products and new products for display
             const regular = (data.products || []).map(p => ({ ...p, isNew: false }));
             const special = (data.newProducts || []).map(p => ({
                 ...p,
@@ -196,17 +291,11 @@
 
             allProducts = [...special, ...regular];
 
-            // Update Stats
             document.getElementById('countProducts').textContent = regular.length;
             document.getElementById('countNew').textContent = special.length;
 
-            // Update Notifications
             renderNotifications(data.notifications || []);
-
-            // Update Categories
             updateCategories();
-
-            // Render Products
             filterProducts();
         }
 
@@ -232,7 +321,7 @@
             select.innerHTML = '<option value="">Toutes les catégories</option>' +
                 cats.map(c => `<option value="${c}">${c}</option>`).join('');
 
-            select.value = current; // Restore selection
+            select.value = current;
         }
 
         function filterProducts() {
@@ -269,7 +358,7 @@
                             <p class="card-text small text-muted mb-2">${p.famille}</p>
                             <div class="d-flex justify-content-between align-items-center">
                                 <span class="price-tag">${formatPrice(p.prix)}</span>
-                                <button class="btn btn-outline-primary btn-sm rounded-circle" onclick="alert('Ajouté au panier!')">
+                                <button class="btn btn-outline-primary btn-sm rounded-circle" onclick="addToCart('${p.id}')">
                                     <i class="fas fa-plus"></i>
                                 </button>
                             </div>
@@ -279,8 +368,171 @@
             `).join('');
         }
 
+        // --- Cart Functions ---
+
+        function addToCart(id) {
+            const product = allProducts.find(p => p.id === id);
+            if (!product) return;
+
+            const existing = cart.find(item => item.id === id);
+            if (existing) {
+                existing.qty++;
+            } else {
+                cart.push({ ...product, qty: 1 });
+            }
+
+            saveCart();
+            showToast(`Ajouté: ${product.designation}`);
+        }
+
+        function removeFromCart(id) {
+            cart = cart.filter(item => item.id !== id);
+            saveCart();
+            renderCartItems(); // Re-render if modal is open
+        }
+
+        function updateQty(id, change) {
+            const item = cart.find(i => i.id === id);
+            if (item) {
+                item.qty += change;
+                if (item.qty <= 0) removeFromCart(id);
+                else saveCart();
+            }
+            renderCartItems();
+        }
+
+        function clearCart() {
+            if (confirm('Vider le panier?')) {
+                cart = [];
+                saveCart();
+                renderCartItems();
+            }
+        }
+
+        function saveCart() {
+            localStorage.setItem('varicom_cart', JSON.stringify(cart));
+            updateCartUI();
+        }
+
+        function updateCartUI() {
+            const count = cart.reduce((sum, item) => sum + item.qty, 0);
+            document.getElementById('cartCount').textContent = count;
+
+            // Animate badge
+            const badge = document.getElementById('cartCount');
+            badge.classList.add('animate__animated', 'animate__bounceIn');
+            setTimeout(() => badge.classList.remove('animate__animated', 'animate__bounceIn'), 500);
+        }
+
+        function openCart() {
+            renderCartItems();
+            new bootstrap.Modal(document.getElementById('cartModal')).show();
+        }
+
+        function renderCartItems() {
+            const container = document.getElementById('cartItems');
+            const totalEl = document.getElementById('cartTotal');
+
+            if (cart.length === 0) {
+                container.innerHTML = '<div class="text-center py-5 text-muted"><i class="fas fa-shopping-basket fa-3x mb-3"></i><br>Votre panier est vide</div>';
+                totalEl.textContent = '0.00 DA';
+                return;
+            }
+
+            let total = 0;
+            container.innerHTML = '<div class="list-group">' + cart.map(item => {
+                const itemTotal = item.prix * item.qty;
+                total += itemTotal;
+                return `
+                    <div class="list-group-item d-flex justify-content-between align-items-center">
+                        <div class="ms-2 me-auto">
+                            <div class="fw-bold">${item.designation}</div>
+                            ${formatPrice(item.prix)} x ${item.qty}
+                        </div>
+                        <div class="d-flex align-items-center">
+                            <button class="btn btn-sm btn-outline-secondary me-2" onclick="updateQty('${item.id}', -1)">-</button>
+                            <span class="badge bg-primary rounded-pill">${item.qty}</span>
+                            <button class="btn btn-sm btn-outline-secondary ms-2 me-3" onclick="updateQty('${item.id}', 1)">+</button>
+                            <span class="fw-bold me-3">${formatPrice(itemTotal)}</span>
+                            <button class="btn btn-sm btn-outline-danger" onclick="removeFromCart('${item.id}')"><i class="fas fa-trash"></i></button>
+                        </div>
+                    </div>
+                `;
+            }).join('') + '</div>';
+
+            totalEl.textContent = formatPrice(total);
+        }
+
+        function showToast(msg) {
+            // Simple toast implementation
+            const toast = document.createElement('div');
+            toast.className = 'notification-toast alert alert-success shadow-sm';
+            toast.innerHTML = `<i class="fas fa-check-circle me-2"></i>${msg}`;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        // --- PDF Generation ---
+
+        function generatePDF() {
+            if (cart.length === 0) return alert('Le panier est vide!');
+
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            const clientName = document.getElementById('clientName').value || 'Client';
+            const clientPhone = document.getElementById('clientPhone').value || '';
+            const date = new Date().toLocaleDateString('fr-FR');
+
+            // Header
+            doc.setFillColor(26, 58, 108); // Primary Color
+            doc.rect(0, 0, 210, 40, 'F');
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(22);
+            doc.text('VARICOM', 15, 20);
+            doc.setFontSize(12);
+            doc.text('Devis / Proforma', 15, 30);
+
+            doc.setFontSize(10);
+            doc.text(`Date: ${date}`, 190, 20, { align: 'right' });
+
+            // Client Info
+            doc.setTextColor(0, 0, 0);
+            doc.setFontSize(12);
+            doc.text(`Client: ${clientName}`, 15, 55);
+            if (clientPhone) doc.text(`Tel: ${clientPhone}`, 15, 62);
+
+            // Table
+            const tableData = cart.map(item => [
+                item.designation,
+                item.qty,
+                formatPrice(item.prix),
+                formatPrice(item.prix * item.qty)
+            ]);
+
+            const total = cart.reduce((sum, item) => sum + (item.prix * item.qty), 0);
+
+            doc.autoTable({
+                startY: 70,
+                head: [['Désignation', 'Qté', 'Prix Unit.', 'Total']],
+                body: tableData,
+                theme: 'striped',
+                headStyles: { fillColor: [26, 58, 108] },
+                foot: [['', '', 'Total Global:', formatPrice(total)]],
+                footStyles: { fillColor: [233, 236, 239], textColor: [0, 0, 0], fontStyle: 'bold' }
+            });
+
+            // Footer
+            const pageHeight = doc.internal.pageSize.height;
+            doc.setFontSize(8);
+            doc.setTextColor(100);
+            doc.text('Ce document est un devis généré automatiquement.', 105, pageHeight - 10, { align: 'center' });
+
+            doc.save(`Devis_VARICOM_${Date.now()}.pdf`);
+        }
+
         function formatPrice(p) {
-            return new Intl.NumberFormat('fr-FR').format(p) + ' DA';
+            return new Intl.NumberFormat('fr-FR', { minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(p) + ' DA';
         }
 
         function updateLastSyncTime() {
@@ -301,6 +553,7 @@
             `;
         }
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 
 </html>
