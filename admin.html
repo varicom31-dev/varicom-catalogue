@@ -1,1 +1,576 @@
+<!DOCTYPE html>
+<html lang="fr" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VARICOM - Administration Pro</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <style>
+        :root {
+            --primary-color: #1a3a6c;
+            --secondary-color: #e63946;
+            --accent-color: #2a9d8f;
+            --dark-color: #2c3e50;
+            --light-color: #ecf0f1;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .admin-container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            margin: 0 auto;
+            max-width: 1400px;
+            overflow: hidden;
+        }
+        
+        .admin-header {
+            background: linear-gradient(135deg, var(--primary-color), #2a4d7a);
+            color: white;
+            padding: 25px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .upload-section {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .upload-area {
+            border: 3px dashed rgba(255,255,255,0.5);
+            border-radius: 12px;
+            padding: 40px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(255,255,255,0.1);
+        }
+        
+        .upload-area:hover {
+            background: rgba(255,255,255,0.2);
+            border-color: white;
+        }
+        
+        .sync-status {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            padding: 15px 25px;
+            border-radius: 10px;
+            display: none;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.15);
+            animation: slideInRight 0.5s ease;
+            color: white;
+        }
+        
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        .sync-success { background: #28a745; border-left: 5px solid #1e7e34; }
+        .sync-warning { background: #ffc107; color: #000; border-left: 5px solid #e0a800; }
+        .sync-error { background: #dc3545; border-left: 5px solid #bd2130; }
+        
+        .stats-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            transition: transform 0.3s;
+        }
+        
+        .stats-card:hover { transform: translateY(-5px); }
+        
+        .feature-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .btn-pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.7); }
+            70% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(40, 167, 69, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(40, 167, 69, 0); }
+        }
+    </style>
+</head>
+<body>
+    <div id="syncStatus" class="sync-status"></div>
+
+    <div class="admin-container">
+        <div class="admin-header text-center">
+            <h1><i class="fas fa-user-shield me-3"></i>PANEL ADMINISTRATEUR VARICOM</h1>
+            <p class="lead mb-0">Solution Professionnelle - Synchronisation Temps Réel</p>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="p-4 bg-light border-bottom">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <h4 class="mb-0 text-primary"><i class="fas fa-bolt me-2"></i>Tableau de Bord</h4>
+                </div>
+                <div class="col-md-6 text-end">
+                    <button class="btn btn-success btn-lg me-2" onclick="uploadToGitHubGist()" id="publishBtn">
+                        <i class="fab fa-github me-2"></i>Publier / Synchroniser
+                    </button>
+                    <button class="btn btn-primary btn-lg" onclick="generateClientLink()">
+                        <i class="fas fa-link me-2"></i>Lien Client
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="row m-4">
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <i class="fas fa-box fa-2x text-primary mb-2"></i>
+                    <h3 id="statsProducts">0</h3>
+                    <p class="text-muted mb-0">Produits Totaux</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <i class="fas fa-star fa-2x text-warning mb-2"></i>
+                    <h3 id="statsNewProducts">0</h3>
+                    <p class="text-muted mb-0">Nouveautés</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <i class="fas fa-bell fa-2x text-info mb-2"></i>
+                    <h3 id="statsNotifications">0</h3>
+                    <p class="text-muted mb-0">Notifications</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <i class="fas fa-sync fa-2x text-success mb-2"></i>
+                    <h3 id="statsStatus">Inactif</h3>
+                    <p class="text-muted mb-0">Statut Sync</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Excel Upload -->
+        <div class="upload-section">
+            <h4><i class="fas fa-file-excel me-2"></i>Importation Produits Excel</h4>
+            <div class="upload-area" id="excelUploadArea" onclick="document.getElementById('excelFile').click()">
+                <i class="fas fa-cloud-upload-alt fa-3x mb-3"></i>
+                <h5>Cliquez ou glissez votre fichier Excel ici</h5>
+                <p class="small opacity-75">Supporte .xlsx, .xls, .csv</p>
+                <input type="file" id="excelFile" accept=".xlsx, .xls, .csv" style="display: none;" onchange="handleExcelUpload(this.files[0])">
+            </div>
+            <div class="mt-3 text-center">
+                <button class="btn btn-outline-light btn-sm" onclick="downloadTemplate()">
+                    <i class="fas fa-download me-1"></i>Télécharger Modèle
+                </button>
+            </div>
+        </div>
+
+        <div class="row m-4">
+            <!-- New Products -->
+            <div class="col-md-6">
+                <div class="feature-card h-100">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0"><i class="fas fa-plus-circle me-2"></i>Ajouter Produit / Nouveauté</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <input type="text" class="form-control mb-2" id="newProductName" placeholder="Nom du produit">
+                            <div class="row g-2">
+                                <div class="col-6">
+                                    <input type="number" class="form-control" id="newProductPrice" placeholder="Prix (DA)">
+                                </div>
+                                <div class="col-6">
+                                    <select class="form-select" id="newProductCategory">
+                                        <option value="Général">Catégorie...</option>
+                                        <option value="Ordinateurs">Ordinateurs</option>
+                                        <option value="Téléphones">Téléphones</option>
+                                        <option value="Accessoires">Accessoires</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <input type="text" class="form-control mt-2" id="newProductImage" placeholder="URL de l'image (https://...)">
+                        </div>
+                        <button class="btn btn-primary w-100" onclick="addNewProduct()">
+                            <i class="fas fa-plus me-2"></i>Ajouter à la liste
+                        </button>
+                        
+                        <hr>
+                        <h6 class="text-muted">Produits Nouveaux Actifs:</h6>
+                        <ul id="activeNewProducts" class="list-group list-group-flush small" style="max-height: 200px; overflow-y: auto;">
+                            <!-- List items -->
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Notifications -->
+            <div class="col-md-6">
+                <div class="feature-card h-100">
+                    <div class="card-header bg-warning text-dark">
+                        <h5 class="mb-0"><i class="fas fa-bullhorn me-2"></i>Gérer Notifications</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <input type="text" class="form-control mb-2" id="notifTitle" placeholder="Titre (ex: Promo)">
+                            <textarea class="form-control mb-2" id="notifMessage" rows="2" placeholder="Message..."></textarea>
+                            <select class="form-select" id="notifType">
+                                <option value="info">Information ℹ️</option>
+                                <option value="success">Succès ✅</option>
+                                <option value="warning">Attention ⚠️</option>
+                                <option value="error">Urgent ❌</option>
+                            </select>
+                        </div>
+                        <button class="btn btn-warning w-100" onclick="createNotification()">
+                            <i class="fas fa-paper-plane me-2"></i>Publier Notification
+                        </button>
+
+                        <hr>
+                        <h6 class="text-muted">Notifications Actives:</h6>
+                        <ul id="activeNotifications" class="list-group list-group-flush small" style="max-height: 200px; overflow-y: auto;">
+                            <!-- List items -->
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings -->
+        <div class="row m-4">
+            <div class="col-12">
+                <div class="feature-card">
+                    <div class="card-header bg-dark text-white">
+                        <h5 class="mb-0"><i class="fas fa-cogs me-2"></i>Configuration</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row align-items-end">
+                            <div class="col-md-8">
+                                <label class="form-label">Token GitHub (Personnel Access Token)</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fab fa-github"></i></span>
+                                    <input type="password" class="form-control" id="githubToken" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx">
+                                    <button class="btn btn-outline-secondary" type="button" onclick="toggleToken()">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                                <small class="text-muted">Nécessaire pour la synchronisation. Stocké localement.</small>
+                            </div>
+                            <div class="col-md-4">
+                                <button class="btn btn-danger w-100" onclick="resetSync()">
+                                    <i class="fas fa-trash-alt me-2"></i>Réinitialiser Sync
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // State
+        let state = {
+            products: [],
+            newProducts: [],
+            notifications: [],
+            gistId: localStorage.getItem('varicom_gist_id') || null,
+            lastSync: localStorage.getItem('varicom_last_sync') || null
+        };
+
+        // Initialization
+        document.addEventListener('DOMContentLoaded', () => {
+            loadLocalData();
+            updateUI();
+            
+            // Token listener
+            const tokenInput = document.getElementById('githubToken');
+            tokenInput.value = localStorage.getItem('varicom_github_token') || '';
+            tokenInput.addEventListener('input', (e) => localStorage.setItem('varicom_github_token', e.target.value));
+        });
+
+        function loadLocalData() {
+            try {
+                const saved = localStorage.getItem('varicom_data');
+                if (saved) {
+                    const data = JSON.parse(saved);
+                    state.products = data.products || [];
+                    state.newProducts = data.newProducts || [];
+                    state.notifications = data.notifications || [];
+                }
+            } catch (e) { console.error('Error loading local data', e); }
+        }
+
+        function saveData() {
+            localStorage.setItem('varicom_data', JSON.stringify({
+                products: state.products,
+                newProducts: state.newProducts,
+                notifications: state.notifications
+            }));
+            updateUI();
+        }
+
+        // Excel Handling
+        function handleExcelUpload(file) {
+            if (!file) return;
+            
+            showStatus('Lecture du fichier...', 'info');
+            const reader = new FileReader();
+            
+            reader.onload = (e) => {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const jsonData = XLSX.utils.sheet_to_json(firstSheet);
+                    
+                    processExcelData(jsonData);
+                } catch (err) {
+                    showStatus('Erreur lecture Excel: ' + err.message, 'error');
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function processExcelData(data) {
+            const processed = data.map((row, idx) => ({
+                id: `prod_${Date.now()}_${idx}`,
+                ref: row['Ref'] || row['Référence'] || row['Code'] || 'N/A',
+                designation: row['Designation'] || row['Désignation'] || row['Nom'] || 'Produit sans nom',
+                famille: row['Famille'] || row['Categorie'] || 'Général',
+                prix: parseFloat(row['Prix'] || row['Price'] || 0),
+                image: row['Image'] || row['Photo'] || ''
+            })).filter(p => p.prix > 0); // Filter invalid
+
+            state.products = processed;
+            saveData();
+            showStatus(`${processed.length} produits importés avec succès!`, 'success');
+        }
+
+        // Product & Notification Management
+        function addNewProduct() {
+            const name = document.getElementById('newProductName').value;
+            const price = document.getElementById('newProductPrice').value;
+            const cat = document.getElementById('newProductCategory').value;
+            const img = document.getElementById('newProductImage').value;
+
+            if (!name || !price) return showStatus('Nom et Prix requis', 'warning');
+
+            state.newProducts.unshift({
+                id: `new_${Date.now()}`,
+                name,
+                price: parseFloat(price),
+                category: cat,
+                image: img,
+                timestamp: new Date().toISOString()
+            });
+            
+            // Reset inputs
+            document.getElementById('newProductName').value = '';
+            document.getElementById('newProductPrice').value = '';
+            
+            saveData();
+            showStatus('Nouveau produit ajouté', 'success');
+        }
+
+        function createNotification() {
+            const title = document.getElementById('notifTitle').value;
+            const msg = document.getElementById('notifMessage').value;
+            const type = document.getElementById('notifType').value;
+
+            if (!title || !msg) return showStatus('Titre et Message requis', 'warning');
+
+            state.notifications.unshift({
+                id: `notif_${Date.now()}`,
+                title,
+                message: msg,
+                type,
+                timestamp: new Date().toISOString()
+            });
+
+            document.getElementById('notifTitle').value = '';
+            document.getElementById('notifMessage').value = '';
+            
+            saveData();
+            showStatus('Notification créée', 'success');
+        }
+
+        function removeNewProduct(id) {
+            state.newProducts = state.newProducts.filter(p => p.id !== id);
+            saveData();
+        }
+
+        function removeNotification(id) {
+            state.notifications = state.notifications.filter(n => n.id !== id);
+            saveData();
+        }
+
+        // GitHub Sync
+        async function uploadToGitHubGist() {
+            const token = document.getElementById('githubToken').value;
+            if (!token) return showStatus('Token GitHub manquant!', 'error');
+
+            const btn = document.getElementById('publishBtn');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Synchronisation...';
+            btn.disabled = true;
+
+            const payload = {
+                description: "VARICOM Catalog Data",
+                public: true,
+                files: {
+                    "varicom_data.json": {
+                        content: JSON.stringify({
+                            products: state.products,
+                            newProducts: state.newProducts,
+                            notifications: state.notifications,
+                            lastUpdate: new Date().toISOString(),
+                            meta: { version: "2.0", source: "VaricomAdmin" }
+                        })
+                    }
+                }
+            };
+
+            try {
+                let url = 'https://api.github.com/gists';
+                let method = 'POST';
+
+                // If we have an ID, try to update (PATCH) instead of create
+                if (state.gistId) {
+                    url += `/${state.gistId}`;
+                    method = 'PATCH';
+                }
+
+                const response = await fetch(url, {
+                    method: method,
+                    headers: {
+                        'Authorization': `token ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                if (!response.ok) {
+                    if (response.status === 404 && state.gistId) {
+                        // Gist deleted or invalid, retry as new
+                        state.gistId = null;
+                        return uploadToGitHubGist(); 
+                    }
+                    throw new Error(`Erreur GitHub: ${response.status}`);
+                }
+
+                const result = await response.json();
+                state.gistId = result.id;
+                state.lastSync = new Date().toISOString();
+                
+                localStorage.setItem('varicom_gist_id', state.gistId);
+                localStorage.setItem('varicom_last_sync', state.lastSync);
+                
+                showStatus('✅ Synchronisation réussie!', 'success');
+                updateUI();
+
+            } catch (err) {
+                showStatus('Erreur Sync: ' + err.message, 'error');
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        }
+
+        // UI Updates
+        function updateUI() {
+            // Stats
+            document.getElementById('statsProducts').textContent = state.products.length;
+            document.getElementById('statsNewProducts').textContent = state.newProducts.length;
+            document.getElementById('statsNotifications').textContent = state.notifications.length;
+            document.getElementById('statsStatus').textContent = state.gistId ? 'Actif' : 'Inactif';
+            document.getElementById('statsStatus').className = state.gistId ? 'text-success' : 'text-danger';
+
+            // Lists
+            const npList = document.getElementById('activeNewProducts');
+            npList.innerHTML = state.newProducts.map(p => `
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <div><strong>${p.name}</strong> - ${p.price} DA</div>
+                    <button class="btn btn-sm btn-outline-danger" onclick="removeNewProduct('${p.id}')"><i class="fas fa-times"></i></button>
+                </li>
+            `).join('');
+
+            const notifList = document.getElementById('activeNotifications');
+            notifList.innerHTML = state.notifications.map(n => `
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <div><span class="badge bg-${getBadgeClass(n.type)}">${n.type}</span> ${n.title}</div>
+                    <button class="btn btn-sm btn-outline-danger" onclick="removeNotification('${n.id}')"><i class="fas fa-times"></i></button>
+                </li>
+            `).join('');
+        }
+
+        function getBadgeClass(type) {
+            return { info: 'info', success: 'success', warning: 'warning', error: 'danger' }[type] || 'secondary';
+        }
+
+        function showStatus(msg, type) {
+            const el = document.getElementById('syncStatus');
+            el.textContent = msg;
+            el.className = `sync-status sync-${type}`;
+            el.style.display = 'block';
+            setTimeout(() => el.style.display = 'none', 4000);
+        }
+
+        function generateClientLink() {
+            if (!state.gistId) return showStatus('Veuillez d\'abord synchroniser!', 'warning');
+            const url = `${window.location.href.replace('admin.html', 'index.html')}?gist=${state.gistId}`;
+            navigator.clipboard.writeText(url);
+            alert('Lien copié dans le presse-papier:\n' + url);
+        }
+
+        function toggleToken() {
+            const el = document.getElementById('githubToken');
+            el.type = el.type === 'password' ? 'text' : 'password';
+        }
+
+        function resetSync() {
+            if(confirm('Oublier l\'ID de synchronisation actuel?')) {
+                state.gistId = null;
+                localStorage.removeItem('varicom_gist_id');
+                updateUI();
+                showStatus('Sync réinitialisée', 'info');
+            }
+        }
+
+        function downloadTemplate() {
+            const data = [
+                { "Référence": "REF001", "Désignation": "Exemple Produit", "Famille": "Général", "Prix": 1000, "Image": "" }
+            ];
+            const ws = XLSX.utils.json_to_sheet(data);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, "Template");
+            XLSX.writeFile(wb, "template_varicom.xlsx");
+        }
+    </script>
+</body>
+</html>
 
