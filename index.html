@@ -205,6 +205,20 @@
         [data-theme="dark"] .text-muted {
             color: #adb5bd !important;
         }
+
+        /* Recommendation Section */
+        .recommendation-section {
+            background: linear-gradient(to right, rgba(42, 157, 143, 0.1), rgba(26, 58, 108, 0.1));
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 30px;
+            display: none;
+            /* Hidden by default */
+        }
+
+        [data-theme="dark"] .recommendation-section {
+            background: linear-gradient(to right, rgba(100, 255, 218, 0.05), rgba(74, 144, 226, 0.05));
+        }
     </style>
 </head>
 
@@ -239,6 +253,13 @@
 
     <!-- Main Content -->
     <div class="container my-4">
+
+        <!-- Recommendations -->
+        <div id="recommendationSection" class="recommendation-section">
+            <h4 class="mb-3"><i class="fas fa-magic me-2 text-warning"></i>Recommandé pour vous</h4>
+            <div class="row g-3" id="recommendationGrid"></div>
+        </div>
+
         <!-- Search & Filter -->
         <div class="row g-3 mb-4">
             <div class="col-md-8">
@@ -340,6 +361,7 @@
         let cart = [];
         let wishlist = [];
         let showWishlistOnly = false;
+        let categoryAffinity = {};
 
         document.addEventListener('DOMContentLoaded', () => {
             // Load Local Data
@@ -351,6 +373,9 @@
 
             const savedTheme = localStorage.getItem('varicom_theme');
             if (savedTheme) { applyTheme(savedTheme); }
+
+            const savedAffinity = localStorage.getItem('varicom_affinity');
+            if (savedAffinity) { categoryAffinity = JSON.parse(savedAffinity); }
 
             // Get Gist ID
             const params = new URLSearchParams(window.location.search);
@@ -425,6 +450,7 @@
             renderNotifications(data.notifications || []);
             updateCategories();
             filterProducts();
+            updateRecommendations();
         }
 
         function renderNotifications(notifs) {
@@ -452,17 +478,63 @@
             select.value = current;
         }
 
+        // --- Recommendation Engine ---
+        function trackAffinity(category, score) {
+            if (!category) return;
+            categoryAffinity[category] = (categoryAffinity[category] || 0) + score;
+            localStorage.setItem('varicom_affinity', JSON.stringify(categoryAffinity));
+            // Debounce recommendation update
+            setTimeout(updateRecommendations, 1000);
+        }
+
+        function updateRecommendations() {
+            const section = document.getElementById('recommendationSection');
+            const grid = document.getElementById('recommendationGrid');
+
+            // Find top 2 categories
+            const topCategories = Object.entries(categoryAffinity)
+                .sort((a, b) => b[1] - a[1])
+                .slice(0, 2)
+                .map(entry => entry[0]);
+
+            if (topCategories.length === 0) {
+                section.style.display = 'none';
+                return;
+            }
+
+            // Get 4 random products from top categories, excluding cart/wishlist
+            let recs = allProducts.filter(p =>
+                topCategories.includes(p.famille) &&
+                !cart.some(c => c.id === p.id) &&
+                !wishlist.includes(p.id)
+            );
+
+            // Shuffle and slice
+            recs = recs.sort(() => 0.5 - Math.random()).slice(0, 4);
+
+            if (recs.length > 0) {
+                section.style.display = 'block';
+                grid.innerHTML = recs.map(p => createProductCard(p)).join('');
+            } else {
+                section.style.display = 'none';
+            }
+        }
+
         // --- Wishlist Functions ---
         function toggleWishlist(id) {
             const index = wishlist.indexOf(id);
+            const product = allProducts.find(p => p.id === id);
+
             if (index === -1) {
                 wishlist.push(id);
                 showToast('Ajouté aux favoris ❤️');
+                if (product) trackAffinity(product.famille, 3); // +3 Score for Wishlist
             } else {
                 wishlist.splice(index, 1);
             }
             localStorage.setItem('varicom_wishlist', JSON.stringify(wishlist));
-            filterProducts(); // Re-render to update icons
+            filterProducts();
+            updateRecommendations();
         }
 
         function toggleWishlistFilter() {
@@ -495,17 +567,9 @@
             renderGrid(filtered);
         }
 
-        function renderGrid(products) {
-            const grid = document.getElementById('productsGrid');
-
-            if (products.length === 0) {
-                grid.innerHTML = '<div class="col-12 text-center text-muted py-5">Aucun produit trouvé</div>';
-                return;
-            }
-
-            grid.innerHTML = products.map(p => {
-                const isFav = wishlist.includes(p.id);
-                return `
+        function createProductCard(p) {
+            const isFav = wishlist.includes(p.id);
+            return `
                 <div class="col-sm-6 col-md-4 col-lg-3">
                     <div class="card product-card">
                         <div class="product-img-container">
@@ -527,10 +591,22 @@
                         </div>
                     </div>
                 </div>
-            `}).join('');
+            `;
+        }
+
+        function renderGrid(products) {
+            const grid = document.getElementById('productsGrid');
+
+            if (products.length === 0) {
+                grid.innerHTML = '<div class="col-12 text-center text-muted py-5">Aucun produit trouvé</div>';
+                return;
+            }
+
+            grid.innerHTML = products.map(p => createProductCard(p)).join('');
         }
 
         // --- Cart Functions ---
+
         function addToCart(id) {
             const product = allProducts.find(p => p.id === id);
             if (!product) return;
@@ -542,6 +618,7 @@
                 cart.push({ ...product, qty: 1 });
             }
 
+            trackAffinity(product.famille, 5); // +5 Score for Cart
             saveCart();
             showToast(`Ajouté: ${product.designation}`);
         }
@@ -632,6 +709,7 @@
         }
 
         // --- Export Functions ---
+
         function generatePDF() {
             if (cart.length === 0) return alert('Le panier est vide!');
 
@@ -642,22 +720,31 @@
             const clientPhone = document.getElementById('clientPhone').value || '';
             const date = new Date().toLocaleDateString('fr-FR');
 
-            doc.setFillColor(26, 58, 108);
-            doc.rect(0, 0, 210, 40, 'F');
+            // Header
+            doc.setFillColor(26, 58, 108); // Primary Color
+            doc.rect(0, 0, 210, 50, 'F'); // Increased height for more info
             doc.setTextColor(255, 255, 255);
+
             doc.setFontSize(22);
-            doc.text('VARICOM', 15, 20);
-            doc.setFontSize(12);
-            doc.text('Devis / Proforma', 15, 30);
+            doc.text('VARICOM', 15, 15);
 
             doc.setFontSize(10);
-            doc.text(`Date: ${date}`, 190, 20, { align: 'right' });
+            doc.text('07 Boulevard MIRA Abderahmen Loc N°2, Oran', 15, 25);
+            doc.text('Tél: 05 41 52 75 61 | Fax: 041 36 32 57', 15, 32);
+            doc.text('Email: contact@varicom-dz.com', 15, 39);
 
+            doc.setFontSize(14);
+            doc.text('Devis / Proforma', 150, 25, { align: 'right' });
+            doc.setFontSize(10);
+            doc.text(`Date: ${date}`, 190, 35, { align: 'right' });
+
+            // Client Info
             doc.setTextColor(0, 0, 0);
             doc.setFontSize(12);
-            doc.text(`Client: ${clientName}`, 15, 55);
-            if (clientPhone) doc.text(`Tel: ${clientPhone}`, 15, 62);
+            doc.text(`Client: ${clientName}`, 15, 65);
+            if (clientPhone) doc.text(`Tel: ${clientPhone}`, 15, 72);
 
+            // Table
             const tableData = cart.map(item => [
                 item.designation,
                 item.qty,
@@ -668,7 +755,7 @@
             const total = cart.reduce((sum, item) => sum + (item.prix * item.qty), 0);
 
             doc.autoTable({
-                startY: 70,
+                startY: 80,
                 head: [['Désignation', 'Qté', 'Prix Unit.', 'Total']],
                 body: tableData,
                 theme: 'striped',
@@ -677,6 +764,7 @@
                 footStyles: { fillColor: [233, 236, 239], textColor: [0, 0, 0], fontStyle: 'bold' }
             });
 
+            // Footer
             const pageHeight = doc.internal.pageSize.height;
             doc.setFontSize(8);
             doc.setTextColor(100);
@@ -708,8 +796,7 @@
             message += `*💰 TOTAL: ${formatPrice(total)}*`;
 
             const encodedMessage = encodeURIComponent(message);
-            // Replace with your actual WhatsApp number
-            const adminPhone = "213555555555";
+            const adminPhone = "213698020833"; // Updated Number
             window.open(`https://wa.me/${adminPhone}?text=${encodedMessage}`, '_blank');
         }
 
