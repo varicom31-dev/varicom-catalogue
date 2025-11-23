@@ -583,310 +583,66 @@
                                                 </div>
                                             </div>
                                         </div>
-                                    </div>
-                                </div>
-
-                            </div>
-
-                            <!-- Bulk Image Modal -->
-                            <div class="modal fade" id="bulkImageModal" tabindex="-1">
-                                <div class="modal-dialog">
-                                    <div class="modal-content">
-                                        <div class="modal-header bg-primary text-white">
-                                            <h5 class="modal-title"><i class="fas fa-magic me-2"></i>Générateur de Liens
-                                                Images</h5>
-                                            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                        </div>
-                                        <div class="modal-body">
-                                            <p class="small text-muted">
-                                                Cet outil va générer automatiquement les liens d'images pour
-                                                <strong>tous</strong> les produits en se basant sur leur Référence ou
-                                                Désignation.
-                                            </p>
-                                            <div class="mb-3">
-                                                <label class="form-label">Base URL (Dossier Images)</label>
-                                                <input type="text" class="form-control" id="bulkBaseUrl"
-                                                    placeholder="ex: https://monsite.com/images/">
-                                                <div class="form-text">Le lien où sont hébergées vos images.</div>
-                                            </div>
-                                            <div class="row g-2 mb-3">
-                                                <div class="col-6">
-                                                    <label class="form-label">Utiliser le champ</label>
-                                                    <select class="form-select" id="bulkField">
-                                                        <option value="ref">Référence</option>
-                                                        <option value="designation">Désignation</option>
-                                                    </select>
-                                                </div>
-                                                <div class="col-6">
-                                                    <label class="form-label">Extension</label>
-                                                    <select class="form-select" id="bulkExt">
-                                                        <option value=".jpg">.jpg</option>
-                                                        <option value=".png">.png</option>
-                                                        <option value=".webp">.webp</option>
-                                                        <option value="">(Aucune)</option>
-                                                    </select>
-                                                </div>
-                                            </div>
-                                            <div class="alert alert-info small">
-                                                <strong>Exemple:</strong> <span
-                                                    id="bulkPreview">https://monsite.com/images/REF123.jpg</span>
-                                            </div>
-                                        </div>
-                                        <div class="modal-footer">
-                                            <button type="button" class="btn btn-secondary"
-                                                data-bs-dismiss="modal">Annuler</button>
-                                            <button type="button" class="btn btn-primary"
-                                                onclick="applyBulkImages()">Appliquer à tous</button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <script>
-                                // State
-                                let state = {
-                                    products: [],
-                                    newProducts: [],
-                                    notifications: [],
-                                    gistId: localStorage.getItem('varicom_gist_id') || null,
-                                    lastSync: localStorage.getItem('varicom_last_sync') || null
-                                };
-
-                                // Initialization
-                                document.addEventListener('DOMContentLoaded', () => {
-                                    loadLocalData();
-                                    updateUI();
-
-                                    // Token listener
-                                    const tokenInput = document.getElementById('githubToken');
-                                    tokenInput.value = localStorage.getItem('varicom_github_token') || '';
-                                    tokenInput.addEventListener('input', (e) => localStorage.setItem('varicom_github_token', e.target.value));
-
-                                    // Bulk Preview Listener
-                                    ['bulkBaseUrl', 'bulkField', 'bulkExt'].forEach(id => {
-                                        document.getElementById(id).addEventListener('input', updateBulkPreview);
-                                    });
-                                });
-
-                                function loadLocalData() {
-                                    try {
-                                        const saved = localStorage.getItem('varicom_data');
-                                        if (saved) {
-                                            const data = JSON.parse(saved);
-                                            state.products = data.products || [];
-                                            state.newProducts = data.newProducts || [];
-                                            state.notifications = data.notifications || [];
-                                        }
-                                    } catch (e) { console.error('Error loading local data', e); }
-                                }
-
-                                function saveData() {
-                                    localStorage.setItem('varicom_data', JSON.stringify({
-                                        products: state.products,
-                                        newProducts: state.newProducts,
-                                        notifications: state.notifications
-                                    }));
-                                    updateUI();
-                                }
-
-                                // Excel Handling
-                                function handleExcelUpload(file) {
-                                    if (!file) return;
-
-                                    showStatus('Lecture du fichier...', 'info');
-                                    const reader = new FileReader();
-
-                                    reader.onload = (e) => {
-                                        try {
-                                            const data = new Uint8Array(e.target.result);
-                                            const workbook = XLSX.read(data, { type: 'array' });
-                                            const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-                                            const jsonData = XLSX.utils.sheet_to_json(firstSheet);
-
-                                            processExcelData(jsonData);
-                                        } catch (err) {
-                                            showStatus('Erreur lecture Excel: ' + err.message, 'error');
-                                        }
-                                    };
-                                    reader.readAsArrayBuffer(file);
-                                }
-
-                                function processExcelData(data) {
-                                    const processed = data.map((row, idx) => ({
-                                        id: `prod_${Date.now()}_${idx}`,
-                                        ref: row['Ref'] || row['Référence'] || row['Code'] || 'N/A',
-                                        designation: row['Designation'] || row['Désignation'] || row['Nom'] || 'Produit sans nom',
-                                        famille: row['Famille'] || row['Categorie'] || 'Général',
-                                        prix: parseFloat(row['Prix'] || row['Price'] || 0),
-                                        image: row['Image'] || row['Photo'] || ''
-                                    })).filter(p => p.prix > 0); // Filter invalid
-
-                                    state.products = processed;
-                                    saveData();
-                                    showStatus(`${processed.length} produits importés avec succès!`, 'success');
-                                }
-
-                                // Product & Notification Management
-                                function addNewProduct() {
-                                    const name = document.getElementById('newProductName').value;
-                                    const price = document.getElementById('newProductPrice').value;
-                                    const cat = document.getElementById('newProductCategory').value;
-                                    const img = document.getElementById('newProductImage').value;
-
-                                    if (!name || !price) return showStatus('Nom et Prix requis', 'warning');
-
-                                    state.newProducts.unshift({
-                                        id: `new_${Date.now()}`,
-                                        name,
-                                        price: parseFloat(price),
-                                        category: cat,
-                                        image: img,
-                                        timestamp: new Date().toISOString()
-                                    });
-
-                                    // Reset inputs
-                                    document.getElementById('newProductName').value = '';
-                                    document.getElementById('newProductPrice').value = '';
-
-                                    saveData();
-                                    showStatus('Nouveau produit ajouté', 'success');
-                                }
-
-                                function createNotification() {
-                                    const title = document.getElementById('notifTitle').value;
-                                    const msg = document.getElementById('notifMessage').value;
-                                    const type = document.getElementById('notifType').value;
-
-                                    if (!title || !msg) return showStatus('Titre et Message requis', 'warning');
-
-                                    state.notifications.unshift({
-                                        id: `notif_${Date.now()}`,
-                                        title,
-                                        message: msg,
-                                        type,
-                                        timestamp: new Date().toISOString()
-                                    });
-
-                                    document.getElementById('notifTitle').value = '';
-                                    document.getElementById('notifMessage').value = '';
-
-                                    saveData();
-                                    showStatus('Notification créée', 'success');
-                                }
-
-                                function removeNewProduct(id) {
-                                    state.newProducts = state.newProducts.filter(p => p.id !== id);
-                                    saveData();
-                                }
-
-                                function removeNotification(id) {
-                                    state.notifications = state.notifications.filter(n => n.id !== id);
-                                    saveData();
-                                }
-
-                                // --- Bulk Image Functions ---
-                                function openBulkImageModal() {
-                                    new bootstrap.Modal(document.getElementById('bulkImageModal')).show();
-                                    updateBulkPreview();
-                                }
-
-                                function updateBulkPreview() {
-                                    const baseUrl = document.getElementById('bulkBaseUrl').value || 'https://site.com/img/';
-                                    const field = document.getElementById('bulkField').value;
-                                    const ext = document.getElementById('bulkExt').value;
-                                    const example = field === 'ref' ? 'REF123' : 'Produit_Exemple';
-
-                                    document.getElementById('bulkPreview').textContent = `${baseUrl}${example}${ext}`;
-                                }
-
-                                function applyBulkImages() {
-                                    const baseUrl = document.getElementById('bulkBaseUrl').value;
-                                    const field = document.getElementById('bulkField').value;
-                                    const ext = document.getElementById('bulkExt').value;
-
-                                    if (!baseUrl) return alert('Veuillez entrer une URL de base');
-
-                                    if (confirm(`Cela va modifier les images de ${state.products.length} produits. Continuer?`)) {
-                                        state.products = state.products.map(p => {
-                                            const val = p[field] ? p[field].toString().trim() : '';
-                                            // Simple sanitization for filenames if using designation
-                                            const safeVal = field === 'designation' ? val.replace(/[^a-zA-Z0-9-_]/g, '_') : val;
-                                            return {
-                                                ...p,
-                                                image: `${baseUrl}${safeVal}${ext}`
-                                            };
-                                        });
-                                        saveData();
-                                        bootstrap.Modal.getInstance(document.getElementById('bulkImageModal')).hide();
-                                        showStatus('Images mises à jour avec succès!', 'success');
-                                    }
-                                }
-
-                                function searchGoogleImage(term) {
-                                    const query = encodeURIComponent(term);
-                                    window.open(`https://www.google.com/search?tbm=isch&q=${query}`, '_blank');
-                                }
-
-                                function updateProductImage(id, newUrl) {
-                                    const p = state.products.find(p => p.id === id);
-                                    if (p) {
+                                        function updateProductImage(id, newUrl) {
+                                        const p = state.products.find(p => p.id === id);
+                                        if (p) {
                                         p.image = newUrl;
                                         saveData(); // This triggers UI update
-                                    }
-                                }
+                                        }
+                                        }
 
-                                // GitHub Sync
-                                async function uploadToGitHubGist() {
-                                    const token = document.getElementById('githubToken').value;
-                                    if (!token) return showStatus('Token GitHub manquant!', 'error');
+                                        // GitHub Sync
+                                        async function uploadToGitHubGist() {
+                                        const token = document.getElementById('githubToken').value;
+                                        if (!token) return showStatus('Token GitHub manquant!', 'error');
 
-                                    const btn = document.getElementById('publishBtn');
-                                    const originalText = btn.innerHTML;
-                                    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Synchronisation...';
-                                    btn.disabled = true;
+                                        const btn = document.getElementById('publishBtn');
+                                        const originalText = btn.innerHTML;
+                                        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Synchronisation...';
+                                        btn.disabled = true;
 
-                                    const payload = {
+                                        const payload = {
                                         description: "VARICOM Catalog Data",
                                         public: true,
                                         files: {
-                                            "varicom_data.json": {
-                                                content: JSON.stringify({
-                                                    products: state.products,
-                                                    newProducts: state.newProducts,
-                                                    notifications: state.notifications,
-                                                    lastUpdate: new Date().toISOString(),
-                                                    meta: { version: "2.0", source: "VaricomAdmin" }
-                                                })
-                                            }
+                                        "varicom_data.json": {
+                                        content: JSON.stringify({
+                                        products: state.products,
+                                        newProducts: state.newProducts,
+                                        notifications: state.notifications,
+                                        lastUpdate: new Date().toISOString(),
+                                        meta: { version: "2.0", source: "VaricomAdmin" }
+                                        })
                                         }
-                                    };
+                                        }
+                                        };
 
-                                    try {
+                                        try {
                                         let url = 'https://api.github.com/gists';
                                         let method = 'POST';
 
                                         // If we have an ID, try to update (PATCH) instead of create
                                         if (state.gistId) {
-                                            url += `/${state.gistId}`;
-                                            method = 'PATCH';
+                                        url += `/${state.gistId}`;
+                                        method = 'PATCH';
                                         }
 
                                         const response = await fetch(url, {
-                                            method: method,
-                                            headers: {
-                                                'Authorization': `token ${token}`,
-                                                'Content-Type': 'application/json'
-                                            },
-                                            body: JSON.stringify(payload)
+                                        method: method,
+                                        headers: {
+                                        'Authorization': `token ${token}`,
+                                        'Content-Type': 'application/json'
+                                        },
+                                        body: JSON.stringify(payload)
                                         });
 
                                         if (!response.ok) {
-                                            if (response.status === 404 && state.gistId) {
-                                                // Gist deleted or invalid, retry as new
-                                                state.gistId = null;
-                                                return uploadToGitHubGist();
-                                            }
-                                            throw new Error(`Erreur GitHub: ${response.status}`);
+                                        if (response.status === 404 && state.gistId) {
+                                        // Gist deleted or invalid, retry as new
+                                        state.gistId = null;
+                                        return uploadToGitHubGist();
+                                        }
+                                        throw new Error(`Erreur GitHub: ${response.status}`);
                                         }
 
                                         const result = await response.json();
@@ -899,107 +655,121 @@
                                         showStatus('✅ Synchronisation réussie!', 'success');
                                         updateUI();
 
-                                    } catch (err) {
+                                        } catch (err) {
                                         showStatus('Erreur Sync: ' + err.message, 'error');
-                                    } finally {
+                                        } finally {
                                         btn.innerHTML = originalText;
                                         btn.disabled = false;
-                                    }
-                                }
+                                        }
+                                        }
 
-                                // UI Updates
-                                function updateUI() {
-                                    // Stats
-                                    document.getElementById('statsProducts').textContent = state.products.length;
-                                    document.getElementById('statsNewProducts').textContent = state.newProducts.length;
-                                    document.getElementById('statsNotifications').textContent = state.notifications.length;
-                                    document.getElementById('statsStatus').textContent = state.gistId ? 'Actif' : 'Inactif';
-                                    document.getElementById('statsStatus').className = state.gistId ? 'text-success' : 'text-danger';
+                                        // UI Updates
+                                        function updateUI() {
+                                        // Stats
+                                        document.getElementById('statsProducts').textContent = state.products.length;
+                                        document.getElementById('statsNewProducts').textContent =
+                                        state.newProducts.length;
+                                        document.getElementById('statsNotifications').textContent =
+                                        state.notifications.length;
+                                        document.getElementById('statsStatus').textContent = state.gistId ? 'Actif' :
+                                        'Inactif';
+                                        document.getElementById('statsStatus').className = state.gistId ? 'text-success'
+                                        : 'text-danger';
 
-                                    // Lists
-                                    const npList = document.getElementById('activeNewProducts');
-                                    npList.innerHTML = state.newProducts.map(p => `
-                <li class="list-group-item d-flex justify-content-between align-items-center">
-                    <div><strong>${p.name}</strong> - ${p.price} DA</div>
-                    <button class="btn btn-sm btn-outline-danger" onclick="removeNewProduct('${p.id}')"><i class="fas fa-times"></i></button>
-                </li>
-            `).join('');
+                                        // Lists
+                                        const npList = document.getElementById('activeNewProducts');
+                                        npList.innerHTML = state.newProducts.map(p => `
+                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                            <div><strong>${p.name}</strong> - ${p.price} DA</div>
+                                            <button class="btn btn-sm btn-outline-danger"
+                                                onclick="removeNewProduct('${p.id}')"><i
+                                                    class="fas fa-times"></i></button>
+                                        </li>
+                                        `).join('');
 
-                                    const notifList = document.getElementById('activeNotifications');
-                                    notifList.innerHTML = state.notifications.map(n => `
-                <li class="list-group-item d-flex justify-content-between align-items-center">
-                    <div><span class="badge bg-${getBadgeClass(n.type)}">${n.type}</span> ${n.title}</div>
-                    <button class="btn btn-sm btn-outline-danger" onclick="removeNotification('${n.id}')"><i class="fas fa-times"></i></button>
-                </li>
-            `).join('');
+                                        const notifList = document.getElementById('activeNotifications');
+                                        notifList.innerHTML = state.notifications.map(n => `
+                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                            <div><span class="badge bg-${getBadgeClass(n.type)}">${n.type}</span>
+                                                ${n.title}</div>
+                                            <button class="btn btn-sm btn-outline-danger"
+                                                onclick="removeNotification('${n.id}')"><i
+                                                    class="fas fa-times"></i></button>
+                                        </li>
+                                        `).join('');
 
-                                    // Catalog Table (Limit to 100 for performance)
-                                    const tableBody = document.getElementById('catalogTableBody');
-                                    tableBody.innerHTML = state.products.slice(0, 100).map(p => `
-                <tr>
-                    <td><small>${p.ref}</small></td>
-                    <td class="text-truncate" style="max-width: 150px;" title="${p.designation}">${p.designation}</td>
-                    <td>${p.prix}</td>
-                    <td>
-                        <input type="text" class="form-control form-control-sm" 
-                               value="${p.image || ''}" 
-                               onchange="updateProductImage('${p.id}', this.value)"
-                               placeholder="URL Image...">
-                    </td>
-                    <td>
-                        <button class="btn btn-sm btn-outline-primary" onclick="searchGoogleImage('${p.designation}')" title="Chercher sur Google">
-                            <i class="fab fa-google"></i>
-                        </button>
-                    </td>
-                </tr>
-            `).join('');
-                                }
+                                        // Catalog Table (Limit to 100 for performance)
+                                        const tableBody = document.getElementById('catalogTableBody');
+                                        tableBody.innerHTML = state.products.slice(0, 100).map(p => `
+                                        <tr>
+                                            <td><small>${p.ref}</small></td>
+                                            <td class="text-truncate" style="max-width: 150px;"
+                                                title="${p.designation}">${p.designation}</td>
+                                            <td>${p.prix}</td>
+                                            <td>
+                                                <input type="text" class="form-control form-control-sm"
+                                                    value="${p.image || ''}"
+                                                    onchange="updateProductImage('${p.id}', this.value)"
+                                                    placeholder="URL Image...">
+                                            </td>
+                                            <td>
+                                                <button class="btn btn-sm btn-outline-primary"
+                                                    onclick="searchGoogleImage('${p.designation}')"
+                                                    title="Chercher sur Google">
+                                                    <i class="fab fa-google"></i>
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        `).join('');
+                                        }
 
-                                function getBadgeClass(type) {
-                                    return { info: 'info', success: 'success', warning: 'warning', error: 'danger' }[type] || 'secondary';
-                                }
+                                        function getBadgeClass(type) {
+                                        return { info: 'info', success: 'success', warning: 'warning', error: 'danger'
+                                        }[type] || 'secondary';
+                                        }
 
-                                function showStatus(msg, type) {
-                                    const el = document.getElementById('syncStatus');
-                                    el.textContent = msg;
-                                    el.className = `sync-status sync-${type}`;
-                                    el.style.display = 'block';
-                                    setTimeout(() => el.style.display = 'none', 4000);
-                                }
+                                        function showStatus(msg, type) {
+                                        const el = document.getElementById('syncStatus');
+                                        el.textContent = msg;
+                                        el.className = `sync-status sync-${type}`;
+                                        el.style.display = 'block';
+                                        setTimeout(() => el.style.display = 'none', 4000);
+                                        }
 
-                                function generateClientLink() {
-                                    if (!state.gistId) return showStatus('Veuillez d\'abord synchroniser!', 'warning');
-                                    const url = `${window.location.href.replace('admin.html', 'index.html')}?gist=${state.gistId}`;
-                                    navigator.clipboard.writeText(url);
-                                    alert('Lien copié dans le presse-papier:\n' + url);
-                                }
+                                        function generateClientLink() {
+                                        if (!state.gistId) return showStatus('Veuillez d\'abord synchroniser!',
+                                        'warning');
+                                        const url = `${window.location.href.replace('admin.html',
+                                        'index.html')}?gist=${state.gistId}`;
+                                        navigator.clipboard.writeText(url);
+                                        alert('Lien copié dans le presse-papier:\n' + url);
+                                        }
 
-                                function toggleToken() {
-                                    const el = document.getElementById('githubToken');
-                                    el.type = el.type === 'password' ? 'text' : 'password';
-                                }
+                                        function toggleToken() {
+                                        const el = document.getElementById('githubToken');
+                                        el.type = el.type === 'password' ? 'text' : 'password';
+                                        }
 
-                                function resetSync() {
-                                    if (confirm('Oublier l\'ID de synchronisation actuel?')) {
+                                        function resetSync() {
+                                        if (confirm('Oublier l\'ID de synchronisation actuel?')) {
                                         state.gistId = null;
                                         localStorage.removeItem('varicom_gist_id');
                                         updateUI();
                                         showStatus('Sync réinitialisée', 'info');
-                                    }
-                                }
+                                        }
+                                        }
 
-                                function downloadTemplate() {
-                                    const data = [
-                                        { "Référence": "REF001", "Désignation": "Exemple Produit", "Famille": "Général", "Prix": 1000, "Image": "" }
-                                    ];
-                                    const ws = XLSX.utils.json_to_sheet(data);
-                                    const wb = XLSX.utils.book_new();
-                                    XLSX.utils.book_append_sheet(wb, ws, "Template");
-                                    XLSX.writeFile(wb, "template_varicom.xlsx");
-                                }
-                            </script>
-                            <script
-                                src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+                                        function downloadTemplate() {
+                                        const data = [
+                                        { "Référence": "REF001", "Désignation": "Exemple Produit", "Famille": "Général",
+                                        "Prix": 1000, "Image": "" }
+                                        ];
+                                        const ws = XLSX.utils.json_to_sheet(data);
+                                        const wb = XLSX.utils.book_new();
+                                        XLSX.utils.book_append_sheet(wb, ws, "Template");
+                                        XLSX.writeFile(wb, "template_varicom.xlsx");
+                                        }
+                                        </script>
+                                        <script
+                                            src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
                         </body>
-
-</html>
