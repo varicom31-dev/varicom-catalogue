@@ -1,431 +1,920 @@
 <!DOCTYPE html>
-<html lang="fr" data-theme="light">
+<html lang="fr" dir="ltr">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Catalogue Client - VARICOM</title>
+    <title>VARICOM - Administration Pro</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <style>
         :root {
             --primary-color: #1a3a6c;
             --secondary-color: #e63946;
-            --accent-color: #457b9d;
-            --bg-light: #f8f9fa;
-            --text-dark: #212529;
-            --glass-bg: rgba(255, 255, 255, 0.95);
-            --glass-border: rgba(255, 255, 255, 0.2);
-        }
-
-        [data-theme="dark"] {
-            --primary-color: #4a90e2;
-            --bg-light: #121212;
-            --text-dark: #e0e0e0;
-            --glass-bg: rgba(30, 30, 30, 0.95);
-            --glass-border: rgba(255, 255, 255, 0.1);
+            --accent-color: #2a9d8f;
+            --dark-color: #2c3e50;
+            --light-color: #ecf0f1;
         }
 
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg-light);
-            color: var(--text-dark);
-            transition: background-color 0.3s, color 0.3s;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
         }
 
-        /* Navbar & Glassmorphism */
-        .navbar {
-            background: var(--glass-bg);
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid var(--glass-border);
+        .admin-container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            margin: 0 auto;
+            max-width: 1400px;
+            overflow: hidden;
         }
 
-        .navbar-brand {
-            font-weight: 600;
-            color: var(--primary-color) !important;
-        }
-
-        /* Hero Section */
-        .hero-section {
-            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
+        .admin-header {
+            background: linear-gradient(135deg, var(--primary-color), #2a4d7a);
             color: white;
-            padding: 3rem 0;
-            margin-bottom: 2rem;
-            border-radius: 0 0 20px 20px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        }
-
-        /* Product Cards */
-        .product-card {
-            border: none;
-            border-radius: 12px;
-            overflow: hidden;
-            transition: transform 0.3s, box-shadow 0.3s;
-            background: var(--glass-bg);
-            height: 100%;
-        }
-
-        .product-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
-        }
-
-        .product-img-container {
+            padding: 25px;
             position: relative;
-            height: 200px;
-            background-color: #fff;
-            display: flex;
-            align-items: center;
-            justify-content: center;
             overflow: hidden;
         }
 
-        .product-img-container img {
-            max-height: 180px;
-            max-width: 100%;
-            object-fit: contain;
+        .upload-section {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .upload-area {
+            border: 3px dashed rgba(255, 255, 255, 0.5);
+            border-radius: 12px;
+            padding: 40px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .upload-area:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: white;
+        }
+
+        .sync-status {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            padding: 15px 25px;
+            border-radius: 10px;
+            display: none;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+            animation: slideInRight 0.5s ease;
+            color: white;
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .sync-success {
+            background: #28a745;
+            border-left: 5px solid #1e7e34;
+        }
+
+        .sync-warning {
+            background: #ffc107;
+            color: #000;
+            border-left: 5px solid #e0a800;
+        }
+
+        .sync-error {
+            background: #dc3545;
+            border-left: 5px solid #bd2130;
+        }
+
+        .stats-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
             transition: transform 0.3s;
-            const index=wishlist.indexOf(id);
-            const product=allProducts.find(p=> p.id===id);
+        }
 
-            if (index===-1) {
-                wishlist.push(id);
-                showToast('Ajouté aux favoris ❤️');
-                if (product) trackAffinity(product.famille, 3);
+        .stats-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .feature-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .btn-pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.7);
             }
 
-            else {
-                wishlist.splice(index, 1);
+            70% {
+                transform: scale(1.05);
+                box-shadow: 0 0 0 10px rgba(40, 167, 69, 0);
             }
 
-            localStorage.setItem('varicom_wishlist', JSON.stringify(wishlist));
-            filterProducts(); // Re-render to update heart icons
-            updateRecommendations();
-        }
-
-        function toggleWishlistFilter() {
-            showWishlistOnly= !showWishlistOnly;
-            const btn=document.getElementById('wishlistFilterBtn');
-
-            if (showWishlistOnly) {
-                btn.classList.remove('btn-outline-light');
-                btn.classList.add('btn-danger');
-            }
-
-            else {
-                btn.classList.remove('btn-danger');
-                btn.classList.add('btn-outline-light');
-            }
-
-            filterProducts();
-        }
-
-        // --- Cart Functions ---
-
-        function addToCart(id) {
-            const product=allProducts.find(p=> p.id===id);
-            if ( !product) return;
-
-            const existing=cart.find(item=> item.id===id);
-
-            if (existing) {
-                existing.qty++;
-            }
-
-            else {
-                cart.push({
-                    ...product, qty: 1
-                });
-        }
-
-        trackAffinity(product.famille, 5);
-        saveCart();
-
-        showToast(`Ajouté: $ {
-                product.designation
-            }
-
-            `);
-        }
-
-        function removeFromCart(id) {
-            cart=cart.filter(item=> item.id !==id);
-            saveCart();
-            renderCartItems();
-        }
-
-        function updateQty(id, change) {
-            const item=cart.find(i=> i.id===id);
-
-            if (item) {
-                item.qty+=change;
-                if (item.qty <=0) removeFromCart(id);
-                else saveCart();
-            }
-
-            renderCartItems();
-        }
-
-        function clearCart() {
-            if (confirm('Vider le panier?')) {
-                cart=[];
-                saveCart();
-                renderCartItems();
+            100% {
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(40, 167, 69, 0);
             }
         }
+    </style>
+</head>
 
-        function saveCart() {
-            localStorage.setItem('varicom_cart', JSON.stringify(cart));
-            updateCartUI();
-        }
+<body>
+    <div id="syncStatus" class="sync-status"></div>
 
-        function updateCartUI() {
-            const count=cart.reduce((sum, item)=> sum + item.qty, 0);
-            document.getElementById('cartCount').textContent=count;
+    <div class="admin-container">
+        <div class="admin-header text-center">
+            <h1><i class="fas fa-user-shield me-3"></i>PANEL ADMINISTRATEUR VARICOM</h1>
+            <p class="lead mb-0">Solution Professionnelle - Synchronisation Temps Réel</p>
+        </div>
 
-            const badge=document.getElementById('cartCount');
-            badge.classList.add('animate__animated', 'animate__bounceIn');
-            setTimeout(()=> badge.classList.remove('animate__animated', 'animate__bounceIn'), 500);
-        }
+        <!-- Quick Actions -->
+        <div class="p-4 bg-light border-bottom">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <h4 class="mb-0 text-primary"><i class="fas fa-bolt me-2"></i>Tableau de Bord</h4>
+                </div>
+                <div class="col-md-6 text-end">
+                    <button class="btn btn-success btn-lg me-2" onclick="uploadToGitHubGist()" id="publishBtn">
+                        <i class="fab fa-github me-2"></i>Publier / Synchroniser
+                    </button>
+                    <button class="btn btn-primary btn-lg" onclick="generateClientLink()">
+                        <i class="fas fa-link me-2"></i>Lien Client
+                    </button>
+                </div>
+            </div>
+        </div>
 
-        function openCart() {
-            renderCartItems();
-            new bootstrap.Modal(document.getElementById('cartModal')).show();
-        }
+        <!-- Stats -->
+        <div class="row m-4">
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <i class="fas fa-box fa-2x text-primary mb-2"></i>
+                    <h3 id="statsProducts">0</h3>
+                    <p class="text-muted mb-0">Produits Totaux</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <i class="fas fa-star fa-2x text-warning mb-2"></i>
+                    <h3 id="statsNewProducts">0</h3>
+                    <p class="text-muted mb-0">Nouveautés</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <i class="fas fa-bell fa-2x text-info mb-2"></i>
+                    <h3 id="statsNotifications">0</h3>
+                    <p class="text-muted mb-0">Notifications</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <i class="fas fa-sync fa-2x text-success mb-2"></i>
+                    <h3 id="statsStatus">Inactif</h3>
+                    <p class="text-muted mb-0">Statut Sync</p>
+                </div>
+            </div>
+        </div>
 
-        function renderCartItems() {
-            const container=document.getElementById('cartItems');
-            const totalEl=document.getElementById('cartTotal');
+        <!-- Excel Upload -->
+        <div class="upload-section">
+            <h4><i class="fas fa-file-excel me-2"></i>Importation Produits Excel</h4>
+            <div class="upload-area" id="excelUploadArea" onclick="document.getElementById('excelFile').click()">
+                <i class="fas fa-cloud-upload-alt fa-3x mb-3"></i>
+                <h5>Cliquez ou glissez votre fichier Excel ici</h5>
+                <p class="small opacity-75">Supporte .xlsx, .xls, .csv</p>
+                <input type="file" id="excelFile" accept=".xlsx, .xls, .csv" style="display: none;"
+                    onchange="handleExcelUpload(this.files[0])">
+            </div>
+            <div class="mt-3 text-center">
+                <button class="btn btn-outline-light btn-sm" onclick="downloadTemplate()">
+                    <i class="fas fa-download me-1"></i>Télécharger Modèle
+                </button>
+            </div>
+        </div>
 
-            if (cart.length===0) {
-                container.innerHTML='<div class="text-center py-5 text-muted"><i class="fas fa-shopping-basket fa-3x mb-3"></i><br>Votre panier est vide</div>';
-                totalEl.textContent='0.00 DA';
-                return;
-            }
+        <div class="row m-4">
+            <!-- New Products -->
+            <div class="col-md-6">
+                <div class="feature-card h-100">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0"><i class="fas fa-plus-circle me-2"></i>Ajouter Produit / Nouveauté</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <input type="text" class="form-control mb-2" id="newProductName"
+                                placeholder="Nom du produit">
+                            <div class="row g-2">
+                                <div class="col-6">
+                                    <input type="number" class="form-control" id="newProductPrice"
+                                        placeholder="Prix (DA)">
+                                </div>
+                                <div class="col-6">
+                                    <select class="form-select" id="newProductCategory">
+                                        <option value="Général">Catégorie...</option>
+                                        <option value="Ordinateurs">Ordinateurs</option>
+                                        <option value="Téléphones">Téléphones</option>
+                                        <option value="Accessoires">Accessoires</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <input type="text" class="form-control mt-2" id="newProductImage"
+                                placeholder="URL de l'image (https://...)">
+                        </div>
+                        <button class="btn btn-primary w-100" onclick="addNewProduct()">
+                            <i class="fas fa-plus me-2"></i>Ajouter à la liste
+                        </button>
 
-            let html='<ul class="list-group list-group-flush">';
-            let total=0;
+                        <hr>
+                        <h6 class="text-muted">Produits Nouveaux Actifs:</h6>
+                        <ul id="activeNewProducts" class="list-group list-group-flush small"
+                            style="max-height: 200px; overflow-y: auto;">
+                            <!-- List items -->
+                        </ul>
+                    </div>
+                </div>
+            </div>
 
-            cart.forEach(item=> {
-                    const itemTotal=item.prix * item.qty;
-                    total +=itemTotal;
+            <!-- Notifications -->
+            <div class="col-md-6">
+                <div class="feature-card h-100">
+                    <div class="card-header bg-warning text-dark">
+                        <h5 class="mb-0"><i class="fas fa-bullhorn me-2"></i>Gérer Notifications</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <input type="text" class="form-control mb-2" id="notifTitle"
+                                placeholder="Titre (ex: Promo)">
+                            <textarea class="form-control mb-2" id="notifMessage" rows="2"
+                                placeholder="Message..."></textarea>
+                            <select class="form-select" id="notifType">
+                                <option value="info">Information ℹ️</option>
+                                <option value="success">Succès ✅</option>
+                                <option value="warning">Attention ⚠️</option>
+                                <option value="error">Urgent ❌</option>
+                            </select>
+                        </div>
+                        <button class="btn btn-warning w-100" onclick="createNotification()">
+                            <i class="fas fa-paper-plane me-2"></i>Publier Notification
+                        </button>
 
-                    html +=` <li class="list-group-item d-flex justify-content-between align-items-center" > <div> <h6 class="mb-0" >$ {
-                        item.designation
-                    }
+                        <hr>
+                        <h6 class="text-muted">Notifications Actives:</h6>
+                        <ul id="activeNotifications" class="list-group list-group-flush small"
+                            style="max-height: 200px; overflow-y: auto;">
+                            <!-- List items -->
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-                    </h6> <small class="text-muted" >$ {
-                        formatPrice(item.prix)
-                    }
+        <!-- Settings -->
+        <div class="row m-4">
+            <div class="col-12">
+                <div class="feature-card">
+                    <div class="card-header bg-dark text-white">
+                        <h5 class="mb-0"><i class="fas fa-cogs me-2"></i>Configuration</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row align-items-end">
+                            <div class="col-md-8">
+                                <label class="form-label">Token GitHub (Personnel Access Token)</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fab fa-github"></i></span>
+                                    <input type="password" class="form-control" id="githubToken"
+                                        placeholder="ghp_xxxxxxxxxxxxxxxxxxxx">
+                                    <button class="btn btn-outline-secondary" type="button" onclick="toggleToken()">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                                <small class="text-muted">Nécessaire pour la synchronisation. Stocké localement.</small>
+                            </div>
+                            <div class="col-md-4">
+                                <button class="btn btn-danger w-100" onclick="resetSync()">
+                                    <i class="fas fa-trash-alt me-2"></i>Réinitialiser Sync
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-                    x $ {
-                        item.qty
-                    }
+        <!-- Catalog Management -->
+        <div class="row m-4">
+            <div class="col-12">
+                <div class="feature-card">
+                    <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="fas fa-boxes me-2"></i>Gestion du Catalogue</h5>
+                        <button class="btn btn-light btn-sm text-primary fw-bold" onclick="openBulkImageModal()">
+                            <i class="fas fa-magic me-2"></i>Actions en Masse (Images/Desc)
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive" style="max-height: 500px;">
+                            <table class="table table-hover align-middle">
+                                <thead class="table-light sticky-top">
+                                    <tr>
+                                        <th>Ref</th>
+                                        <th>Désignation</th>
+                                        <th>Prix</th>
+                                        <th style="width: 30%;">Image URL</th>
+                                        <th style="width: 20%;">Description URL</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="catalogTableBody">
+                                    <!-- Products rendered here -->
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="text-center mt-3">
+                            <small class="text-muted">Affichage limité aux 100 premiers produits pour la
+                                performance.</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-                    </small> </div> <div class="d-flex align-items-center gap-2" > <button class="btn btn-sm btn-outline-secondary" onclick="updateQty('${item.id}', -1)" >-</button> <span>$ {
-                        item.qty
-                    }
+    </div>
 
-                    </span> <button class="btn btn-sm btn-outline-secondary" onclick="updateQty('${item.id}', 1)" >+</button> <button class="btn btn-sm btn-danger ms-2" onclick="removeFromCart('${item.id}')" ><i class="fas fa-trash" ></i></button> </div> </li> `;
-                });
-            html+='</ul>';
+    <!-- Bulk Image Modal -->
+    <div class="modal fade" id="bulkImageModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title"><i class="fas fa-magic me-2"></i>Générateur Automatique</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <ul class="nav nav-tabs mb-3" id="bulkTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="mode-hosted-tab" data-bs-toggle="tab"
+                                data-bs-target="#mode-hosted" type="button" role="tab">📂 Images Hébergées</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="mode-magic-tab" data-bs-toggle="tab"
+                                data-bs-target="#mode-magic" type="button" role="tab">✨ Images Magiques</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="mode-desc-tab" data-bs-toggle="tab" data-bs-target="#mode-desc"
+                                type="button" role="tab">📝 Descriptions Auto</button>
+                        </li>
+                    </ul>
 
-            container.innerHTML=html;
-            totalEl.textContent=formatPrice(total);
-        }
+                    <div class="tab-content" id="bulkTabsContent">
+                        <!-- Hosted Mode -->
+                        <div class="tab-pane fade show active" id="mode-hosted" role="tabpanel">
+                            <p class="small text-muted">
+                                Utilisez ce mode si vous avez vos propres images hébergées (ex: GitHub Pages, Imgur).
+                            </p>
+                            <div class="mb-3">
+                                <label class="form-label">Base URL</label>
+                                <input type="text" class="form-control" id="bulkBaseUrl"
+                                    placeholder="ex: https://monsite.com/images/">
+                            </div>
+                            <div class="row g-2 mb-3">
+                                <div class="col-6">
+                                    <label class="form-label">Champ</label>
+                                    <select class="form-select" id="bulkField">
+                                        <option value="ref">Référence</option>
+                                        <option value="designation">Désignation</option>
+                                    </select>
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label">Extension</label>
+                                    <select class="form-select" id="bulkExt">
+                                        <option value=".jpg">.jpg</option>
+                                        <option value=".png">.png</option>
+                                        <option value=".webp">.webp</option>
+                                        <option value="">(Aucune)</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
 
-        // --- Export Functions ---
+                        <!-- Magic Mode -->
+                        <div class="tab-pane fade" id="mode-magic" role="tabpanel">
+                            <div class="alert alert-warning small">
+                                <i class="fas fa-exclamation-triangle me-2"></i><strong>Note:</strong> L'association
+                                <em>automatique</em> ne fonctionne qu'avec <strong>Bing</strong> pour des raisons
+                                techniques.
+                            </div>
+                            <p class="small text-muted">
+                                Recherche automatique d'images sur Bing via la Désignation.
+                            </p>
+                        </div>
 
-        function generatePDF() {
-            if (cart.length===0) return alert('Le panier est vide!');
+                        <!-- Description Mode -->
+                        <div class="tab-pane fade" id="mode-desc" role="tabpanel">
+                            <div class="alert alert-info small">
+                                <i class="fas fa-info-circle me-2"></i><strong>Info:</strong> Génère un lien de
+                                recherche.
+                            </div>
+                            <p class="small text-muted">
+                                Crée un lien "Fiche Technique" vers Bing pour chaque produit.
+                            </p>
+                        </div>
+                    </div>
 
-            const {
-                jsPDF
-            }
+                    <div class="alert alert-info small mt-3">
+                        <strong>Aperçu:</strong> <span id="bulkPreview" class="text-break">...</span>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="button" class="btn btn-primary" onclick="applyBulkActions()">Appliquer à tous</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
-            =window.jspdf;
-            const doc=new jsPDF();
+    <script>
+        // State
+        let state = {
+            products: [],
+            newProducts: [],
+            notifications: [],
+            gistId: localStorage.getItem('varicom_gist_id') || null,
+            lastSync: localStorage.getItem('varicom_last_sync') || null
+        };
 
-            const clientName=document.getElementById('clientName').value || 'Client';
-            const clientPhone=document.getElementById('clientPhone').value || '';
-            const date=new Date().toLocaleDateString('fr-FR');
+        // Initialization
+        document.addEventListener('DOMContentLoaded', () => {
+            loadLocalData();
+            updateUI();
 
-            // Header
-            doc.setFillColor(26, 58, 108); // Primary Color
-            doc.rect(0, 0, 210, 40, 'F');
-            doc.setTextColor(255, 255, 255);
-            doc.setFontSize(22);
-            doc.text('VARICOM', 15, 15);
-            doc.setFontSize(10);
-            doc.text('07 Boulevard MIRA Abderahmen Loc N°2, Oran', 15, 25);
-            doc.text('Tél: 05 41 52 75 61', 15, 32);
+            // Token listener
+            const tokenInput = document.getElementById('githubToken');
+            tokenInput.value = localStorage.getItem('varicom_github_token') || '';
+            tokenInput.addEventListener('input', (e) => localStorage.setItem('varicom_github_token', e.target.value));
 
-            doc.setFontSize(16);
-
-            doc.text('BON DE COMMANDE', 195, 20, {
-                align: 'right'
+            // Bulk Preview Listener
+            ['bulkBaseUrl', 'bulkField', 'bulkExt'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.addEventListener('input', updateBulkPreview);
             });
-        doc.setFontSize(10);
 
-        doc.text(`Date: $ {
-                date
-            }
-
-            `, 195, 30, {
-            align: 'right'
+            // Tab Change Listener
+            const tabEls = document.querySelectorAll('button[data-bs-toggle="tab"]');
+            tabEls.forEach(tab => {
+                tab.addEventListener('shown.bs.tab', updateBulkPreview);
+            });
         });
 
-        // Client Info
-        doc.setTextColor(0, 0, 0);
-        doc.setFontSize(12);
-
-        doc.text(`Client: $ {
-                clientName
-            }
-
-            `, 15, 55);
-
-        if (clientPhone) doc.text(`Tél: $ {
-                clientPhone
-            }
-
-            `, 15, 62);
-
-        // Table
-        const tableData=cart.map(item=> [ item.designation,
-            item.qty,
-            formatPrice(item.prix),
-            formatPrice(item.prix * item.qty)]);
-
-        const total=cart.reduce((sum, item)=> sum + (item.prix * item.qty), 0);
-
-        doc.autoTable({
-
-            startY: 70,
-            head: [['Désignation', 'Qté', 'P.U', 'Total']],
-            body: tableData,
-            theme: 'striped',
-            headStyles: {
-                fillColor: [26, 58, 108]
-            }
-
-            ,
-            foot: [['', '', 'Total Global:', formatPrice(total)]],
-            footStyles: {
-                fillColor: [240, 240, 240], textColor: [0, 0, 0], fontStyle: 'bold'
-            }
-        });
-
-        doc.save(`Commande_VARICOM_$ {
-                Date.now()
-            }
-
-            .pdf`);
+        function loadLocalData() {
+            try {
+                const saved = localStorage.getItem('varicom_data');
+                if (saved) {
+                    const data = JSON.parse(saved);
+                    state.products = data.products || [];
+                    state.newProducts = data.newProducts || [];
+                    state.notifications = data.notifications || [];
+                }
+            } catch (e) { console.error('Error loading local data', e); }
         }
 
-        function sendWhatsApp() {
-            if (cart.length===0) return alert('Le panier est vide!');
+        function saveData() {
+            localStorage.setItem('varicom_data', JSON.stringify({
+                products: state.products,
+                newProducts: state.newProducts,
+                notifications: state.notifications
+            }));
+            updateUI();
+        }
 
-            const clientName=document.getElementById('clientName').value || 'Client';
-            const clientPhone=document.getElementById('clientPhone').value || '';
+        // Excel Handling
+        function handleExcelUpload(file) {
+            if (!file) return;
 
-            let msg=`*Nouvelle Commande - VARICOM*\n`;
+            showStatus('Lecture du fichier...', 'info');
+            const reader = new FileReader();
 
-            msg+=`Client: $ {
-                clientName
+            reader.onload = (e) => {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const jsonData = XLSX.utils.sheet_to_json(firstSheet);
+
+                    processExcelData(jsonData);
+                } catch (err) {
+                    showStatus('Erreur lecture Excel: ' + err.message, 'error');
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function processExcelData(data) {
+            const processed = data.map((row, idx) => ({
+                id: `prod_${Date.now()}_${idx}`,
+                ref: row['Ref'] || row['Référence'] || row['Code'] || 'N/A',
+                designation: row['Designation'] || row['Désignation'] || row['Nom'] || 'Produit sans nom',
+                famille: row['Famille'] || row['Categorie'] || 'Général',
+                prix: parseFloat(row['Prix'] || row['Price'] || 0),
+                image: row['Image'] || row['Photo'] || '',
+                description: row['Description'] || row['Desc'] || ''
+            })).filter(p => p.prix > 0);
+
+            state.products = processed;
+            saveData();
+            showStatus(`${processed.length} produits importés avec succès!`, 'success');
+        }
+
+        // Product & Notification Management
+        function addNewProduct() {
+            const name = document.getElementById('newProductName').value;
+            const price = document.getElementById('newProductPrice').value;
+            const cat = document.getElementById('newProductCategory').value;
+            const img = document.getElementById('newProductImage').value;
+
+            if (!name || !price) return showStatus('Nom et Prix requis', 'warning');
+
+            state.newProducts.unshift({
+                id: `new_${Date.now()}`,
+                name,
+                price: parseFloat(price),
+                category: cat,
+                image: img,
+                timestamp: new Date().toISOString()
+            });
+
+            // Reset inputs
+            document.getElementById('newProductName').value = '';
+            document.getElementById('newProductPrice').value = '';
+
+            saveData();
+            showStatus('Nouveau produit ajouté', 'success');
+        }
+
+        function createNotification() {
+            const title = document.getElementById('notifTitle').value;
+            const msg = document.getElementById('notifMessage').value;
+            const type = document.getElementById('notifType').value;
+
+            if (!title || !msg) return showStatus('Titre et Message requis', 'warning');
+
+            state.notifications.unshift({
+                id: `notif_${Date.now()}`,
+                title,
+                message: msg,
+                type,
+                timestamp: new Date().toISOString()
+            });
+
+            document.getElementById('notifTitle').value = '';
+            document.getElementById('notifMessage').value = '';
+
+            saveData();
+            showStatus('Notification créée', 'success');
+        }
+
+        function removeNewProduct(id) {
+            state.newProducts = state.newProducts.filter(p => p.id !== id);
+            saveData();
+        }
+
+        function removeNotification(id) {
+            state.notifications = state.notifications.filter(n => n.id !== id);
+            saveData();
+        }
+
+        // --- Bulk Functions ---
+        function openBulkImageModal() {
+            new bootstrap.Modal(document.getElementById('bulkImageModal')).show();
+            updateBulkPreview();
+        }
+
+        function updateBulkPreview() {
+            const activeTab = document.querySelector('.nav-link.active').id;
+
+            if (activeTab === 'mode-magic-tab') {
+                document.getElementById('bulkPreview').textContent = `https://tse2.mm.bing.net/th?q=Exemple...`;
+            } else if (activeTab === 'mode-desc-tab') {
+                document.getElementById('bulkPreview').textContent = `https://www.bing.com/search?q=fiche+technique+Exemple`;
+            } else {
+                const baseUrl = document.getElementById('bulkBaseUrl').value || 'https://site.com/img/';
+                const field = document.getElementById('bulkField').value;
+                const ext = document.getElementById('bulkExt').value;
+                const example = field === 'ref' ? 'REF123' : 'Produit_Exemple';
+                document.getElementById('bulkPreview').textContent = `${baseUrl}${example}${ext}`;
+            }
+        }
+
+        function applyBulkActions() {
+            const activeTab = document.querySelector('.nav-link.active').id;
+
+            if (confirm(`Cela va modifier ${state.products.length} produits. Continuer?`)) {
+
+                if (activeTab === 'mode-magic-tab') {
+                    // Magic Images
+                    state.products = state.products.map(p => ({
+                        ...p,
+                        image: `https://tse2.mm.bing.net/th?q=${encodeURIComponent(p.designation)}&w=500&h=500&c=7&rs=1&p=0`
+                    }));
+                } else if (activeTab === 'mode-desc-tab') {
+                    // Magic Descriptions
+                    state.products = state.products.map(p => ({
+                        ...p,
+                        description: `https://www.bing.com/search?q=fiche+technique+${encodeURIComponent(p.designation)}`
+                    }));
+                } else {
+                    // Hosted Images
+                    const baseUrl = document.getElementById('bulkBaseUrl').value;
+                    const field = document.getElementById('bulkField').value;
+                    const ext = document.getElementById('bulkExt').value;
+
+                    if (!baseUrl) return alert('Veuillez entrer une URL de base');
+
+                    state.products = state.products.map(p => {
+                        const val = p[field] ? p[field].toString().trim() : '';
+                        const safeVal = field === 'designation' ? val.replace(/[^a-zA-Z0-9-_]/g, '_') : val;
+                        return {
+                            ...p,
+                            image: `${baseUrl}${safeVal}${ext}`
+                        };
+                    });
+                }
+
+                saveData();
+                bootstrap.Modal.getInstance(document.getElementById('bulkImageModal')).hide();
+                showStatus('Mise à jour effectuée avec succès!', 'success');
+            }
+        }
+
+        function searchImage(term, provider) {
+            const query = encodeURIComponent(term);
+            let url = '';
+
+            switch (provider) {
+                case 'google':
+                    url = `https://www.google.com/search?tbm=isch&q=${query}`;
+                    break;
+                case 'bing':
+                    url = `https://www.bing.com/images/search?q=${query}`;
+                    break;
+                case 'facebook':
+                    url = `https://www.facebook.com/search/photos/?q=${query}`;
+                    break;
             }
 
-            \n`;
+            if (url) window.open(url, '_blank');
+        }
 
-            msg+=`Tél: $ {
-                clientPhone
+        function updateProductImage(id, newUrl) {
+            const p = state.products.find(p => p.id === id);
+            if (p) {
+                p.image = newUrl;
+                saveData(); // This triggers UI update
             }
+        }
 
-            \n\n`;
+        function updateProductDesc(id, newUrl) {
+            const p = state.products.find(p => p.id === id);
+            if (p) {
+                p.description = newUrl;
+                saveData();
+            }
+        }
 
-            let total=0;
+        // GitHub Sync
+        async function uploadToGitHubGist() {
+            const token = document.getElementById('githubToken').value;
+            if (!token) return showStatus('Token GitHub manquant!', 'error');
 
-            cart.forEach(item=> {
-                    const itemTotal=item.prix * item.qty;
-                    total +=itemTotal;
+            const btn = document.getElementById('publishBtn');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Synchronisation...';
+            btn.disabled = true;
 
-                    msg +=`- $ {
-                        item.designation
+            const payload = {
+                description: "VARICOM Catalog Data",
+                public: true,
+                files: {
+                    "varicom_data.json": {
+                        content: JSON.stringify({
+                            products: state.products,
+                            newProducts: state.newProducts,
+                            notifications: state.notifications,
+                            lastUpdate: new Date().toISOString(),
+                            meta: { version: "2.0", source: "VaricomAdmin" }
+                        })
                     }
+                }
+            };
 
-                    (x$ {
-                            item.qty
+            try {
+                let url = 'https://api.github.com/gists';
+                let method = 'POST';
 
-                        }) : $ {
-                        formatPrice(itemTotal)
-                    }
+                // If we have an ID, try to update (PATCH) instead of create
+                if (state.gistId) {
+                    url += `/${state.gistId}`;
+                    method = 'PATCH';
+                }
 
-                    \n`;
+                const response = await fetch(url, {
+                    method: method,
+                    headers: {
+                        'Authorization': `token ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
                 });
 
-            msg+=`\n*TOTAL GLOBAL: $ {
-                formatPrice(total)
-            }
-
-            *`;
-
-            const url=`https: //wa.me/${adminPhone}?text=${encodeURIComponent(msg)}`;
-            window.open(url, '_blank');
-        }
-
-        // --- Utility Functions ---
-
-        function formatPrice(price) {
-            return new Intl.NumberFormat('fr-DZ', {
-                style: 'currency', currency: 'DZD'
-            }).format(price);
-        }
-
-        function applyTheme(theme) {
-            document.documentElement.setAttribute('data-theme', theme);
-            localStorage.setItem('varicom_theme', theme);
-
-            const icon=document.getElementById('themeIcon');
-
-            if (icon) {
-                if (theme==='dark') {
-                    icon.classList.replace('fa-moon', 'fa-sun');
+                if (!response.ok) {
+                    if (response.status === 404 && state.gistId) {
+                        // Gist deleted or invalid, retry as new
+                        state.gistId = null;
+                        return uploadToGitHubGist();
+                    }
+                    throw new Error(`Erreur GitHub: ${response.status}`);
                 }
 
-                else {
-                    icon.classList.replace('fa-sun', 'fa-moon');
-                }
+                const result = await response.json();
+                state.gistId = result.id;
+                state.lastSync = new Date().toISOString();
+
+                localStorage.setItem('varicom_gist_id', state.gistId);
+                localStorage.setItem('varicom_last_sync', state.lastSync);
+
+                showStatus('✅ Synchronisation réussie!', 'success');
+                updateUI();
+
+            } catch (err) {
+                showStatus('Erreur Sync: ' + err.message, 'error');
+            } finally {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
             }
         }
 
-        function toggleTheme() {
-            const section=document.getElementById('recommendationSection');
-            const grid=document.getElementById('recGrid');
-            if ( !section || !grid) return;
+        // UI Updates
+        function updateUI() {
+            // Stats
+            document.getElementById('statsProducts').textContent = state.products.length;
+            document.getElementById('statsNewProducts').textContent = state.newProducts.length;
+            document.getElementById('statsNotifications').textContent = state.notifications.length;
+            document.getElementById('statsStatus').textContent = state.gistId ? 'Actif' : 'Inactif';
+            document.getElementById('statsStatus').className = state.gistId ? 'text-success' : 'text-danger';
 
-            const topCategories=Object.entries(categoryAffinity) .sort((a, b)=> b[1] - a[1]) .slice(0, 2) .map(entry=> entry[0]);
+            // Helper to escape single quotes for JS strings (e.g. onclick parameters)
+            const escapeQuote = (str) => str ? str.toString().replace(/'/g, "\\'") : '';
 
-            if (topCategories.length===0) {
-                section.style.display='none';
-                return;
-            }
+            // Helper to escape double quotes for HTML attributes (e.g. value, title)
+            const escapeHtml = (str) => str ? str.toString().replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;") : '';
 
-            let recs=allProducts.filter(p=> topCategories.includes(p.famille) && !cart.some(c=> c.id===p.id) && !wishlist.includes(p.id));
+            // Combined helper for JS strings inside HTML attributes
+            const escapeJsHtml = (str) => escapeHtml(escapeQuote(str));
 
-            recs=recs.sort(()=> 0.5 - Math.random()).slice(0, 4);
+            // Lists
+            const npList = document.getElementById('activeNewProducts');
+            npList.innerHTML = state.newProducts.map(p => `
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <div><strong>${escapeHtml(p.name)}</strong> - ${p.price} DA</div>
+                    <button class="btn btn-sm btn-outline-danger" onclick="removeNewProduct('${escapeJsHtml(p.id)}')"><i class="fas fa-times"></i></button>
+                </li>
+            `).join('');
 
-            if (recs.length > 0) {
-                section.style.display='block';
-                grid.innerHTML=recs.map(p=> createProductCard(p)).join('');
-            }
+            const notifList = document.getElementById('activeNotifications');
+            notifList.innerHTML = state.notifications.map(n => `
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <div><span class="badge bg-${getBadgeClass(n.type)}">${n.type}</span> ${escapeHtml(n.title)}</div>
+                    <button class="btn btn-sm btn-outline-danger" onclick="removeNotification('${escapeJsHtml(n.id)}')"><i class="fas fa-times"></i></button>
+                </li>
+            `).join('');
 
-            else {
-                section.style.display='none';
+            // Catalog Table (Limit to 100 for performance)
+            const tableBody = document.getElementById('catalogTableBody');
+
+            tableBody.innerHTML = state.products.slice(0, 100).map(p => `
+                <tr>
+                    <td><small>${escapeHtml(p.ref)}</small></td>
+                    <td class="text-truncate" style="max-width: 150px;" title="${escapeHtml(p.designation)}">${escapeHtml(p.designation)}</td>
+                    <td>${p.prix}</td>
+                    <td>
+                        <input type="text" class="form-control form-control-sm" 
+                               value="${escapeHtml(p.image || '')}" 
+                               onchange="updateProductImage('${escapeJsHtml(p.id)}', this.value)"
+                               placeholder="URL Image...">
+                    </td>
+                    <td>
+                        <input type="text" class="form-control form-control-sm" 
+                               value="${escapeHtml(p.description || '')}" 
+                               onchange="updateProductDesc('${escapeJsHtml(p.id)}', this.value)"
+                               placeholder="URL Desc...">
+                    </td>
+                    <td>
+                        <div class="btn-group btn-group-sm">
+                            <button class="btn btn-outline-primary" onclick="searchImage('${escapeJsHtml(p.designation)}', 'google')" title="Google">
+                                <i class="fab fa-google"></i>
+                            </button>
+                            <button class="btn btn-outline-info" onclick="searchImage('${escapeJsHtml(p.designation)}', 'bing')" title="Bing">
+                                <i class="fas fa-search"></i>
+                            </button>
+                            <button class="btn btn-outline-primary" onclick="searchImage('${escapeJsHtml(p.designation)}', 'facebook')" title="Facebook">
+                                <i class="fab fa-facebook"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function getBadgeClass(type) {
+            switch (type) {
+                case 'info': return 'info';
+                case 'success': return 'success';
+                case 'warning': return 'warning';
+                case 'error': return 'danger';
+                default: return 'secondary';
             }
         }
 
-        </script><script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script></body></html>
+        function showStatus(msg, type) {
+            const el = document.getElementById('syncStatus');
+            el.textContent = msg;
+            el.className = 'sync-status'; // Reset
+            el.classList.add(type === 'success' ? 'sync-success' : type === 'warning' ? 'sync-warning' : 'sync-error');
+            el.style.display = 'block';
+            setTimeout(() => {
+                el.style.display = 'none';
+            }, 3000);
+        }
+
+        function generateClientLink() {
+            if (!state.gistId) return showStatus('Veuillez d\'abord publier le catalogue', 'warning');
+            const url = `${window.location.href.replace('admin.html', 'index.html')}?gist=${state.gistId}`;
+            navigator.clipboard.writeText(url);
+            showStatus('Lien copié dans le presse-papier!', 'success');
+        }
+
+        function toggleToken() {
+            const input = document.getElementById('githubToken');
+            const icon = document.querySelector('.input-group .fa-eye, .input-group .fa-eye-slash');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.replace('fa-eye', 'fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.replace('fa-eye-slash', 'fa-eye');
+            }
+        }
+
+        function resetSync() {
+            if (confirm('Voulez-vous vraiment réinitialiser la synchronisation? Cela déconnectera le catalogue actuel.')) {
+                localStorage.removeItem('varicom_gist_id');
+                localStorage.removeItem('varicom_last_sync');
+                state.gistId = null;
+                state.lastSync = null;
+                updateUI();
+                showStatus('Synchronisation réinitialisée', 'info');
+            }
+        }
+
+        function downloadTemplate() {
+            const wb = XLSX.utils.book_new();
+            const ws = XLSX.utils.json_to_sheet([
+                { Ref: 'REF001', Designation: 'Exemple Produit', Famille: 'Informatique', Prix: 1000, Image: '', Description: '' }
+            ]);
+            XLSX.utils.book_append_sheet(wb, ws, "Modele");
+            XLSX.writeFile(wb, "modele_import_varicom.xlsx");
+        }
+    </script>
+</body>
+
+</html>
