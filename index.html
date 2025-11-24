@@ -403,35 +403,6 @@
         }
 
         function toggleTheme() {
-            const current=document.documentElement.getAttribute('data-theme');
-            const newTheme=current==='dark' ? 'light': 'dark';
-            applyTheme(newTheme);
-        }
-
-        function showToast(message) {
-            // Simple toast implementation
-            const toast=document.createElement('div');
-            toast.className='position-fixed bottom-0 end-0 p-3';
-            toast.style.zIndex='1100';
-
-            toast.innerHTML=` <div class="toast show align-items-center text-white bg-success border-0" role="alert"><div class="d-flex"><div class="toast-body">$ {
-                message
-            }
-
-            </div><button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button></div></div>`;
-            document.body.appendChild(toast);
-            setTimeout(()=> toast.remove(), 3000);
-        }
-
-        // --- Recommendation Logic ---
-
-        function trackAffinity(category, score) {
-            if ( !categoryAffinity[category]) categoryAffinity[category]=0;
-            categoryAffinity[category]+=score;
-            localStorage.setItem('varicom_affinity', JSON.stringify(categoryAffinity));
-        }
-
-        function updateRecommendations() {
             const section=document.getElementById('recommendationSection');
             const grid=document.getElementById('recGrid');
             if ( !section || !grid) return;
