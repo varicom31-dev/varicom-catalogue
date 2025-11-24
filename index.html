@@ -431,7 +431,21 @@
 
                 const data = await response.json();
                 const filename = Object.keys(data.files)[0];
-                allProducts = JSON.parse(data.files[filename].content);
+                const content = JSON.parse(data.files[filename].content);
+
+                // Handle both old (array) and new (object) formats
+                if (Array.isArray(content)) {
+                    allProducts = content;
+                } else if (content.products) {
+                    allProducts = content.products;
+
+                    // Handle Notifications if present
+                    if (content.notifications && content.notifications.length > 0) {
+                        showAdminNotifications(content.notifications);
+                    }
+                } else {
+                    throw new Error('Format de données invalide');
+                }
 
                 updateCategories();
                 filterProducts();
@@ -439,7 +453,25 @@
                 updateLastSyncTime();
             } catch (error) {
                 console.error(error);
-                showError("Impossible de charger le catalogue. Vérifiez votre connexion.");
+                showError("Impossible de charger le catalogue. Vérifiez votre connexion ou le lien.");
+            }
+        }
+
+        function showAdminNotifications(notifs) {
+            // Show the most recent active notification
+            const latest = notifs[0];
+            if (latest) {
+                const alertDiv = document.createElement('div');
+                alertDiv.className = `alert alert-${latest.type === 'error' ? 'danger' : latest.type} alert-dismissible fade show m-3 shadow-sm`;
+                alertDiv.role = 'alert';
+                alertDiv.innerHTML = `
+                    <strong><i class="fas fa-bullhorn me-2"></i>${latest.title}</strong>: ${latest.message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                `;
+
+                // Insert after Navbar
+                const nav = document.querySelector('nav');
+                nav.parentNode.insertBefore(alertDiv, nav.nextSibling);
             }
         }
 
