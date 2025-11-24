@@ -313,120 +313,51 @@
                 loadData();
                 localStorage.setItem('varicom_gist_id', gistId);
             } else {
-                document.getElementById('productGrid').innerHTML =
-                    '<div class="col-12 text-center mt-5"><div class="alert alert-warning">Catalogue non connecté. Veuillez utiliser le lien fourni par l\'administrateur.</div></div>';
-            }
-            updateCartUI();
-
-            // Theme init
-            const savedTheme = localStorage.getItem('varicom_theme') || 'light';
-            applyTheme(savedTheme);
-        });
-
-        async function loadData() {
-            try {
-                const response = await fetch(`https://api.github.com/gists/${gistId}`);
-                if (!response.ok) throw new Error('Catalogue introuvable');
-
-                const data = await response.json();
-                const filename = Object.keys(data.files)[0];
-                const parsedContent = JSON.parse(data.files[filename].content);
-
-                let products = [];
-
-                // Handle both new object format and legacy array format
-                if (Array.isArray(parsedContent)) {
-                    products = parsedContent;
-                } else if (parsedContent.products) {
-                    products = parsedContent.products;
-
-                    // Merge New Products if available
-                    if (parsedContent.newProducts && Array.isArray(parsedContent.newProducts)) {
-                        const newItems = parsedContent.newProducts.map(np => ({
-                            id: np.id,
-                            ref: 'NOUVEAU',
-                            designation: np.name, // Normalize name -> designation
-                            famille: np.category, // Normalize category -> famille
-                            prix: np.price,       // Normalize price -> prix
-                            image: np.image,
-                            description: ''
-                        }));
-                        products = [...newItems, ...products];
-                    }
-
-                    if (parsedContent.notifications) displayNotifications(parsedContent.notifications);
-                }
-
-                allProducts = products;
-                updateCategories();
-                filterProducts();
-                updateRecommendations();
-            } catch (error) {
-                console.error(error);
-                showToast("Impossible de charger le catalogue", "error");
-            }
-        }
-
-        function displayNotifications(notifs) {
-            const container = document.getElementById('adminNotifications');
-            if (!notifs || notifs.length === 0) return;
-
-            container.innerHTML = notifs.map(n => `
-                <div class="alert alert-${n.type === 'error' ? 'danger' : n.type} alert-dismissible fade show" role="alert">
-                    <strong>${n.title}</strong>: ${n.message}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            `).join('');
-        }
-
-        function updateCategories() {
-            const categories = ['all', ...new Set(allProducts.map(p => p.famille))];
-            const container = document.getElementById('categoryPills');
-            container.innerHTML = categories.map(cat => `
+                container.innerHTML = categories.map(cat => `
                 <button class="btn ${currentCategory === cat ? 'btn-primary' : 'btn-outline-primary'} rounded-pill px-4 text-capitalize" 
                         onclick="filterCategory('${cat}')">
                     ${cat === 'all' ? 'Tout' : cat}
                 </button>
             `).join('');
-        }
-
-        function filterCategory(cat) {
-            currentCategory = cat;
-            updateCategories(); // Update active state
-            filterProducts();
-        }
-
-        function filterProducts() {
-            const term = document.getElementById('searchInput').value.toLowerCase();
-            const filtered = allProducts.filter(p => {
-                const matchesCat = currentCategory === 'all' || p.famille === currentCategory;
-                const matchesSearch = p.designation.toLowerCase().includes(term) || p.ref.toLowerCase().includes(term);
-                return matchesCat && matchesSearch;
-            });
-
-            renderProducts(filtered);
-        }
-
-        function renderProducts(products) {
-            const grid = document.getElementById('productGrid');
-            if (products.length === 0) {
-                grid.innerHTML = '<div class="col-12 text-center text-muted py-5">Aucun produit trouvé</div>';
-                return;
             }
 
-            grid.innerHTML = products.map(p => createProductCard(p)).join('');
-        }
+            function filterCategory(cat) {
+                currentCategory = cat;
+                updateCategories(); // Update active state
+                filterProducts();
+            }
 
-        function createProductCard(p) {
-            const isNew = p.id && p.id.startsWith('new_'); // Simple check for new products
-            const badge = isNew ? '<span class="badge-new animate-shake">NOUVEAU</span>' : '';
-            const image = p.image || 'https://via.placeholder.com/300x200?text=No+Image';
+            function filterProducts() {
+                const term = document.getElementById('searchInput').value.toLowerCase();
+                const filtered = allProducts.filter(p => {
+                    const matchesCat = currentCategory === 'all' || p.famille === currentCategory;
+                    const matchesSearch = p.designation.toLowerCase().includes(term) || p.ref.toLowerCase().includes(term);
+                    return matchesCat && matchesSearch;
+                });
 
-            // Magic Description Icon
-            const descIcon = p.description ?
-                `<a href="${p.description}" target="_blank" class="text-info ms-2" title="Fiche Technique"><i class="fas fa-info-circle"></i></a>` : '';
+                renderProducts(filtered);
+            }
 
-            return `
+            function renderProducts(products) {
+                const grid = document.getElementById('productGrid');
+                if (products.length === 0) {
+                    grid.innerHTML = '<div class="col-12 text-center text-muted py-5">Aucun produit trouvé</div>';
+                    return;
+                }
+
+                grid.innerHTML = products.map(p => createProductCard(p)).join('');
+            }
+
+            function createProductCard(p) {
+                const isNew = p.id && p.id.startsWith('new_'); // Simple check for new products
+                const badge = isNew ? '<span class="badge-new animate-shake">NOUVEAU</span>' : '';
+                const image = p.image || 'https://via.placeholder.com/300x200?text=No+Image';
+
+                // Magic Description Icon
+                const descIcon = p.description ?
+                    `<a href="${p.description}" target="_blank" class="text-info ms-2" title="Fiche Technique"><i class="fas fa-info-circle"></i></a>` : '';
+
+                return `
                 <div class="col-6 col-md-4 col-lg-3">
                     <div class="product-card h-100 shadow-sm">
                         <div class="product-img-container">
@@ -450,87 +381,87 @@
                     </div>
                 </div>
             `;
-        }
-
-        // --- Cart & Wishlist Logic ---
-
-        function addToCart(id) {
-            const product = allProducts.find(p => p.id === id);
-            if (!product) return;
-
-            const existing = cart.find(item => item.id === id);
-            if (existing) {
-                existing.qty++;
-            } else {
-                cart.push({ ...product, qty: 1 });
             }
 
-            trackAffinity(product.famille, 5);
-            saveCart();
-            showToast(`Ajouté: ${product.designation}`);
-        }
+            // --- Cart & Wishlist Logic ---
 
-        function removeFromCart(id) {
-            cart = cart.filter(item => item.id !== id);
-            saveCart();
-            renderCartItems();
-        }
+            function addToCart(id) {
+                const product = allProducts.find(p => p.id === id);
+                if (!product) return;
 
-        function updateQty(id, change) {
-            const item = cart.find(i => i.id === id);
-            if (item) {
-                item.qty += change;
-                if (item.qty <= 0) removeFromCart(id);
-                else saveCart();
+                const existing = cart.find(item => item.id === id);
+                if (existing) {
+                    existing.qty++;
+                } else {
+                    cart.push({ ...product, qty: 1 });
+                }
+
+                trackAffinity(product.famille, 5);
+                saveCart();
+                showToast(`Ajouté: ${product.designation}`);
             }
-            renderCartItems();
-        }
 
-        function clearCart() {
-            if (confirm('Vider le panier?')) {
-                cart = [];
+            function removeFromCart(id) {
+                cart = cart.filter(item => item.id !== id);
                 saveCart();
                 renderCartItems();
             }
-        }
 
-        function saveCart() {
-            localStorage.setItem('varicom_cart', JSON.stringify(cart));
-            updateCartUI();
-        }
-
-        function updateCartUI() {
-            const count = cart.reduce((sum, item) => sum + item.qty, 0);
-            document.getElementById('cartCount').textContent = count;
-
-            const badge = document.getElementById('cartCount');
-            badge.classList.remove('animate__bounceIn');
-            void badge.offsetWidth; // Trigger reflow
-            badge.classList.add('animate__animated', 'animate__bounceIn');
-        }
-
-        function openCart() {
-            renderCartItems();
-            new bootstrap.Modal(document.getElementById('cartModal')).show();
-        }
-
-        function renderCartItems() {
-            const container = document.getElementById('cartItems');
-            const totalEl = document.getElementById('cartTotal');
-
-            if (cart.length === 0) {
-                container.innerHTML = '<div class="text-center py-5 text-muted"><i class="fas fa-shopping-basket fa-3x mb-3"></i><br>Votre panier est vide</div>';
-                totalEl.textContent = '0.00 DA';
-                return;
+            function updateQty(id, change) {
+                const item = cart.find(i => i.id === id);
+                if (item) {
+                    item.qty += change;
+                    if (item.qty <= 0) removeFromCart(id);
+                    else saveCart();
+                }
+                renderCartItems();
             }
 
-            let html = '<ul class="list-group list-group-flush">';
-            let total = 0;
+            function clearCart() {
+                if (confirm('Vider le panier?')) {
+                    cart = [];
+                    saveCart();
+                    renderCartItems();
+                }
+            }
 
-            cart.forEach(item => {
-                const itemTotal = item.prix * item.qty;
-                total += itemTotal;
-                html += `
+            function saveCart() {
+                localStorage.setItem('varicom_cart', JSON.stringify(cart));
+                updateCartUI();
+            }
+
+            function updateCartUI() {
+                const count = cart.reduce((sum, item) => sum + item.qty, 0);
+                document.getElementById('cartCount').textContent = count;
+
+                const badge = document.getElementById('cartCount');
+                badge.classList.remove('animate__bounceIn');
+                void badge.offsetWidth; // Trigger reflow
+                badge.classList.add('animate__animated', 'animate__bounceIn');
+            }
+
+            function openCart() {
+                renderCartItems();
+                new bootstrap.Modal(document.getElementById('cartModal')).show();
+            }
+
+            function renderCartItems() {
+                const container = document.getElementById('cartItems');
+                const totalEl = document.getElementById('cartTotal');
+
+                if (cart.length === 0) {
+                    container.innerHTML = '<div class="text-center py-5 text-muted"><i class="fas fa-shopping-basket fa-3x mb-3"></i><br>Votre panier est vide</div>';
+                    totalEl.textContent = '0.00 DA';
+                    return;
+                }
+
+                let html = '<ul class="list-group list-group-flush">';
+                let total = 0;
+
+                cart.forEach(item => {
+                    const itemTotal = item.prix * item.qty;
+                    total += itemTotal;
+                    html += `
                     <li class="list-group-item d-flex justify-content-between align-items-center bg-transparent">
                         <div>
                             <h6 class="mb-0 text-truncate" style="max-width: 200px;">${item.designation}</h6>
@@ -544,123 +475,123 @@
                         </div>
                     </li>
                 `;
-            });
-            html += '</ul>';
+                });
+                html += '</ul>';
 
-            container.innerHTML = html;
-            totalEl.textContent = formatPrice(total);
-        }
-
-        function toggleWishlist(id) {
-            const index = wishlist.indexOf(id);
-            const product = allProducts.find(p => p.id === id);
-
-            if (index === -1) {
-                wishlist.push(id);
-                showToast('Ajouté aux favoris ❤️');
-                if (product) trackAffinity(product.famille, 3);
-            } else {
-                wishlist.splice(index, 1);
+                container.innerHTML = html;
+                totalEl.textContent = formatPrice(total);
             }
 
-            localStorage.setItem('varicom_wishlist', JSON.stringify(wishlist));
-            filterProducts(); // Re-render to update heart icons
-            updateRecommendations();
-        }
+            function toggleWishlist(id) {
+                const index = wishlist.indexOf(id);
+                const product = allProducts.find(p => p.id === id);
 
-        // --- Export Functions ---
+                if (index === -1) {
+                    wishlist.push(id);
+                    showToast('Ajouté aux favoris ❤️');
+                    if (product) trackAffinity(product.famille, 3);
+                } else {
+                    wishlist.splice(index, 1);
+                }
 
-        function generatePDF() {
-            if (cart.length === 0) return alert('Le panier est vide!');
+                localStorage.setItem('varicom_wishlist', JSON.stringify(wishlist));
+                filterProducts(); // Re-render to update heart icons
+                updateRecommendations();
+            }
 
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
+            // --- Export Functions ---
 
-            const clientName = document.getElementById('clientName').value || 'Client';
-            const clientPhone = document.getElementById('clientPhone').value || '';
-            const date = new Date().toLocaleDateString('fr-FR');
+            function generatePDF() {
+                if (cart.length === 0) return alert('Le panier est vide!');
 
-            // Header
-            doc.setFillColor(26, 58, 108);
-            doc.rect(0, 0, 210, 40, 'F');
-            doc.setTextColor(255, 255, 255);
-            doc.setFontSize(22);
-            doc.text('VARICOM', 15, 15);
-            doc.setFontSize(10);
-            doc.text('07 Boulevard MIRA Abderahmen Loc N°2, Oran', 15, 25);
-            doc.text('Tél: 05 41 52 75 61', 15, 32);
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
 
-            doc.setFontSize(16);
-            doc.text('BON DE COMMANDE', 195, 20, { align: 'right' });
-            doc.setFontSize(10);
-            doc.text(`Date: ${date}`, 195, 30, { align: 'right' });
+                const clientName = document.getElementById('clientName').value || 'Client';
+                const clientPhone = document.getElementById('clientPhone').value || '';
+                const date = new Date().toLocaleDateString('fr-FR');
 
-            // Client Info
-            doc.setTextColor(0, 0, 0);
-            doc.setFontSize(12);
-            doc.text(`Client: ${clientName}`, 15, 55);
-            if (clientPhone) doc.text(`Tél: ${clientPhone}`, 15, 62);
+                // Header
+                doc.setFillColor(26, 58, 108);
+                doc.rect(0, 0, 210, 40, 'F');
+                doc.setTextColor(255, 255, 255);
+                doc.setFontSize(22);
+                doc.text('VARICOM', 15, 15);
+                doc.setFontSize(10);
+                doc.text('07 Boulevard MIRA Abderahmen Loc N°2, Oran', 15, 25);
+                doc.text('Tél: 05 41 52 75 61', 15, 32);
 
-            // Table
-            const tableData = cart.map(item => [
-                item.designation,
-                item.qty,
-                formatPrice(item.prix),
-                formatPrice(item.prix * item.qty)
-            ]);
+                doc.setFontSize(16);
+                doc.text('BON DE COMMANDE', 195, 20, { align: 'right' });
+                doc.setFontSize(10);
+                doc.text(`Date: ${date}`, 195, 30, { align: 'right' });
 
-            const total = cart.reduce((sum, item) => sum + (item.prix * item.qty), 0);
+                // Client Info
+                doc.setTextColor(0, 0, 0);
+                doc.setFontSize(12);
+                doc.text(`Client: ${clientName}`, 15, 55);
+                if (clientPhone) doc.text(`Tél: ${clientPhone}`, 15, 62);
 
-            doc.autoTable({
-                startY: 70,
-                head: [['Désignation', 'Qté', 'P.U', 'Total']],
-                body: tableData,
-                theme: 'striped',
-                headStyles: { fillColor: [26, 58, 108] },
-                foot: [['', '', 'Total Global:', formatPrice(total)]],
-                footStyles: { fillColor: [240, 240, 240], textColor: [0, 0, 0], fontStyle: 'bold' }
-            });
+                // Table
+                const tableData = cart.map(item => [
+                    item.designation,
+                    item.qty,
+                    formatPrice(item.prix),
+                    formatPrice(item.prix * item.qty)
+                ]);
 
-            doc.save(`Commande_VARICOM_${Date.now()}.pdf`);
-        }
+                const total = cart.reduce((sum, item) => sum + (item.prix * item.qty), 0);
 
-        function sendWhatsApp() {
-            if (cart.length === 0) return alert('Le panier est vide!');
+                doc.autoTable({
+                    startY: 70,
+                    head: [['Désignation', 'Qté', 'P.U', 'Total']],
+                    body: tableData,
+                    theme: 'striped',
+                    headStyles: { fillColor: [26, 58, 108] },
+                    foot: [['', '', 'Total Global:', formatPrice(total)]],
+                    footStyles: { fillColor: [240, 240, 240], textColor: [0, 0, 0], fontStyle: 'bold' }
+                });
 
-            const clientName = document.getElementById('clientName').value || 'Client';
-            const clientPhone = document.getElementById('clientPhone').value || '';
+                doc.save(`Commande_VARICOM_${Date.now()}.pdf`);
+            }
 
-            let msg = `*Nouvelle Commande - VARICOM*\n`;
-            msg += `Client: ${clientName}\n`;
-            msg += `Tél: ${clientPhone}\n\n`;
+            function sendWhatsApp() {
+                if (cart.length === 0) return alert('Le panier est vide!');
 
-            let total = 0;
-            cart.forEach(item => {
-                const itemTotal = item.prix * item.qty;
-                total += itemTotal;
-                msg += `- ${item.designation} (x${item.qty}) : ${formatPrice(itemTotal)}\n`;
-            });
+                const clientName = document.getElementById('clientName').value || 'Client';
+                const clientPhone = document.getElementById('clientPhone').value || '';
 
-            msg += `\n*TOTAL GLOBAL: ${formatPrice(total)}*`;
+                let msg = `*Nouvelle Commande - VARICOM*\n`;
+                msg += `Client: ${clientName}\n`;
+                msg += `Tél: ${clientPhone}\n\n`;
 
-            const url = `https://wa.me/${adminPhone}?text=${encodeURIComponent(msg)}`;
-            window.open(url, '_blank');
-        }
+                let total = 0;
+                cart.forEach(item => {
+                    const itemTotal = item.prix * item.qty;
+                    total += itemTotal;
+                    msg += `- ${item.designation} (x${item.qty}) : ${formatPrice(itemTotal)}\n`;
+                });
 
-        // --- Utility Functions ---
+                msg += `\n*TOTAL GLOBAL: ${formatPrice(total)}*`;
 
-        function formatPrice(price) {
-            return new Intl.NumberFormat('fr-DZ', { style: 'currency', currency: 'DZD' }).format(price);
-        }
+                const url = `https://wa.me/${adminPhone}?text=${encodeURIComponent(msg)}`;
+                window.open(url, '_blank');
+            }
 
-        function showToast(message, type = 'success') {
-            const toast = document.createElement('div');
-            toast.className = 'position-fixed bottom-0 end-0 p-3';
-            toast.style.zIndex = '1100';
+            // --- Utility Functions ---
 
-            const bgClass = type === 'error' ? 'bg-danger' : 'bg-success';
+            function formatPrice(price) {
+                return new Intl.NumberFormat('fr-DZ', { style: 'currency', currency: 'DZD' }).format(price);
+            }
 
-            toast.innerHTML = `
+            function showToast(message, type = 'success') {
+                const toast = document.createElement('div');
+                toast.className = 'position-fixed bottom-0 end-0 p-3';
+                toast.style.zIndex = '1100';
+
+                const bgClass = type === 'error' ? 'bg-danger' : 'bg-success';
+
+                toast.innerHTML = `
                 <div class="toast show align-items-center text-white ${bgClass} border-0" role="alert">
                     <div class="d-flex">
                         <div class="toast-body">${message}</div>
@@ -668,36 +599,36 @@
                     </div>
                 </div>
             `;
-            document.body.appendChild(toast);
-            setTimeout(() => toast.remove(), 3000);
-        }
-
-        function trackAffinity(category, score) {
-            if (!category) return;
-            categoryAffinity[category] = (categoryAffinity[category] || 0) + score;
-            localStorage.setItem('varicom_affinity', JSON.stringify(categoryAffinity));
-            updateRecommendations();
-        }
-
-        function updateRecommendations() {
-            // Simple recommendation logic based on affinity
-            // (Implementation kept simple for brevity)
-        }
-
-        function applyTheme(theme) {
-            document.documentElement.setAttribute('data-theme', theme);
-            localStorage.setItem('varicom_theme', theme);
-            const icon = document.getElementById('themeIcon');
-            if (icon) {
-                icon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+                document.body.appendChild(toast);
+                setTimeout(() => toast.remove(), 3000);
             }
-        }
 
-        function toggleTheme() {
-            const current = localStorage.getItem('varicom_theme') || 'light';
-            const next = current === 'light' ? 'dark' : 'light';
-            applyTheme(next);
-        }
+            function trackAffinity(category, score) {
+                if (!category) return;
+                categoryAffinity[category] = (categoryAffinity[category] || 0) + score;
+                localStorage.setItem('varicom_affinity', JSON.stringify(categoryAffinity));
+                updateRecommendations();
+            }
+
+            function updateRecommendations() {
+                // Simple recommendation logic based on affinity
+                // (Implementation kept simple for brevity)
+            }
+
+            function applyTheme(theme) {
+                document.documentElement.setAttribute('data-theme', theme);
+                localStorage.setItem('varicom_theme', theme);
+                const icon = document.getElementById('themeIcon');
+                if (icon) {
+                    icon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+                }
+            }
+
+            function toggleTheme() {
+                const current = localStorage.getItem('varicom_theme') || 'light';
+                const next = current === 'light' ? 'dark' : 'light';
+                applyTheme(next);
+            }
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 </body>
