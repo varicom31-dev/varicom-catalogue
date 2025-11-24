@@ -89,554 +89,90 @@
             max-width: 100%;
             object-fit: contain;
             transition: transform 0.3s;
-        }
+            const index=wishlist.indexOf(id);
+            const product=allProducts.find(p=> p.id===id);
 
-        .product-card:hover .product-img-container img {
-            transform: scale(1.05);
-        }
-
-        .badge-new {
-            position: absolute;
-            top: 10px;
-            left: 10px;
-            background-color: var(--secondary-color);
-            color: white;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 0.75rem;
-            font-weight: bold;
-        }
-
-        .wishlist-btn {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            background: rgba(255, 255, 255, 0.8);
-            border: none;
-            border-radius: 50%;
-            width: 35px;
-            height: 35px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all 0.2s;
-            color: #ccc;
-        }
-
-        .wishlist-btn.active {
-            color: var(--secondary-color);
-            background: white;
-        }
-
-        .price-tag {
-            font-weight: bold;
-            color: var(--primary-color);
-            font-size: 1.1rem;
-        }
-
-        /* Category Pills */
-        .category-pills {
-            display: flex;
-            gap: 10px;
-            overflow-x: auto;
-            padding-bottom: 10px;
-            margin-bottom: 20px;
-            scrollbar-width: none;
-            /* Firefox */
-        }
-
-        .category-pills::-webkit-scrollbar {
-            display: none;
-        }
-
-        .cat-pill {
-            white-space: nowrap;
-            padding: 8px 20px;
-            border-radius: 50px;
-            border: 1px solid var(--primary-color);
-            background: transparent;
-            color: var(--primary-color);
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-
-        .cat-pill.active,
-        .cat-pill:hover {
-            background: var(--primary-color);
-            color: white;
-        }
-
-        /* Floating Cart Button */
-        .floating-cart-btn {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            background-color: var(--primary-color);
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-            z-index: 1000;
-            cursor: pointer;
-            transition: transform 0.2s;
-        }
-
-        .floating-cart-btn:hover {
-            transform: scale(1.1);
-        }
-
-        .cart-badge {
-            position: absolute;
-            top: -5px;
-            right: -5px;
-            background-color: var(--secondary-color);
-            color: white;
-            border-radius: 50%;
-            width: 24px;
-            height: 24px;
-            font-size: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border: 2px solid white;
-        }
-
-        /* Dark Mode Overrides */
-        [data-theme="dark"] .product-img-container {
-            background-color: #2d2d2d;
-        }
-
-        [data-theme="dark"] .card {
-            background-color: #1e1e1e;
-            border-color: #333;
-        }
-
-        [data-theme="dark"] .modal-content {
-            background-color: #1e1e1e;
-            color: #e0e0e0;
-        }
-
-        [data-theme="dark"] .modal-header {
-            border-bottom-color: #333;
-            background-color: #252525;
-        }
-
-        [data-theme="dark"] .modal-footer {
-            border-top-color: #333;
-        }
-
-        [data-theme="dark"] .list-group-item {
-            background-color: #252525;
-            color: #e0e0e0;
-            border-color: #333;
-        }
-
-        [data-theme="dark"] .form-control {
-            background-color: #2d2d2d;
-            border-color: #444;
-            color: #e0e0e0;
-        }
-
-        [data-theme="dark"] .cat-pill {
-            border-color: #4a90e2;
-            color: #4a90e2;
-        }
-
-        [data-theme="dark"] .cat-pill.active {
-            background: #4a90e2;
-            color: white;
-        }
-
-        /* Recommendation Section */
-        .recommendation-section {
-            background: linear-gradient(to right, rgba(42, 157, 143, 0.1), rgba(26, 58, 108, 0.1));
-            border-radius: 15px;
-            padding: 20px;
-            margin-bottom: 30px;
-            display: none;
-        }
-
-        [data-theme="dark"] .recommendation-section {
-            background: linear-gradient(to right, rgba(100, 255, 218, 0.05), rgba(74, 144, 226, 0.05));
-        }
-    </style>
-</head>
-
-<body>
-
-    <!-- Navbar -->
-    <nav class="navbar sticky-top shadow-sm">
-        <div class="container d-flex justify-content-between align-items-center">
-            <a class="navbar-brand" href="#">
-                <i class="fas fa-bolt me-2"></i>VARICOM LIVE
-            </a>
-            <div class="d-flex align-items-center gap-3">
-                <button class="btn btn-link text-dark p-0" onclick="toggleTheme()">
-                    <i class="fas fa-moon" id="themeIcon"></i>
-                </button>
-                <div class="d-none d-md-block text-muted small" id="lastUpdate"></div>
-            </div>
-        </div>
-    </nav>
-
-    <!-- Hero Section -->
-    <div class="hero-section text-center">
-        <div class="container">
-            <h2 class="mb-3">Bienvenue sur notre Catalogue</h2>
-            <p class="mb-4 opacity-75">Découvrez nos derniers produits et offres exclusives.</p>
-            <div class="row justify-content-center">
-                <div class="col-md-6">
-                    <div class="input-group">
-                        <span class="input-group-text border-0"><i class="fas fa-search"></i></span>
-                        <input type="text" class="form-control border-0 p-3" id="searchInput"
-                            placeholder="Rechercher un produit (réf, nom)...">
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <div class="container mb-5">
-        <!-- Category Pills -->
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <h5 class="mb-0">Catégories</h5>
-            <button class="btn btn-outline-light btn-sm text-dark border" id="wishlistFilterBtn"
-                onclick="toggleWishlistFilter()">
-                <i class="fas fa-heart me-1"></i> Favoris
-            </button>
-        </div>
-        <div class="category-pills" id="categoryPills">
-            <!-- Pills injected by JS -->
-        </div>
-
-        <!-- Recommendations -->
-        <div class="recommendation-section mb-4" id="recommendationSection" style="display:none;">
-            <h5 class="mb-3"><i class="fas fa-star text-warning me-2"></i>Recommandé pour vous</h5>
-            <div class="row g-3" id="recGrid"></div>
-        </div>
-
-        <!-- Products Grid -->
-        <div class="row g-4" id="productsGrid">
-            <!-- Products injected by JS -->
-            <div class="col-12 text-center py-5">
-                <div class="spinner-border text-primary" role="status">
-                    <span class="visually-hidden">Chargement...</span>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Floating Cart Button -->
-    <div class="floating-cart-btn" onclick="openCart()">
-        <i class="fas fa-shopping-cart fa-lg"></i>
-        <span class="cart-badge" id="cartCount">0</span>
-    </div>
-
-    <!-- Cart Modal -->
-    <div class="modal fade" id="cartModal" tabindex="-1">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title"><i class="fas fa-shopping-cart me-2"></i>Votre Panier</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <div id="cartItems" class="mb-3">
-                        <div class="text-center py-5 text-muted">Votre panier est vide</div>
-                    </div>
-                    <div class="d-flex justify-content-between align-items-center border-top pt-3">
-                        <h5>Total:</h5>
-                        <h4 class="text-primary" id="cartTotal">0.00 DA</h4>
-                    </div>
-
-                    <!-- Client Info -->
-                    <div class="mt-4 p-3 bg-light rounded border">
-                        <h6 class="mb-3"><i class="fas fa-user-edit me-2"></i>Vos Coordonnées</h6>
-                        <div class="row g-2">
-                            <div class="col-md-6">
-                                <input type="text" class="form-control" id="clientName"
-                                    placeholder="Votre Nom / Entreprise">
-                            </div>
-                            <div class="col-md-6">
-                                <input type="text" class="form-control" id="clientPhone" placeholder="Votre Téléphone">
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="modal-footer flex-wrap">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
-                    <button type="button" class="btn btn-danger" onclick="clearCart()">Vider</button>
-                    <div class="d-flex gap-2">
-                        <button type="button" class="btn btn-success" onclick="generatePDF()">
-                            <i class="fas fa-file-pdf me-2"></i>PDF
-                        </button>
-                        <button type="button" class="btn btn-success"
-                            style="background-color: #25D366; border-color: #25D366;" onclick="sendWhatsApp()">
-                            <i class="fab fa-whatsapp me-2"></i>WhatsApp
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        let allProducts = [];
-        let gistId = null;
-        let cart = [];
-        let wishlist = [];
-        let showWishlistOnly = false;
-        let categoryAffinity = {};
-        let currentCategory = '';
-        const adminPhone = "213698020833"; // Hardcoded Admin Phone
-
-        document.addEventListener('DOMContentLoaded', () => {
-            // Load Local Data
-            const savedCart = localStorage.getItem('varicom_cart');
-            if (savedCart) { cart = JSON.parse(savedCart); updateCartUI(); }
-
-            const savedWishlist = localStorage.getItem('varicom_wishlist');
-            if (savedWishlist) { wishlist = JSON.parse(savedWishlist); }
-
-            const savedTheme = localStorage.getItem('varicom_theme');
-            if (savedTheme) { applyTheme(savedTheme); }
-
-            const savedAffinity = localStorage.getItem('varicom_affinity');
-            if (savedAffinity) { categoryAffinity = JSON.parse(savedAffinity); }
-
-            // Get Gist ID
-            const params = new URLSearchParams(window.location.search);
-            gistId = params.get('gist') || localStorage.getItem('varicom_client_gist_id');
-
-            if (gistId) {
-                localStorage.setItem('varicom_client_gist_id', gistId);
-                loadData();
-            } else {
-                showError("ID du catalogue manquant. Veuillez utiliser le lien fourni par l'administrateur.");
-            }
-
-            // Search Listener
-            document.getElementById('searchInput').addEventListener('input', filterProducts);
-        });
-
-        async function loadData() {
-            try {
-                const response = await fetch(`https://api.github.com/gists/${gistId}`);
-                if (!response.ok) throw new Error('Catalogue introuvable');
-
-                const data = await response.json();
-                const filename = Object.keys(data.files)[0];
-                const content = JSON.parse(data.files[filename].content);
-
-                // Handle both old (array) and new (object) formats
-                if (Array.isArray(content)) {
-                    allProducts = content;
-                } else if (content.products) {
-                    allProducts = content.products;
-
-                    // Handle Notifications if present
-                    if (content.notifications && content.notifications.length > 0) {
-                        showAdminNotifications(content.notifications);
-                    }
-                } else {
-                    throw new Error('Format de données invalide');
-                }
-
-                updateCategories();
-                filterProducts();
-                updateRecommendations();
-                updateLastSyncTime();
-            } catch (error) {
-                console.error(error);
-                showError("Impossible de charger le catalogue. Vérifiez votre connexion ou le lien.");
-            }
-        }
-
-        function showAdminNotifications(notifs) {
-            // Show the most recent active notification
-            const latest = notifs[0];
-            if (latest) {
-                const alertDiv = document.createElement('div');
-                alertDiv.className = `alert alert-${latest.type === 'error' ? 'danger' : latest.type} alert-dismissible fade show m-3 shadow-sm`;
-                alertDiv.role = 'alert';
-                alertDiv.innerHTML = `
-                    <strong><i class="fas fa-bullhorn me-2"></i>${latest.title}</strong>: ${latest.message}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                `;
-
-                // Insert after Navbar
-                const nav = document.querySelector('nav');
-                nav.parentNode.insertBefore(alertDiv, nav.nextSibling);
-            }
-        }
-
-        function updateLastSyncTime() {
-            const now = new Date();
-            document.getElementById('lastUpdate').textContent = 'Mise à jour: ' + now.toLocaleTimeString();
-        }
-
-        function forceRefresh() {
-            loadData();
-        }
-
-        function showError(msg) {
-            document.getElementById('productsGrid').innerHTML = `
-                <div class="col-12 text-center text-danger py-5">
-                    <i class="fas fa-exclamation-triangle fa-2x mb-3"></i>
-                    <p>${msg}</p>
-                </div>
-            `;
-        }
-
-        // --- Category & Filter Functions ---
-
-        function updateCategories() {
-            const cats = [...new Set(allProducts.map(p => p.famille))].sort();
-            const container = document.getElementById('categoryPills');
-
-            let html = `<button class="cat-pill ${currentCategory === '' ? 'active' : ''}" onclick="filterByCategory('')">Tout</button>`;
-            html += cats.map(c => `
-                <button class="cat-pill ${currentCategory === c ? 'active' : ''}" onclick="filterByCategory('${c}')">${c}</button>
-            `).join('');
-
-            container.innerHTML = html;
-        }
-
-        function filterByCategory(cat) {
-            currentCategory = cat;
-            updateCategories(); // To update active state
-            filterProducts();
-        }
-
-        function filterProducts() {
-            const term = document.getElementById('searchInput').value.toLowerCase();
-
-            let filtered = allProducts.filter(p => {
-                const matchesSearch = p.designation.toLowerCase().includes(term) ||
-                    (p.ref && p.ref.toLowerCase().includes(term));
-                const matchesCat = currentCategory === '' || p.famille === currentCategory;
-                const matchesWishlist = !showWishlistOnly || wishlist.includes(p.id);
-
-                return matchesSearch && matchesCat && matchesWishlist;
-            });
-
-            renderGrid(filtered);
-        }
-
-        function renderGrid(products) {
-            const grid = document.getElementById('productsGrid');
-            if (products.length === 0) {
-                grid.innerHTML = '<div class="col-12 text-center text-muted py-5">Aucun produit trouvé</div>';
-                return;
-            }
-            grid.innerHTML = products.map(p => createProductCard(p)).join('');
-        }
-
-        function createProductCard(p) {
-            const isFav = wishlist.includes(p.id);
-            return `
-                <div class="col-sm-6 col-md-4 col-lg-3">
-                    <div class="card product-card">
-                        <div class="product-img-container">
-                            ${p.image ? `<img src="${p.image}" onerror="this.src='https://via.placeholder.com/200?text=No+Image'">` : '<i class="fas fa-box fa-3x text-muted"></i>'}
-                            ${p.isNew ? '<span class="badge-new">NOUVEAU</span>' : ''}
-                            <button class="wishlist-btn ${isFav ? 'active' : ''}" onclick="toggleWishlist('${p.id}')">
-                                <i class="${isFav ? 'fas' : 'far'} fa-heart"></i>
-                            </button>
-                        </div>
-                        <div class="card-body">
-                            <h6 class="card-title text-truncate" title="${p.designation}">${p.designation}</h6>
-                            <p class="card-text small text-muted mb-2">${p.famille}</p>
-                            <div class="d-flex justify-content-between align-items-center">
-                                <span class="price-tag">${formatPrice(p.prix)}</span>
-                                <div class="d-flex gap-2">
-                                     <a href="https://www.google.com/search?tbm=isch&q=${encodeURIComponent(p.designation)}" target="_blank" class="btn btn-outline-secondary btn-sm rounded-circle" title="Chercher sur Google">
-                                        <i class="fab fa-google"></i>
-                                    </a>
-                                    <button class="btn btn-outline-primary btn-sm rounded-circle" onclick="addToCart('${p.id}')">
-                                        <i class="fas fa-plus"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-
-        // --- Wishlist Functions ---
-
-        function toggleWishlist(id) {
-            const index = wishlist.indexOf(id);
-            const product = allProducts.find(p => p.id === id);
-
-            if (index === -1) {
+            if (index===-1) {
                 wishlist.push(id);
                 showToast('Ajouté aux favoris ❤️');
                 if (product) trackAffinity(product.famille, 3);
-            } else {
+            }
+
+            else {
                 wishlist.splice(index, 1);
             }
+
             localStorage.setItem('varicom_wishlist', JSON.stringify(wishlist));
             filterProducts(); // Re-render to update heart icons
             updateRecommendations();
         }
 
         function toggleWishlistFilter() {
-            showWishlistOnly = !showWishlistOnly;
-            const btn = document.getElementById('wishlistFilterBtn');
+            showWishlistOnly= !showWishlistOnly;
+            const btn=document.getElementById('wishlistFilterBtn');
+
             if (showWishlistOnly) {
                 btn.classList.remove('btn-outline-light');
                 btn.classList.add('btn-danger');
-            } else {
+            }
+
+            else {
                 btn.classList.remove('btn-danger');
                 btn.classList.add('btn-outline-light');
             }
+
             filterProducts();
         }
 
         // --- Cart Functions ---
 
         function addToCart(id) {
-            const product = allProducts.find(p => p.id === id);
-            if (!product) return;
+            const product=allProducts.find(p=> p.id===id);
+            if ( !product) return;
 
-            const existing = cart.find(item => item.id === id);
+            const existing=cart.find(item=> item.id===id);
+
             if (existing) {
                 existing.qty++;
-            } else {
-                cart.push({ ...product, qty: 1 });
             }
 
-            trackAffinity(product.famille, 5);
-            saveCart();
-            showToast(`Ajouté: ${product.designation}`);
+            else {
+                cart.push({
+                    ...product, qty: 1
+                });
+        }
+
+        trackAffinity(product.famille, 5);
+        saveCart();
+
+        showToast(`Ajouté: $ {
+                product.designation
+            }
+
+            `);
         }
 
         function removeFromCart(id) {
-            cart = cart.filter(item => item.id !== id);
+            cart=cart.filter(item=> item.id !==id);
             saveCart();
             renderCartItems();
         }
 
         function updateQty(id, change) {
-            const item = cart.find(i => i.id === id);
+            const item=cart.find(i=> i.id===id);
+
             if (item) {
-                item.qty += change;
-                if (item.qty <= 0) removeFromCart(id);
+                item.qty+=change;
+                if (item.qty <=0) removeFromCart(id);
                 else saveCart();
             }
+
             renderCartItems();
         }
 
         function clearCart() {
             if (confirm('Vider le panier?')) {
-                cart = [];
+                cart=[];
                 saveCart();
                 renderCartItems();
             }
@@ -648,12 +184,12 @@
         }
 
         function updateCartUI() {
-            const count = cart.reduce((sum, item) => sum + item.qty, 0);
-            document.getElementById('cartCount').textContent = count;
+            const count=cart.reduce((sum, item)=> sum + item.qty, 0);
+            document.getElementById('cartCount').textContent=count;
 
-            const badge = document.getElementById('cartCount');
+            const badge=document.getElementById('cartCount');
             badge.classList.add('animate__animated', 'animate__bounceIn');
-            setTimeout(() => badge.classList.remove('animate__animated', 'animate__bounceIn'), 500);
+            setTimeout(()=> badge.classList.remove('animate__animated', 'animate__bounceIn'), 500);
         }
 
         function openCart() {
@@ -662,53 +198,61 @@
         }
 
         function renderCartItems() {
-            const container = document.getElementById('cartItems');
-            const totalEl = document.getElementById('cartTotal');
+            const container=document.getElementById('cartItems');
+            const totalEl=document.getElementById('cartTotal');
 
-            if (cart.length === 0) {
-                container.innerHTML = '<div class="text-center py-5 text-muted"><i class="fas fa-shopping-basket fa-3x mb-3"></i><br>Votre panier est vide</div>';
-                totalEl.textContent = '0.00 DA';
+            if (cart.length===0) {
+                container.innerHTML='<div class="text-center py-5 text-muted"><i class="fas fa-shopping-basket fa-3x mb-3"></i><br>Votre panier est vide</div>';
+                totalEl.textContent='0.00 DA';
                 return;
             }
 
-            let html = '<ul class="list-group list-group-flush">';
-            let total = 0;
+            let html='<ul class="list-group list-group-flush">';
+            let total=0;
 
-            cart.forEach(item => {
-                const itemTotal = item.prix * item.qty;
-                total += itemTotal;
-                html += `
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        <div>
-                            <h6 class="mb-0">${item.designation}</h6>
-                            <small class="text-muted">${formatPrice(item.prix)} x ${item.qty}</small>
-                        </div>
-                        <div class="d-flex align-items-center gap-2">
-                            <button class="btn btn-sm btn-outline-secondary" onclick="updateQty('${item.id}', -1)">-</button>
-                            <span>${item.qty}</span>
-                            <button class="btn btn-sm btn-outline-secondary" onclick="updateQty('${item.id}', 1)">+</button>
-                            <button class="btn btn-sm btn-danger ms-2" onclick="removeFromCart('${item.id}')"><i class="fas fa-trash"></i></button>
-                        </div>
-                    </li>
-                `;
-            });
-            html += '</ul>';
+            cart.forEach(item=> {
+                    const itemTotal=item.prix * item.qty;
+                    total +=itemTotal;
 
-            container.innerHTML = html;
-            totalEl.textContent = formatPrice(total);
+                    html +=` <li class="list-group-item d-flex justify-content-between align-items-center" > <div> <h6 class="mb-0" >$ {
+                        item.designation
+                    }
+
+                    </h6> <small class="text-muted" >$ {
+                        formatPrice(item.prix)
+                    }
+
+                    x $ {
+                        item.qty
+                    }
+
+                    </small> </div> <div class="d-flex align-items-center gap-2" > <button class="btn btn-sm btn-outline-secondary" onclick="updateQty('${item.id}', -1)" >-</button> <span>$ {
+                        item.qty
+                    }
+
+                    </span> <button class="btn btn-sm btn-outline-secondary" onclick="updateQty('${item.id}', 1)" >+</button> <button class="btn btn-sm btn-danger ms-2" onclick="removeFromCart('${item.id}')" ><i class="fas fa-trash" ></i></button> </div> </li> `;
+                });
+            html+='</ul>';
+
+            container.innerHTML=html;
+            totalEl.textContent=formatPrice(total);
         }
 
         // --- Export Functions ---
 
         function generatePDF() {
-            if (cart.length === 0) return alert('Le panier est vide!');
+            if (cart.length===0) return alert('Le panier est vide!');
 
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
+            const {
+                jsPDF
+            }
 
-            const clientName = document.getElementById('clientName').value || 'Client';
-            const clientPhone = document.getElementById('clientPhone').value || '';
-            const date = new Date().toLocaleDateString('fr-FR');
+            =window.jspdf;
+            const doc=new jsPDF();
+
+            const clientName=document.getElementById('clientName').value || 'Client';
+            const clientPhone=document.getElementById('clientPhone').value || '';
+            const date=new Date().toLocaleDateString('fr-FR');
 
             // Header
             doc.setFillColor(26, 58, 108); // Primary Color
@@ -721,147 +265,196 @@
             doc.text('Tél: 05 41 52 75 61', 15, 32);
 
             doc.setFontSize(16);
-            doc.text('BON DE COMMANDE', 195, 20, { align: 'right' });
-            doc.setFontSize(10);
-            doc.text(`Date: ${date}`, 195, 30, { align: 'right' });
 
-            // Client Info
-            doc.setTextColor(0, 0, 0);
-            doc.setFontSize(12);
-            doc.text(`Client: ${clientName}`, 15, 55);
-            if (clientPhone) doc.text(`Tél: ${clientPhone}`, 15, 62);
-
-            // Table
-            const tableData = cart.map(item => [
-                item.designation,
-                item.qty,
-                formatPrice(item.prix),
-                formatPrice(item.prix * item.qty)
-            ]);
-
-            const total = cart.reduce((sum, item) => sum + (item.prix * item.qty), 0);
-
-            doc.autoTable({
-                startY: 70,
-                head: [['Désignation', 'Qté', 'P.U', 'Total']],
-                body: tableData,
-                theme: 'striped',
-                headStyles: { fillColor: [26, 58, 108] },
-                foot: [['', '', 'Total Global:', formatPrice(total)]],
-                footStyles: { fillColor: [240, 240, 240], textColor: [0, 0, 0], fontStyle: 'bold' }
+            doc.text('BON DE COMMANDE', 195, 20, {
+                align: 'right'
             });
+        doc.setFontSize(10);
 
-            doc.save(`Commande_VARICOM_${Date.now()}.pdf`);
+        doc.text(`Date: $ {
+                date
+            }
+
+            `, 195, 30, {
+            align: 'right'
+        });
+
+        // Client Info
+        doc.setTextColor(0, 0, 0);
+        doc.setFontSize(12);
+
+        doc.text(`Client: $ {
+                clientName
+            }
+
+            `, 15, 55);
+
+        if (clientPhone) doc.text(`Tél: $ {
+                clientPhone
+            }
+
+            `, 15, 62);
+
+        // Table
+        const tableData=cart.map(item=> [ item.designation,
+            item.qty,
+            formatPrice(item.prix),
+            formatPrice(item.prix * item.qty)]);
+
+        const total=cart.reduce((sum, item)=> sum + (item.prix * item.qty), 0);
+
+        doc.autoTable({
+
+            startY: 70,
+            head: [['Désignation', 'Qté', 'P.U', 'Total']],
+            body: tableData,
+            theme: 'striped',
+            headStyles: {
+                fillColor: [26, 58, 108]
+            }
+
+            ,
+            foot: [['', '', 'Total Global:', formatPrice(total)]],
+            footStyles: {
+                fillColor: [240, 240, 240], textColor: [0, 0, 0], fontStyle: 'bold'
+            }
+        });
+
+        doc.save(`Commande_VARICOM_$ {
+                Date.now()
+            }
+
+            .pdf`);
         }
 
         function sendWhatsApp() {
-            if (cart.length === 0) return alert('Le panier est vide!');
+            if (cart.length===0) return alert('Le panier est vide!');
 
-            const clientName = document.getElementById('clientName').value || 'Client';
-            const clientPhone = document.getElementById('clientPhone').value || '';
+            const clientName=document.getElementById('clientName').value || 'Client';
+            const clientPhone=document.getElementById('clientPhone').value || '';
 
-            let msg = `*Nouvelle Commande - VARICOM*\n`;
-            msg += `Client: ${clientName}\n`;
-            msg += `Tél: ${clientPhone}\n\n`;
+            let msg=`*Nouvelle Commande - VARICOM*\n`;
 
-            let total = 0;
-            cart.forEach(item => {
-                const itemTotal = item.prix * item.qty;
-                total += itemTotal;
-                msg += `- ${item.designation} (x${item.qty}) : ${formatPrice(itemTotal)}\n`;
-            });
+            msg+=`Client: $ {
+                clientName
+            }
 
-            msg += `\n*TOTAL GLOBAL: ${formatPrice(total)}*`;
+            \n`;
 
-            const url = `https://wa.me/${adminPhone}?text=${encodeURIComponent(msg)}`;
+            msg+=`Tél: $ {
+                clientPhone
+            }
+
+            \n\n`;
+
+            let total=0;
+
+            cart.forEach(item=> {
+                    const itemTotal=item.prix * item.qty;
+                    total +=itemTotal;
+
+                    msg +=`- $ {
+                        item.designation
+                    }
+
+                    (x$ {
+                            item.qty
+
+                        }) : $ {
+                        formatPrice(itemTotal)
+                    }
+
+                    \n`;
+                });
+
+            msg+=`\n*TOTAL GLOBAL: $ {
+                formatPrice(total)
+            }
+
+            *`;
+
+            const url=`https: //wa.me/${adminPhone}?text=${encodeURIComponent(msg)}`;
             window.open(url, '_blank');
         }
 
         // --- Utility Functions ---
 
         function formatPrice(price) {
-            return new Intl.NumberFormat('fr-DZ', { style: 'currency', currency: 'DZD' }).format(price);
+            return new Intl.NumberFormat('fr-DZ', {
+                style: 'currency', currency: 'DZD'
+            }).format(price);
         }
 
         function applyTheme(theme) {
             document.documentElement.setAttribute('data-theme', theme);
             localStorage.setItem('varicom_theme', theme);
 
-            const icon = document.getElementById('themeIcon');
+            const icon=document.getElementById('themeIcon');
+
             if (icon) {
-                if (theme === 'dark') {
+                if (theme==='dark') {
                     icon.classList.replace('fa-moon', 'fa-sun');
-                } else {
+                }
+
+                else {
                     icon.classList.replace('fa-sun', 'fa-moon');
                 }
             }
         }
 
         function toggleTheme() {
-            const current = document.documentElement.getAttribute('data-theme');
-            const newTheme = current === 'dark' ? 'light' : 'dark';
+            const current=document.documentElement.getAttribute('data-theme');
+            const newTheme=current==='dark' ? 'light': 'dark';
             applyTheme(newTheme);
         }
 
         function showToast(message) {
             // Simple toast implementation
-            const toast = document.createElement('div');
-            toast.className = 'position-fixed bottom-0 end-0 p-3';
-            toast.style.zIndex = '1100';
-            toast.innerHTML = `
-                <div class="toast show align-items-center text-white bg-success border-0" role="alert">
-                    <div class="d-flex">
-                        <div class="toast-body">
-                            ${message}
-                        </div>
-                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
-                    </div>
-                </div>
-            `;
+            const toast=document.createElement('div');
+            toast.className='position-fixed bottom-0 end-0 p-3';
+            toast.style.zIndex='1100';
+
+            toast.innerHTML=` <div class="toast show align-items-center text-white bg-success border-0" role="alert"><div class="d-flex"><div class="toast-body">$ {
+                message
+            }
+
+            </div><button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button></div></div>`;
             document.body.appendChild(toast);
-            setTimeout(() => toast.remove(), 3000);
+            setTimeout(()=> toast.remove(), 3000);
         }
 
         // --- Recommendation Logic ---
 
         function trackAffinity(category, score) {
-            if (!categoryAffinity[category]) categoryAffinity[category] = 0;
-            categoryAffinity[category] += score;
+            if ( !categoryAffinity[category]) categoryAffinity[category]=0;
+            categoryAffinity[category]+=score;
             localStorage.setItem('varicom_affinity', JSON.stringify(categoryAffinity));
         }
 
         function updateRecommendations() {
-            const section = document.getElementById('recommendationSection');
-            const grid = document.getElementById('recGrid');
-            if (!section || !grid) return;
+            const section=document.getElementById('recommendationSection');
+            const grid=document.getElementById('recGrid');
+            if ( !section || !grid) return;
 
-            const topCategories = Object.entries(categoryAffinity)
-                .sort((a, b) => b[1] - a[1])
-                .slice(0, 2)
-                .map(entry => entry[0]);
+            const topCategories=Object.entries(categoryAffinity) .sort((a, b)=> b[1] - a[1]) .slice(0, 2) .map(entry=> entry[0]);
 
-            if (topCategories.length === 0) {
-                section.style.display = 'none';
+            if (topCategories.length===0) {
+                section.style.display='none';
                 return;
             }
 
-            let recs = allProducts.filter(p =>
-                topCategories.includes(p.famille) &&
-                !cart.some(c => c.id === p.id) &&
-                !wishlist.includes(p.id)
-            );
+            let recs=allProducts.filter(p=> topCategories.includes(p.famille) && !cart.some(c=> c.id===p.id) && !wishlist.includes(p.id));
 
-            recs = recs.sort(() => 0.5 - Math.random()).slice(0, 4);
+            recs=recs.sort(()=> 0.5 - Math.random()).slice(0, 4);
 
             if (recs.length > 0) {
-                section.style.display = 'block';
-                grid.innerHTML = recs.map(p => createProductCard(p)).join('');
-            } else {
-                section.style.display = 'none';
+                section.style.display='block';
+                grid.innerHTML=recs.map(p=> createProductCard(p)).join('');
+            }
+
+            else {
+                section.style.display='none';
             }
         }
-    </script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-</body>
 
-</html>
+        </script><script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script></body></html>
