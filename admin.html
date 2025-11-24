@@ -391,8 +391,8 @@
                                 data-bs-target="#mode-magic" type="button" role="tab">✨ Images Magiques</button>
                         </li>
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link" id="mode-desc-tab" data-bs-toggle="tab"
-                                data-bs-target="#mode-desc" type="button" role="tab">📝 Descriptions Auto</button>
+                            <button class="nav-link" id="mode-desc-tab" data-bs-toggle="tab" data-bs-target="#mode-desc"
+                                type="button" role="tab">📝 Descriptions Auto</button>
                         </li>
                     </ul>
 
@@ -442,7 +442,8 @@
                         <!-- Description Mode -->
                         <div class="tab-pane fade" id="mode-desc" role="tabpanel">
                             <div class="alert alert-info small">
-                                <i class="fas fa-info-circle me-2"></i><strong>Info:</strong> Génère un lien de recherche.
+                                <i class="fas fa-info-circle me-2"></i><strong>Info:</strong> Génère un lien de
+                                recherche.
                             </div>
                             <p class="small text-muted">
                                 Crée un lien "Fiche Technique" vers Bing pour chaque produit.
@@ -701,7 +702,7 @@
                 saveData(); // This triggers UI update
             }
         }
-        
+
         function updateProductDesc(id, newUrl) {
             const p = state.products.find(p => p.id === id);
             if (p) {
@@ -810,6 +811,10 @@
 
             // Catalog Table (Limit to 100 for performance)
             const tableBody = document.getElementById('catalogTableBody');
+
+            // Helper to escape single quotes for HTML attributes
+            const escapeQuote = (str) => str ? str.replace(/'/g, "\\'") : '';
+
             tableBody.innerHTML = state.products.slice(0, 100).map(p => `
                 <tr>
                     <td><small>${p.ref}</small></td>
@@ -829,13 +834,13 @@
                     </td>
                     <td>
                         <div class="btn-group btn-group-sm">
-                            <button class="btn btn-outline-primary" onclick="searchImage('${p.designation}', 'google')" title="Google">
+                            <button class="btn btn-outline-primary" onclick="searchImage('${escapeQuote(p.designation)}', 'google')" title="Google">
                                 <i class="fab fa-google"></i>
                             </button>
-                            <button class="btn btn-outline-info" onclick="searchImage('${p.designation}', 'bing')" title="Bing">
+                            <button class="btn btn-outline-info" onclick="searchImage('${escapeQuote(p.designation)}', 'bing')" title="Bing">
                                 <i class="fas fa-search"></i>
                             </button>
-                            <button class="btn btn-outline-primary" onclick="searchImage('${p.designation}', 'facebook')" title="Facebook">
+                            <button class="btn btn-outline-primary" onclick="searchImage('${escapeQuote(p.designation)}', 'facebook')" title="Facebook">
                                 <i class="fab fa-facebook"></i>
                             </button>
                         </div>
