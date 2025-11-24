@@ -764,18 +764,6 @@
                     }
                     throw new Error(`Erreur GitHub: ${response.status}`);
                 }
-
-                const result = await response.json();
-                state.gistId = result.id;
-                state.lastSync = new Date().toISOString();
-
-                localStorage.setItem('varicom_gist_id', state.gistId);
-                localStorage.setItem('varicom_last_sync', state.lastSync);
-
-                showStatus('✅ Synchronisation réussie!', 'success');
-                updateUI();
-
-            } catch (err) {
                 showStatus('Erreur Sync: ' + err.message, 'error');
             } finally {
                 btn.innerHTML = originalText;
