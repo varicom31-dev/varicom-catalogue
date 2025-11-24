@@ -293,7 +293,11 @@
     <script>
         // Configuration
         const urlParams = new URLSearchParams(window.location.search);
-        const gistId = urlParams.get('gist') || localStorage.getItem('varicom_gist_id');
+        let gistId = urlParams.get('gist') || localStorage.getItem('varicom_gist_id');
+
+        // Clean up invalid gistId
+        if (gistId === 'null' || gistId === 'undefined') gistId = null;
+
         const adminPhone = "213541527561"; // Replace with actual number
 
         // State
