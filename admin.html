@@ -792,55 +792,61 @@
             document.getElementById('statsStatus').textContent = state.gistId ? 'Actif' : 'Inactif';
             document.getElementById('statsStatus').className = state.gistId ? 'text-success' : 'text-danger';
 
+            // Helper to escape single quotes for JS strings (e.g. onclick parameters)
+            const escapeQuote = (str) => str ? str.toString().replace(/'/g, "\\'") : '';
+
+            // Helper to escape double quotes for HTML attributes (e.g. value, title)
+            const escapeHtml = (str) => str ? str.toString().replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;") : '';
+
+            // Combined helper for JS strings inside HTML attributes
+            const escapeJsHtml = (str) => escapeHtml(escapeQuote(str));
+
             // Lists
             const npList = document.getElementById('activeNewProducts');
             npList.innerHTML = state.newProducts.map(p => `
                 <li class="list-group-item d-flex justify-content-between align-items-center">
-                    <div><strong>${p.name}</strong> - ${p.price} DA</div>
-                    <button class="btn btn-sm btn-outline-danger" onclick="removeNewProduct('${p.id}')"><i class="fas fa-times"></i></button>
+                    <div><strong>${escapeHtml(p.name)}</strong> - ${p.price} DA</div>
+                    <button class="btn btn-sm btn-outline-danger" onclick="removeNewProduct('${escapeJsHtml(p.id)}')"><i class="fas fa-times"></i></button>
                 </li>
             `).join('');
 
             const notifList = document.getElementById('activeNotifications');
             notifList.innerHTML = state.notifications.map(n => `
                 <li class="list-group-item d-flex justify-content-between align-items-center">
-                    <div><span class="badge bg-${getBadgeClass(n.type)}">${n.type}</span> ${n.title}</div>
-                    <button class="btn btn-sm btn-outline-danger" onclick="removeNotification('${n.id}')"><i class="fas fa-times"></i></button>
+                    <div><span class="badge bg-${getBadgeClass(n.type)}">${n.type}</span> ${escapeHtml(n.title)}</div>
+                    <button class="btn btn-sm btn-outline-danger" onclick="removeNotification('${escapeJsHtml(n.id)}')"><i class="fas fa-times"></i></button>
                 </li>
             `).join('');
 
             // Catalog Table (Limit to 100 for performance)
             const tableBody = document.getElementById('catalogTableBody');
 
-            // Helper to escape single quotes for HTML attributes
-            const escapeQuote = (str) => str ? str.replace(/'/g, "\\'") : '';
-
             tableBody.innerHTML = state.products.slice(0, 100).map(p => `
                 <tr>
-                    <td><small>${p.ref}</small></td>
-                    <td class="text-truncate" style="max-width: 150px;" title="${p.designation}">${p.designation}</td>
+                    <td><small>${escapeHtml(p.ref)}</small></td>
+                    <td class="text-truncate" style="max-width: 150px;" title="${escapeHtml(p.designation)}">${escapeHtml(p.designation)}</td>
                     <td>${p.prix}</td>
                     <td>
                         <input type="text" class="form-control form-control-sm" 
-                               value="${p.image || ''}" 
-                               onchange="updateProductImage('${p.id}', this.value)"
+                               value="${escapeHtml(p.image || '')}" 
+                               onchange="updateProductImage('${escapeJsHtml(p.id)}', this.value)"
                                placeholder="URL Image...">
                     </td>
                     <td>
                         <input type="text" class="form-control form-control-sm" 
-                               value="${p.description || ''}" 
-                               onchange="updateProductDesc('${p.id}', this.value)"
+                               value="${escapeHtml(p.description || '')}" 
+                               onchange="updateProductDesc('${escapeJsHtml(p.id)}', this.value)"
                                placeholder="URL Desc...">
                     </td>
                     <td>
                         <div class="btn-group btn-group-sm">
-                            <button class="btn btn-outline-primary" onclick="searchImage('${escapeQuote(p.designation)}', 'google')" title="Google">
+                            <button class="btn btn-outline-primary" onclick="searchImage('${escapeJsHtml(p.designation)}', 'google')" title="Google">
                                 <i class="fab fa-google"></i>
                             </button>
-                            <button class="btn btn-outline-info" onclick="searchImage('${escapeQuote(p.designation)}', 'bing')" title="Bing">
+                            <button class="btn btn-outline-info" onclick="searchImage('${escapeJsHtml(p.designation)}', 'bing')" title="Bing">
                                 <i class="fas fa-search"></i>
                             </button>
-                            <button class="btn btn-outline-primary" onclick="searchImage('${escapeQuote(p.designation)}', 'facebook')" title="Facebook">
+                            <button class="btn btn-outline-primary" onclick="searchImage('${escapeJsHtml(p.designation)}', 'facebook')" title="Facebook">
                                 <i class="fab fa-facebook"></i>
                             </button>
                         </div>
@@ -910,3 +916,5 @@
         }
     </script>
 </body>
+
+</html>
