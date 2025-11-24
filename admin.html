@@ -875,8 +875,13 @@
 
         function generateClientLink() {
             if (!state.gistId) return showStatus('Veuillez d\'abord publier le catalogue', 'warning');
-            const url = `${window.location.href.replace('admin.html', 'index.html')}?gist=${state.gistId}`;
-            navigator.clipboard.writeText(url);
+
+            // Robust link generation: Get current path, remove filename, add index.html
+            const path = window.location.pathname;
+            const dir = path.substring(0, path.lastIndexOf('/'));
+            const clientUrl = `${window.location.origin}${dir}/index.html?gist=${state.gistId}`;
+
+            navigator.clipboard.writeText(clientUrl);
             showStatus('Lien copié dans le presse-papier!', 'success');
         }
 
