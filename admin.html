@@ -340,7 +340,7 @@
                     <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
                         <h5 class="mb-0"><i class="fas fa-boxes me-2"></i>Gestion du Catalogue</h5>
                         <button class="btn btn-light btn-sm text-primary fw-bold" onclick="openBulkImageModal()">
-                            <i class="fas fa-magic me-2"></i>Générateur de Liens Images
+                            <i class="fas fa-magic me-2"></i>Actions en Masse (Images/Desc)
                         </button>
                     </div>
                     <div class="card-body">
@@ -351,7 +351,8 @@
                                         <th>Ref</th>
                                         <th>Désignation</th>
                                         <th>Prix</th>
-                                        <th style="width: 40%;">Image URL</th>
+                                        <th style="width: 30%;">Image URL</th>
+                                        <th style="width: 20%;">Description URL</th>
                                         <th>Actions</th>
                                     </tr>
                                 </thead>
@@ -376,18 +377,22 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title"><i class="fas fa-magic me-2"></i>Générateur de Liens Images</h5>
+                    <h5 class="modal-title"><i class="fas fa-magic me-2"></i>Générateur Automatique</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
                     <ul class="nav nav-tabs mb-3" id="bulkTabs" role="tablist">
                         <li class="nav-item" role="presentation">
                             <button class="nav-link active" id="mode-hosted-tab" data-bs-toggle="tab"
-                                data-bs-target="#mode-hosted" type="button" role="tab">📂 Hébergement Propre</button>
+                                data-bs-target="#mode-hosted" type="button" role="tab">📂 Images Hébergées</button>
                         </li>
                         <li class="nav-item" role="presentation">
                             <button class="nav-link" id="mode-magic-tab" data-bs-toggle="tab"
-                                data-bs-target="#mode-magic" type="button" role="tab">✨ Recherche Magique</button>
+                                data-bs-target="#mode-magic" type="button" role="tab">✨ Images Magiques</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="mode-desc-tab" data-bs-toggle="tab"
+                                data-bs-target="#mode-desc" type="button" role="tab">📝 Descriptions Auto</button>
                         </li>
                     </ul>
 
@@ -425,13 +430,22 @@
                         <!-- Magic Mode -->
                         <div class="tab-pane fade" id="mode-magic" role="tabpanel">
                             <div class="alert alert-warning small">
-                                <i class="fas fa-exclamation-triangle me-2"></i><strong>Attention:</strong> Ce mode
-                                utilise un service de recherche externe (Bing). Les résultats sont automatiques et
-                                peuvent parfois ne pas correspondre exactement.
+                                <i class="fas fa-exclamation-triangle me-2"></i><strong>Note:</strong> L'association
+                                <em>automatique</em> ne fonctionne qu'avec <strong>Bing</strong> pour des raisons
+                                techniques.
                             </div>
                             <p class="small text-muted">
-                                Ce mode va chercher automatiquement une image sur internet correspondant à la
-                                <strong>Désignation</strong> du produit.
+                                Recherche automatique d'images sur Bing via la Désignation.
+                            </p>
+                        </div>
+
+                        <!-- Description Mode -->
+                        <div class="tab-pane fade" id="mode-desc" role="tabpanel">
+                            <div class="alert alert-info small">
+                                <i class="fas fa-info-circle me-2"></i><strong>Info:</strong> Génère un lien de recherche.
+                            </div>
+                            <p class="small text-muted">
+                                Crée un lien "Fiche Technique" vers Bing pour chaque produit.
                             </p>
                         </div>
                     </div>
@@ -442,7 +456,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-                    <button type="button" class="btn btn-primary" onclick="applyBulkImages()">Appliquer à tous</button>
+                    <button type="button" class="btn btn-primary" onclick="applyBulkActions()">Appliquer à tous</button>
                 </div>
             </div>
         </div>
@@ -531,8 +545,9 @@
                 designation: row['Designation'] || row['Désignation'] || row['Nom'] || 'Produit sans nom',
                 famille: row['Famille'] || row['Categorie'] || 'Général',
                 prix: parseFloat(row['Prix'] || row['Price'] || 0),
-                image: row['Image'] || row['Photo'] || ''
-            })).filter(p => p.prix > 0); // Filter invalid
+                image: row['Image'] || row['Photo'] || '',
+                description: row['Description'] || row['Desc'] || ''
+            })).filter(p => p.prix > 0);
 
             state.products = processed;
             saveData();
@@ -597,17 +612,19 @@
             saveData();
         }
 
-        // --- Bulk Image Functions ---
+        // --- Bulk Functions ---
         function openBulkImageModal() {
             new bootstrap.Modal(document.getElementById('bulkImageModal')).show();
             updateBulkPreview();
         }
 
         function updateBulkPreview() {
-            const isMagic = document.getElementById('mode-magic-tab').classList.contains('active');
+            const activeTab = document.querySelector('.nav-link.active').id;
 
-            if (isMagic) {
-                document.getElementById('bulkPreview').textContent = `https://tse2.mm.bing.net/th?q=Exemple%20Produit...`;
+            if (activeTab === 'mode-magic-tab') {
+                document.getElementById('bulkPreview').textContent = `https://tse2.mm.bing.net/th?q=Exemple...`;
+            } else if (activeTab === 'mode-desc-tab') {
+                document.getElementById('bulkPreview').textContent = `https://www.bing.com/search?q=fiche+technique+Exemple`;
             } else {
                 const baseUrl = document.getElementById('bulkBaseUrl').value || 'https://site.com/img/';
                 const field = document.getElementById('bulkField').value;
@@ -617,17 +634,25 @@
             }
         }
 
-        function applyBulkImages() {
-            const isMagic = document.getElementById('mode-magic-tab').classList.contains('active');
+        function applyBulkActions() {
+            const activeTab = document.querySelector('.nav-link.active').id;
 
-            if (confirm(`Cela va modifier les images de ${state.products.length} produits. Continuer?`)) {
+            if (confirm(`Cela va modifier ${state.products.length} produits. Continuer?`)) {
 
-                if (isMagic) {
+                if (activeTab === 'mode-magic-tab') {
+                    // Magic Images
                     state.products = state.products.map(p => ({
                         ...p,
                         image: `https://tse2.mm.bing.net/th?q=${encodeURIComponent(p.designation)}&w=500&h=500&c=7&rs=1&p=0`
                     }));
+                } else if (activeTab === 'mode-desc-tab') {
+                    // Magic Descriptions
+                    state.products = state.products.map(p => ({
+                        ...p,
+                        description: `https://www.bing.com/search?q=fiche+technique+${encodeURIComponent(p.designation)}`
+                    }));
                 } else {
+                    // Hosted Images
                     const baseUrl = document.getElementById('bulkBaseUrl').value;
                     const field = document.getElementById('bulkField').value;
                     const ext = document.getElementById('bulkExt').value;
@@ -646,13 +671,27 @@
 
                 saveData();
                 bootstrap.Modal.getInstance(document.getElementById('bulkImageModal')).hide();
-                showStatus('Images mises à jour avec succès!', 'success');
+                showStatus('Mise à jour effectuée avec succès!', 'success');
             }
         }
 
-        function searchGoogleImage(term) {
+        function searchImage(term, provider) {
             const query = encodeURIComponent(term);
-            window.open(`https://www.google.com/search?tbm=isch&q=${query}`, '_blank');
+            let url = '';
+
+            switch (provider) {
+                case 'google':
+                    url = `https://www.google.com/search?tbm=isch&q=${query}`;
+                    break;
+                case 'bing':
+                    url = `https://www.bing.com/images/search?q=${query}`;
+                    break;
+                case 'facebook':
+                    url = `https://www.facebook.com/search/photos/?q=${query}`;
+                    break;
+            }
+
+            if (url) window.open(url, '_blank');
         }
 
         function updateProductImage(id, newUrl) {
@@ -660,6 +699,14 @@
             if (p) {
                 p.image = newUrl;
                 saveData(); // This triggers UI update
+            }
+        }
+        
+        function updateProductDesc(id, newUrl) {
+            const p = state.products.find(p => p.id === id);
+            if (p) {
+                p.description = newUrl;
+                saveData();
             }
         }
 
@@ -775,58 +822,88 @@
                                placeholder="URL Image...">
                     </td>
                     <td>
-                        <button class="btn btn-sm btn-outline-primary" onclick="searchGoogleImage('${p.designation}')" title="Chercher sur Google">
-                            <i class="fab fa-google"></i>
-                        </button>
+                        <input type="text" class="form-control form-control-sm" 
+                               value="${p.description || ''}" 
+                               onchange="updateProductDesc('${p.id}', this.value)"
+                               placeholder="URL Desc...">
+                    </td>
+                    <td>
+                        <div class="btn-group btn-group-sm">
+                            <button class="btn btn-outline-primary" onclick="searchImage('${p.designation}', 'google')" title="Google">
+                                <i class="fab fa-google"></i>
+                            </button>
+                            <button class="btn btn-outline-info" onclick="searchImage('${p.designation}', 'bing')" title="Bing">
+                                <i class="fas fa-search"></i>
+                            </button>
+                            <button class="btn btn-outline-primary" onclick="searchImage('${p.designation}', 'facebook')" title="Facebook">
+                                <i class="fab fa-facebook"></i>
+                            </button>
+                        </div>
                     </td>
                 </tr>
             `).join('');
         }
 
         function getBadgeClass(type) {
-            return { info: 'info', success: 'success', warning: 'warning', error: 'danger' }[type] || 'secondary';
+            switch (type) {
+                case 'info': return 'info';
+                case 'success': return 'success';
+                case 'warning': return 'warning';
+                case 'error': return 'danger';
+                default: return 'secondary';
+            }
         }
 
         function showStatus(msg, type) {
             const el = document.getElementById('syncStatus');
             el.textContent = msg;
-            el.className = `sync-status sync-${type}`;
+            el.className = 'sync-status'; // Reset
+            el.classList.add(type === 'success' ? 'sync-success' : type === 'warning' ? 'sync-warning' : 'sync-error');
             el.style.display = 'block';
-            setTimeout(() => el.style.display = 'none', 4000);
+            setTimeout(() => {
+                el.style.display = 'none';
+            }, 3000);
         }
 
         function generateClientLink() {
-            if (!state.gistId) return showStatus('Veuillez d\'abord synchroniser!', 'warning');
+            if (!state.gistId) return showStatus('Veuillez d\'abord publier le catalogue', 'warning');
             const url = `${window.location.href.replace('admin.html', 'index.html')}?gist=${state.gistId}`;
             navigator.clipboard.writeText(url);
-            alert('Lien copié dans le presse-papier:\n' + url);
+            showStatus('Lien copié dans le presse-papier!', 'success');
         }
 
         function toggleToken() {
-            const el = document.getElementById('githubToken');
-            el.type = el.type === 'password' ? 'text' : 'password';
+            const input = document.getElementById('githubToken');
+            const icon = document.querySelector('.input-group .fa-eye, .input-group .fa-eye-slash');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.replace('fa-eye', 'fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.replace('fa-eye-slash', 'fa-eye');
+            }
         }
 
         function resetSync() {
-            if (confirm('Oublier l\'ID de synchronisation actuel?')) {
-                state.gistId = null;
+            if (confirm('Voulez-vous vraiment réinitialiser la synchronisation? Cela déconnectera le catalogue actuel.')) {
                 localStorage.removeItem('varicom_gist_id');
+                localStorage.removeItem('varicom_last_sync');
+                state.gistId = null;
+                state.lastSync = null;
                 updateUI();
-                showStatus('Sync réinitialisée', 'info');
+                showStatus('Synchronisation réinitialisée', 'info');
             }
         }
 
         function downloadTemplate() {
-            const data = [
-                { "Référence": "REF001", "Désignation": "Exemple Produit", "Famille": "Général", "Prix": 1000, "Image": "" }
-            ];
-            const ws = XLSX.utils.json_to_sheet(data);
             const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, "Template");
-            XLSX.writeFile(wb, "template_varicom.xlsx");
+            const ws = XLSX.utils.json_to_sheet([
+                { Ref: 'REF001', Designation: 'Exemple Produit', Famille: 'Informatique', Prix: 1000, Image: '', Description: '' }
+            ]);
+            XLSX.utils.book_append_sheet(wb, ws, "Modele");
+            XLSX.writeFile(wb, "modele_import_varicom.xlsx");
         }
     </script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 
 </html>
