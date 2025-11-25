@@ -716,6 +716,11 @@
             const token = document.getElementById('githubToken').value;
             if (!token) return showStatus('Token GitHub manquant!', 'error');
 
+            // FIX 1: Validate that we have data to publish
+            if (state.products.length === 0 && state.newProducts.length === 0) {
+                return showStatus('Aucun produit à publier! Veuillez importer des données.', 'warning');
+            }
+
             const btn = document.getElementById('publishBtn');
             const originalText = btn.innerHTML;
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Synchronisation...';
@@ -772,7 +777,7 @@
                 localStorage.setItem('varicom_gist_id', state.gistId);
                 localStorage.setItem('varicom_last_sync', state.lastSync);
 
-                showStatus('✅ Synchronisation réussie!', 'success');
+                showStatus('✅ Synchronisation réussie! Données publiées.', 'success');
                 updateUI();
 
             } catch (err) {
@@ -877,13 +882,13 @@
         function generateClientLink() {
             if (!state.gistId) return showStatus('Veuillez d\'abord publier le catalogue', 'warning');
 
-            // Robust link generation: Get current path, remove filename, add index.html
+            // FIX 2: Generate link to client.html instead of index.html
             const path = window.location.pathname;
             const dir = path.substring(0, path.lastIndexOf('/'));
-            const clientUrl = `${window.location.origin}${dir}/index.html?gist=${state.gistId}`;
+            const clientUrl = `${window.location.origin}${dir}/client.html?gist=${state.gistId}`;
 
             navigator.clipboard.writeText(clientUrl);
-            showStatus('Lien copié dans le presse-papier!', 'success');
+            showStatus('Lien client copié dans le presse-papier!', 'success');
         }
 
         function toggleToken() {
