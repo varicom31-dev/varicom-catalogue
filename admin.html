@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="fr" dir="ltr">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -79,32 +78,13 @@
         }
 
         @keyframes slideInRight {
-            from {
-                transform: translateX(100%);
-                opacity: 0;
-            }
-
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
         }
 
-        .sync-success {
-            background: #28a745;
-            border-left: 5px solid #1e7e34;
-        }
-
-        .sync-warning {
-            background: #ffc107;
-            color: #000;
-            border-left: 5px solid #e0a800;
-        }
-
-        .sync-error {
-            background: #dc3545;
-            border-left: 5px solid #bd2130;
-        }
+        .sync-success { background: #28a745; border-left: 5px solid #1e7e34; }
+        .sync-warning { background: #ffc107; color: #000; border-left: 5px solid #e0a800; }
+        .sync-error { background: #dc3545; border-left: 5px solid #bd2130; }
 
         .stats-card {
             background: white;
@@ -115,9 +95,7 @@
             transition: transform 0.3s;
         }
 
-        .stats-card:hover {
-            transform: translateY(-5px);
-        }
+        .stats-card:hover { transform: translateY(-5px); }
 
         .feature-card {
             background: white;
@@ -132,24 +110,12 @@
         }
 
         @keyframes pulse {
-            0% {
-                transform: scale(1);
-                box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.7);
-            }
-
-            70% {
-                transform: scale(1.05);
-                box-shadow: 0 0 0 10px rgba(40, 167, 69, 0);
-            }
-
-            100% {
-                transform: scale(1);
-                box-shadow: 0 0 0 0 rgba(40, 167, 69, 0);
-            }
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.7); }
+            70% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(40, 167, 69, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(40, 167, 69, 0); }
         }
     </style>
 </head>
-
 <body>
     <div id="syncStatus" class="sync-status"></div>
 
@@ -234,12 +200,10 @@
                     </div>
                     <div class="card-body">
                         <div class="mb-3">
-                            <input type="text" class="form-control mb-2" id="newProductName"
-                                placeholder="Nom du produit">
+                            <input type="text" class="form-control mb-2" id="newProductName" placeholder="Nom du produit">
                             <div class="row g-2">
                                 <div class="col-6">
-                                    <input type="number" class="form-control" id="newProductPrice"
-                                        placeholder="Prix (DA)">
+                                    <input type="number" class="form-control" id="newProductPrice" placeholder="Prix (DA)">
                                 </div>
                                 <div class="col-6">
                                     <select class="form-select" id="newProductCategory">
@@ -250,8 +214,7 @@
                                     </select>
                                 </div>
                             </div>
-                            <input type="text" class="form-control mt-2" id="newProductImage"
-                                placeholder="URL de l'image (https://...)">
+                            <input type="text" class="form-control mt-2" id="newProductImage" placeholder="URL de l'image (https://...)">
                         </div>
                         <button class="btn btn-primary w-100" onclick="addNewProduct()">
                             <i class="fas fa-plus me-2"></i>Ajouter à la liste
@@ -259,10 +222,7 @@
 
                         <hr>
                         <h6 class="text-muted">Produits Nouveaux Actifs:</h6>
-                        <ul id="activeNewProducts" class="list-group list-group-flush small"
-                            style="max-height: 200px; overflow-y: auto;">
-                            <!-- List items -->
-                        </ul>
+                        <ul id="activeNewProducts" class="list-group list-group-flush small" style="max-height: 200px; overflow-y: auto;"></ul>
                     </div>
                 </div>
             </div>
@@ -275,10 +235,8 @@
                     </div>
                     <div class="card-body">
                         <div class="mb-3">
-                            <input type="text" class="form-control mb-2" id="notifTitle"
-                                placeholder="Titre (ex: Promo)">
-                            <textarea class="form-control mb-2" id="notifMessage" rows="2"
-                                placeholder="Message..."></textarea>
+                            <input type="text" class="form-control mb-2" id="notifTitle" placeholder="Titre (ex: Promo)">
+                            <textarea class="form-control mb-2" id="notifMessage" rows="2" placeholder="Message..."></textarea>
                             <select class="form-select" id="notifType">
                                 <option value="info">Information ℹ️</option>
                                 <option value="success">Succès ✅</option>
@@ -292,10 +250,7 @@
 
                         <hr>
                         <h6 class="text-muted">Notifications Actives:</h6>
-                        <ul id="activeNotifications" class="list-group list-group-flush small"
-                            style="max-height: 200px; overflow-y: auto;">
-                            <!-- List items -->
-                        </ul>
+                        <ul id="activeNotifications" class="list-group list-group-flush small" style="max-height: 200px; overflow-y: auto;"></ul>
                     </div>
                 </div>
             </div>
@@ -314,8 +269,7 @@
                                 <label class="form-label">Token GitHub (Personnel Access Token)</label>
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="fab fa-github"></i></span>
-                                    <input type="password" class="form-control" id="githubToken"
-                                        placeholder="ghp_xxxxxxxxxxxxxxxxxxxx">
+                                    <input type="password" class="form-control" id="githubToken" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx">
                                     <button class="btn btn-outline-secondary" type="button" onclick="toggleToken()">
                                         <i class="fas fa-eye"></i>
                                     </button>
@@ -356,20 +310,16 @@
                                         <th>Actions</th>
                                     </tr>
                                 </thead>
-                                <tbody id="catalogTableBody">
-                                    <!-- Products rendered here -->
-                                </tbody>
+                                <tbody id="catalogTableBody"></tbody>
                             </table>
                         </div>
                         <div class="text-center mt-3">
-                            <small class="text-muted">Affichage limité aux 100 premiers produits pour la
-                                performance.</small>
+                            <small class="text-muted">Affichage limité aux 100 premiers produits pour la performance.</small>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-
     </div>
 
     <!-- Bulk Image Modal -->
@@ -383,29 +333,23 @@
                 <div class="modal-body">
                     <ul class="nav nav-tabs mb-3" id="bulkTabs" role="tablist">
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link active" id="mode-hosted-tab" data-bs-toggle="tab"
-                                data-bs-target="#mode-hosted" type="button" role="tab">📂 Images Hébergées</button>
+                            <button class="nav-link active" id="mode-hosted-tab" data-bs-toggle="tab" data-bs-target="#mode-hosted" type="button" role="tab">📂 Images Hébergées</button>
                         </li>
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link" id="mode-magic-tab" data-bs-toggle="tab"
-                                data-bs-target="#mode-magic" type="button" role="tab">✨ Images Magiques</button>
+                            <button class="nav-link" id="mode-magic-tab" data-bs-toggle="tab" data-bs-target="#mode-magic" type="button" role="tab">✨ Images Magiques</button>
                         </li>
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link" id="mode-desc-tab" data-bs-toggle="tab" data-bs-target="#mode-desc"
-                                type="button" role="tab">📝 Descriptions Auto</button>
+                            <button class="nav-link" id="mode-desc-tab" data-bs-toggle="tab" data-bs-target="#mode-desc" type="button" role="tab">📝 Descriptions Auto</button>
                         </li>
                     </ul>
 
                     <div class="tab-content" id="bulkTabsContent">
                         <!-- Hosted Mode -->
                         <div class="tab-pane fade show active" id="mode-hosted" role="tabpanel">
-                            <p class="small text-muted">
-                                Utilisez ce mode si vous avez vos propres images hébergées (ex: GitHub Pages, Imgur).
-                            </p>
+                            <p class="small text-muted">Utilisez ce mode si vous avez vos propres images hébergées (ex: GitHub Pages, Imgur).</p>
                             <div class="mb-3">
                                 <label class="form-label">Base URL</label>
-                                <input type="text" class="form-control" id="bulkBaseUrl"
-                                    placeholder="ex: https://monsite.com/images/">
+                                <input type="text" class="form-control" id="bulkBaseUrl" placeholder="ex: https://monsite.com/images/">
                             </div>
                             <div class="row g-2 mb-3">
                                 <div class="col-6">
@@ -430,24 +374,17 @@
                         <!-- Magic Mode -->
                         <div class="tab-pane fade" id="mode-magic" role="tabpanel">
                             <div class="alert alert-warning small">
-                                <i class="fas fa-exclamation-triangle me-2"></i><strong>Note:</strong> L'association
-                                <em>automatique</em> ne fonctionne qu'avec <strong>Bing</strong> pour des raisons
-                                techniques.
+                                <i class="fas fa-exclamation-triangle me-2"></i><strong>Note:</strong> L'association <em>automatique</em> ne fonctionne qu'avec <strong>Bing</strong> pour des raisons techniques.
                             </div>
-                            <p class="small text-muted">
-                                Recherche automatique d'images sur Bing via la Désignation.
-                            </p>
+                            <p class="small text-muted">Recherche automatique d'images sur Bing via la Désignation.</p>
                         </div>
 
                         <!-- Description Mode -->
                         <div class="tab-pane fade" id="mode-desc" role="tabpanel">
                             <div class="alert alert-info small">
-                                <i class="fas fa-info-circle me-2"></i><strong>Info:</strong> Génère un lien de
-                                recherche.
+                                <i class="fas fa-info-circle me-2"></i><strong>Info:</strong> Génère un lien de recherche.
                             </div>
-                            <p class="small text-muted">
-                                Crée un lien "Fiche Technique" vers Bing pour chaque produit.
-                            </p>
+                            <p class="small text-muted">Crée un lien "Fiche Technique" vers Bing pour chaque produit.</p>
                         </div>
                     </div>
 
@@ -464,203 +401,245 @@
     </div>
 
     <script>
-        // State
-        let state = {
-            products: [],
-            newProducts: [],
-            notifications: [],
-            gistId: localStorage.getItem('varicom_gist_id') || null,
-            lastSync: localStorage.getItem('varicom_last_sync') || null
+        // State Management
+        const StateManager = {
+            data: {
+                products: [],
+                newProducts: [],
+                notifications: [],
+                gistId: localStorage.getItem('varicom_gist_id') || null,
+                lastSync: localStorage.getItem('varicom_last_sync') || null
+            },
+
+            init() {
+                this.loadLocalData();
+                this.setupEventListeners();
+                UI.update();
+            },
+
+            loadLocalData() {
+                try {
+                    const saved = localStorage.getItem('varicom_data');
+                    if (saved) {
+                        const data = JSON.parse(saved);
+                        this.data.products = data.products || [];
+                        this.data.newProducts = data.newProducts || [];
+                        this.data.notifications = data.notifications || [];
+                    }
+                } catch (e) {
+                    console.error('Error loading local data', e);
+                }
+            },
+
+            saveLocalData() {
+                localStorage.setItem('varicom_data', JSON.stringify({
+                    products: this.data.products,
+                    newProducts: this.data.newProducts,
+                    notifications: this.data.notifications
+                }));
+                UI.update();
+            },
+
+            setupEventListeners() {
+                // Token listener
+                const tokenInput = document.getElementById('githubToken');
+                tokenInput.value = localStorage.getItem('varicom_github_token') || '';
+                tokenInput.addEventListener('input', (e) => {
+                    localStorage.setItem('varicom_github_token', e.target.value);
+                });
+
+                // Bulk Preview Listeners
+                ['bulkBaseUrl', 'bulkField', 'bulkExt'].forEach(id => {
+                    const el = document.getElementById(id);
+                    if (el) el.addEventListener('input', BulkManager.updatePreview);
+                });
+
+                // Tab Change Listener
+                const tabEls = document.querySelectorAll('button[data-bs-toggle="tab"]');
+                tabEls.forEach(tab => {
+                    tab.addEventListener('shown.bs.tab', BulkManager.updatePreview);
+                });
+            }
         };
 
-        // Initialization
-        document.addEventListener('DOMContentLoaded', () => {
-            loadLocalData();
-            updateUI();
+        // Excel Manager
+        const ExcelManager = {
+            handleUpload(file) {
+                if (!file) return;
 
-            // Token listener
-            const tokenInput = document.getElementById('githubToken');
-            tokenInput.value = localStorage.getItem('varicom_github_token') || '';
-            tokenInput.addEventListener('input', (e) => localStorage.setItem('varicom_github_token', e.target.value));
+                UI.showStatus('Lecture du fichier...', 'info');
+                const reader = new FileReader();
 
-            // Bulk Preview Listener
-            ['bulkBaseUrl', 'bulkField', 'bulkExt'].forEach(id => {
-                const el = document.getElementById(id);
-                if (el) el.addEventListener('input', updateBulkPreview);
-            });
+                reader.onload = (e) => {
+                    try {
+                        const data = new Uint8Array(e.target.result);
+                        const workbook = XLSX.read(data, { type: 'array' });
+                        const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                        const jsonData = XLSX.utils.sheet_to_json(firstSheet);
+                        this.processData(jsonData);
+                    } catch (err) {
+                        UI.showStatus('Erreur lecture Excel: ' + err.message, 'error');
+                    }
+                };
+                reader.readAsArrayBuffer(file);
+            },
 
-            // Tab Change Listener
-            const tabEls = document.querySelectorAll('button[data-bs-toggle="tab"]');
-            tabEls.forEach(tab => {
-                tab.addEventListener('shown.bs.tab', updateBulkPreview);
-            });
-        });
+            processData(data) {
+                const processed = data.map((row, idx) => ({
+                    id: `prod_${Date.now()}_${idx}`,
+                    ref: row['Ref'] || row['Référence'] || row['Code'] || 'N/A',
+                    designation: row['Designation'] || row['Désignation'] || row['Nom'] || 'Produit sans nom',
+                    famille: row['Famille'] || row['Categorie'] || 'Général',
+                    prix: parseFloat(row['Prix'] || row['Price'] || 0),
+                    image: row['Image'] || row['Photo'] || '',
+                    description: row['Description'] || row['Desc'] || ''
+                })).filter(p => p.prix > 0);
 
-        function loadLocalData() {
-            try {
-                const saved = localStorage.getItem('varicom_data');
-                if (saved) {
-                    const data = JSON.parse(saved);
-                    state.products = data.products || [];
-                    state.newProducts = data.newProducts || [];
-                    state.notifications = data.notifications || [];
-                }
-            } catch (e) { console.error('Error loading local data', e); }
-        }
+                StateManager.data.products = processed;
+                StateManager.saveLocalData();
+                UI.showStatus(`${processed.length} produits importés avec succès!`, 'success');
+            },
 
-        function saveData() {
-            localStorage.setItem('varicom_data', JSON.stringify({
-                products: state.products,
-                newProducts: state.newProducts,
-                notifications: state.notifications
-            }));
-            updateUI();
-        }
-
-        // Excel Handling
-        function handleExcelUpload(file) {
-            if (!file) return;
-
-            showStatus('Lecture du fichier...', 'info');
-            const reader = new FileReader();
-
-            reader.onload = (e) => {
-                try {
-                    const data = new Uint8Array(e.target.result);
-                    const workbook = XLSX.read(data, { type: 'array' });
-                    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-                    const jsonData = XLSX.utils.sheet_to_json(firstSheet);
-
-                    processExcelData(jsonData);
-                } catch (err) {
-                    showStatus('Erreur lecture Excel: ' + err.message, 'error');
-                }
-            };
-            reader.readAsArrayBuffer(file);
-        }
-
-        function processExcelData(data) {
-            const processed = data.map((row, idx) => ({
-                id: `prod_${Date.now()}_${idx}`,
-                ref: row['Ref'] || row['Référence'] || row['Code'] || 'N/A',
-                designation: row['Designation'] || row['Désignation'] || row['Nom'] || 'Produit sans nom',
-                famille: row['Famille'] || row['Categorie'] || 'Général',
-                prix: parseFloat(row['Prix'] || row['Price'] || 0),
-                image: row['Image'] || row['Photo'] || '',
-                description: row['Description'] || row['Desc'] || ''
-            })).filter(p => p.prix > 0);
-
-            state.products = processed;
-            saveData();
-            showStatus(`${processed.length} produits importés avec succès!`, 'success');
-        }
-
-        // Product & Notification Management
-        function addNewProduct() {
-            const name = document.getElementById('newProductName').value;
-            const price = document.getElementById('newProductPrice').value;
-            const cat = document.getElementById('newProductCategory').value;
-            const img = document.getElementById('newProductImage').value;
-
-            if (!name || !price) return showStatus('Nom et Prix requis', 'warning');
-
-            state.newProducts.unshift({
-                id: `new_${Date.now()}`,
-                name,
-                price: parseFloat(price),
-                category: cat,
-                image: img,
-                timestamp: new Date().toISOString()
-            });
-
-            // Reset inputs
-            document.getElementById('newProductName').value = '';
-            document.getElementById('newProductPrice').value = '';
-
-            saveData();
-            showStatus('Nouveau produit ajouté', 'success');
-        }
-
-        function createNotification() {
-            const title = document.getElementById('notifTitle').value;
-            const msg = document.getElementById('notifMessage').value;
-            const type = document.getElementById('notifType').value;
-
-            if (!title || !msg) return showStatus('Titre et Message requis', 'warning');
-
-            state.notifications.unshift({
-                id: `notif_${Date.now()}`,
-                title,
-                message: msg,
-                type,
-                timestamp: new Date().toISOString()
-            });
-
-            document.getElementById('notifTitle').value = '';
-            document.getElementById('notifMessage').value = '';
-
-            saveData();
-            showStatus('Notification créée', 'success');
-        }
-
-        function removeNewProduct(id) {
-            state.newProducts = state.newProducts.filter(p => p.id !== id);
-            saveData();
-        }
-
-        function removeNotification(id) {
-            state.notifications = state.notifications.filter(n => n.id !== id);
-            saveData();
-        }
-
-        // --- Bulk Functions ---
-        function openBulkImageModal() {
-            new bootstrap.Modal(document.getElementById('bulkImageModal')).show();
-            updateBulkPreview();
-        }
-
-        function updateBulkPreview() {
-            const activeTab = document.querySelector('.nav-link.active').id;
-
-            if (activeTab === 'mode-magic-tab') {
-                document.getElementById('bulkPreview').textContent = `https://tse2.mm.bing.net/th?q=Exemple...`;
-            } else if (activeTab === 'mode-desc-tab') {
-                document.getElementById('bulkPreview').textContent = `https://www.bing.com/search?q=fiche+technique+Exemple`;
-            } else {
-                const baseUrl = document.getElementById('bulkBaseUrl').value || 'https://site.com/img/';
-                const field = document.getElementById('bulkField').value;
-                const ext = document.getElementById('bulkExt').value;
-                const example = field === 'ref' ? 'REF123' : 'Produit_Exemple';
-                document.getElementById('bulkPreview').textContent = `${baseUrl}${example}${ext}`;
+            downloadTemplate() {
+                const wb = XLSX.utils.book_new();
+                const ws = XLSX.utils.json_to_sheet([
+                    { Ref: 'REF001', Designation: 'Exemple Produit', Famille: 'Informatique', Prix: 1000, Image: '', Description: '' }
+                ]);
+                XLSX.utils.book_append_sheet(wb, ws, "Modele");
+                XLSX.writeFile(wb, "modele_import_varicom.xlsx");
             }
-        }
+        };
 
-        function applyBulkActions() {
-            const activeTab = document.querySelector('.nav-link.active').id;
+        // Product & Notification Manager
+        const ContentManager = {
+            addNewProduct() {
+                const name = document.getElementById('newProductName').value;
+                const price = document.getElementById('newProductPrice').value;
+                const cat = document.getElementById('newProductCategory').value;
+                const img = document.getElementById('newProductImage').value;
 
-            if (confirm(`Cela va modifier ${state.products.length} produits. Continuer?`)) {
+                if (!name || !price) {
+                    UI.showStatus('Nom et Prix requis', 'warning');
+                    return;
+                }
+
+                StateManager.data.newProducts.unshift({
+                    id: `new_${Date.now()}`,
+                    name,
+                    price: parseFloat(price),
+                    category: cat,
+                    image: img,
+                    timestamp: new Date().toISOString()
+                });
+
+                document.getElementById('newProductName').value = '';
+                document.getElementById('newProductPrice').value = '';
+                StateManager.saveLocalData();
+                UI.showStatus('Nouveau produit ajouté', 'success');
+            },
+
+            createNotification() {
+                const title = document.getElementById('notifTitle').value;
+                const msg = document.getElementById('notifMessage').value;
+                const type = document.getElementById('notifType').value;
+
+                if (!title || !msg) {
+                    UI.showStatus('Titre et Message requis', 'warning');
+                    return;
+                }
+
+                StateManager.data.notifications.unshift({
+                    id: `notif_${Date.now()}`,
+                    title,
+                    message: msg,
+                    type,
+                    timestamp: new Date().toISOString()
+                });
+
+                document.getElementById('notifTitle').value = '';
+                document.getElementById('notifMessage').value = '';
+                StateManager.saveLocalData();
+                UI.showStatus('Notification créée', 'success');
+            },
+
+            removeNewProduct(id) {
+                StateManager.data.newProducts = StateManager.data.newProducts.filter(p => p.id !== id);
+                StateManager.saveLocalData();
+            },
+
+            removeNotification(id) {
+                StateManager.data.notifications = StateManager.data.notifications.filter(n => n.id !== id);
+                StateManager.saveLocalData();
+            },
+
+            updateProductImage(id, newUrl) {
+                const product = StateManager.data.products.find(p => p.id === id);
+                if (product) {
+                    product.image = newUrl;
+                    StateManager.saveLocalData();
+                }
+            },
+
+            updateProductDesc(id, newUrl) {
+                const product = StateManager.data.products.find(p => p.id === id);
+                if (product) {
+                    product.description = newUrl;
+                    StateManager.saveLocalData();
+                }
+            }
+        };
+
+        // Bulk Operations Manager
+        const BulkManager = {
+            openModal() {
+                new bootstrap.Modal(document.getElementById('bulkImageModal')).show();
+                this.updatePreview();
+            },
+
+            updatePreview() {
+                const activeTab = document.querySelector('.nav-link.active').id;
 
                 if (activeTab === 'mode-magic-tab') {
-                    // Magic Images
-                    state.products = state.products.map(p => ({
+                    document.getElementById('bulkPreview').textContent = `https://tse2.mm.bing.net/th?q=Exemple...`;
+                } else if (activeTab === 'mode-desc-tab') {
+                    document.getElementById('bulkPreview').textContent = `https://www.bing.com/search?q=fiche+technique+Exemple`;
+                } else {
+                    const baseUrl = document.getElementById('bulkBaseUrl').value || 'https://site.com/img/';
+                    const field = document.getElementById('bulkField').value;
+                    const ext = document.getElementById('bulkExt').value;
+                    const example = field === 'ref' ? 'REF123' : 'Produit_Exemple';
+                    document.getElementById('bulkPreview').textContent = `${baseUrl}${example}${ext}`;
+                }
+            },
+
+            applyBulkActions() {
+                const activeTab = document.querySelector('.nav-link.active').id;
+
+                if (!confirm(`Cela va modifier ${StateManager.data.products.length} produits. Continuer?`)) {
+                    return;
+                }
+
+                if (activeTab === 'mode-magic-tab') {
+                    StateManager.data.products = StateManager.data.products.map(p => ({
                         ...p,
                         image: `https://tse2.mm.bing.net/th?q=${encodeURIComponent(p.designation)}&w=500&h=500&c=7&rs=1&p=0`
                     }));
                 } else if (activeTab === 'mode-desc-tab') {
-                    // Magic Descriptions
-                    state.products = state.products.map(p => ({
+                    StateManager.data.products = StateManager.data.products.map(p => ({
                         ...p,
                         description: `https://www.bing.com/search?q=fiche+technique+${encodeURIComponent(p.designation)}`
                     }));
                 } else {
-                    // Hosted Images
                     const baseUrl = document.getElementById('bulkBaseUrl').value;
                     const field = document.getElementById('bulkField').value;
                     const ext = document.getElementById('bulkExt').value;
 
-                    if (!baseUrl) return alert('Veuillez entrer une URL de base');
+                    if (!baseUrl) {
+                        alert('Veuillez entrer une URL de base');
+                        return;
+                    }
 
-                    state.products = state.products.map(p => {
+                    StateManager.data.products = StateManager.data.products.map(p => {
                         const val = p[field] ? p[field].toString().trim() : '';
                         const safeVal = field === 'designation' ? val.replace(/[^a-zA-Z0-9-_]/g, '_') : val;
                         return {
@@ -670,260 +649,277 @@
                     });
                 }
 
-                saveData();
+                StateManager.saveLocalData();
                 bootstrap.Modal.getInstance(document.getElementById('bulkImageModal')).hide();
-                showStatus('Mise à jour effectuée avec succès!', 'success');
+                UI.showStatus('Mise à jour effectuée avec succès!', 'success');
             }
-        }
+        };
 
-        function searchImage(term, provider) {
-            const query = encodeURIComponent(term);
-            let url = '';
+        // GitHub Sync Manager
+        const SyncManager = {
+            async uploadToGitHubGist() {
+                const token = document.getElementById('githubToken').value;
+                if (!token) {
+                    UI.showStatus('Token GitHub manquant!', 'error');
+                    return;
+                }
 
-            switch (provider) {
-                case 'google':
-                    url = `https://www.google.com/search?tbm=isch&q=${query}`;
-                    break;
-                case 'bing':
-                    url = `https://www.bing.com/images/search?q=${query}`;
-                    break;
-                case 'facebook':
-                    url = `https://www.facebook.com/search/photos/?q=${query}`;
-                    break;
-            }
+                // Validate data before publishing
+                if (StateManager.data.products.length === 0 && StateManager.data.newProducts.length === 0) {
+                    UI.showStatus('Aucun produit à publier! Veuillez importer des données.', 'warning');
+                    return;
+                }
 
-            if (url) window.open(url, '_blank');
-        }
+                const btn = document.getElementById('publishBtn');
+                const originalText = btn.innerHTML;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Synchronisation...';
+                btn.disabled = true;
 
-        function updateProductImage(id, newUrl) {
-            const p = state.products.find(p => p.id === id);
-            if (p) {
-                p.image = newUrl;
-                saveData(); // This triggers UI update
-            }
-        }
-
-        function updateProductDesc(id, newUrl) {
-            const p = state.products.find(p => p.id === id);
-            if (p) {
-                p.description = newUrl;
-                saveData();
-            }
-        }
-
-        // GitHub Sync
-        async function uploadToGitHubGist() {
-            const token = document.getElementById('githubToken').value;
-            if (!token) return showStatus('Token GitHub manquant!', 'error');
-
-            // FIX 1: Validate that we have data to publish
-            if (state.products.length === 0 && state.newProducts.length === 0) {
-                return showStatus('Aucun produit à publier! Veuillez importer des données.', 'warning');
-            }
-
-            const btn = document.getElementById('publishBtn');
-            const originalText = btn.innerHTML;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Synchronisation...';
-            btn.disabled = true;
-
-            const payload = {
-                description: "VARICOM Catalog Data",
-                public: true,
-                files: {
-                    "varicom_data.json": {
-                        content: JSON.stringify({
-                            products: state.products,
-                            newProducts: state.newProducts,
-                            notifications: state.notifications,
-                            lastUpdate: new Date().toISOString(),
-                            meta: { version: "2.0", source: "VaricomAdmin" }
-                        })
+                const payload = {
+                    description: "VARICOM Catalog Data",
+                    public: true,
+                    files: {
+                        "varicom_data.json": {
+                            content: JSON.stringify({
+                                products: StateManager.data.products,
+                                newProducts: StateManager.data.newProducts,
+                                notifications: StateManager.data.notifications,
+                                lastUpdate: new Date().toISOString(),
+                                meta: { version: "2.0", source: "VaricomAdmin" }
+                            })
+                        }
                     }
+                };
+
+                try {
+                    let url = 'https://api.github.com/gists';
+                    let method = 'POST';
+
+                    if (StateManager.data.gistId) {
+                        url += `/${StateManager.data.gistId}`;
+                        method = 'PATCH';
+                    }
+
+                    const response = await fetch(url, {
+                        method: method,
+                        headers: {
+                            'Authorization': `token ${token}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (!response.ok) {
+                        if (response.status === 404 && StateManager.data.gistId) {
+                            StateManager.data.gistId = null;
+                            return this.uploadToGitHubGist();
+                        }
+                        throw new Error(`Erreur GitHub: ${response.status}`);
+                    }
+
+                    const result = await response.json();
+                    StateManager.data.gistId = result.id;
+                    StateManager.data.lastSync = new Date().toISOString();
+
+                    localStorage.setItem('varicom_gist_id', StateManager.data.gistId);
+                    localStorage.setItem('varicom_last_sync', StateManager.data.lastSync);
+
+                    UI.showStatus('✅ Synchronisation réussie! Données publiées.', 'success');
+                    UI.update();
+
+                } catch (err) {
+                    console.error(err);
+                    UI.showStatus('Erreur Sync: ' + err.message, 'error');
+                } finally {
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
                 }
-            };
+            },
 
-            try {
-                let url = 'https://api.github.com/gists';
-                let method = 'POST';
-
-                // If we have an ID, try to update (PATCH) instead of create
-                if (state.gistId) {
-                    url += `/${state.gistId}`;
-                    method = 'PATCH';
+            generateClientLink() {
+                if (!StateManager.data.gistId) {
+                    UI.showStatus('Veuillez d\'abord publier le catalogue', 'warning');
+                    return;
                 }
 
-                const response = await fetch(url, {
-                    method: method,
-                    headers: {
-                        'Authorization': `token ${token}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(payload)
+                // الحل الحاسم: إنشاء رابط صحيح يشير إلى client.html
+                const currentUrl = window.location.href;
+                const baseUrl = currentUrl.substring(0, currentUrl.lastIndexOf('/') + 1);
+                const clientUrl = `${baseUrl}client.html?gist=${StateManager.data.gistId}`;
+
+                // محاولة النسخ إلى الحافظة
+                navigator.clipboard.writeText(clientUrl).then(() => {
+                    UI.showStatus('✅ Lien client copié!', 'success');
+                }).catch(() => {
+                    // إذا فشل النسخ، عرض الرابط للمستخدم
+                    prompt('Copiez ce lien manuellement:', clientUrl);
+                    UI.showStatus('Lien prêt à être copié', 'info');
                 });
+            },
 
-                if (!response.ok) {
-                    if (response.status === 404 && state.gistId) {
-                        // Gist deleted or invalid, retry as new
-                        state.gistId = null;
-                        return uploadToGitHubGist();
-                    }
-                    throw new Error(`Erreur GitHub: ${response.status}`);
+            resetSync() {
+                if (confirm('Voulez-vous vraiment réinitialiser la synchronisation? Cela déconnectera le catalogue actuel.')) {
+                    localStorage.removeItem('varicom_gist_id');
+                    localStorage.removeItem('varicom_last_sync');
+                    StateManager.data.gistId = null;
+                    StateManager.data.lastSync = null;
+                    UI.update();
+                    UI.showStatus('Synchronisation réinitialisée', 'info');
+                }
+            }
+        };
+
+        // UI Manager
+        const UI = {
+            update() {
+                this.updateStats();
+                this.updateLists();
+                this.updateCatalogTable();
+            },
+
+            updateStats() {
+                document.getElementById('statsProducts').textContent = StateManager.data.products.length;
+                document.getElementById('statsNewProducts').textContent = StateManager.data.newProducts.length;
+                document.getElementById('statsNotifications').textContent = StateManager.data.notifications.length;
+                
+                const statusEl = document.getElementById('statsStatus');
+                statusEl.textContent = StateManager.data.gistId ? 'Actif' : 'Inactif';
+                statusEl.className = StateManager.data.gistId ? 'text-success' : 'text-danger';
+            },
+
+            updateLists() {
+                this.escapeHtml = (str) => str ? str.toString().replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;") : '';
+                this.escapeJsHtml = (str) => this.escapeHtml(str ? str.toString().replace(/'/g, "\\'") : '');
+
+                // New Products List
+                const npList = document.getElementById('activeNewProducts');
+                npList.innerHTML = StateManager.data.newProducts.map(p => `
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <div><strong>${this.escapeHtml(p.name)}</strong> - ${p.price} DA</div>
+                        <button class="btn btn-sm btn-outline-danger" onclick="ContentManager.removeNewProduct('${this.escapeJsHtml(p.id)}')">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </li>
+                `).join('');
+
+                // Notifications List
+                const notifList = document.getElementById('activeNotifications');
+                notifList.innerHTML = StateManager.data.notifications.map(n => `
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <div><span class="badge bg-${this.getBadgeClass(n.type)}">${n.type}</span> ${this.escapeHtml(n.title)}</div>
+                        <button class="btn btn-sm btn-outline-danger" onclick="ContentManager.removeNotification('${this.escapeJsHtml(n.id)}')">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </li>
+                `).join('');
+            },
+
+            updateCatalogTable() {
+                const tableBody = document.getElementById('catalogTableBody');
+                const productsToShow = StateManager.data.products.slice(0, 100);
+
+                tableBody.innerHTML = productsToShow.map(p => `
+                    <tr>
+                        <td><small>${this.escapeHtml(p.ref)}</small></td>
+                        <td class="text-truncate" style="max-width: 150px;" title="${this.escapeHtml(p.designation)}">${this.escapeHtml(p.designation)}</td>
+                        <td>${p.prix}</td>
+                        <td>
+                            <input type="text" class="form-control form-control-sm" 
+                                   value="${this.escapeHtml(p.image || '')}" 
+                                   onchange="ContentManager.updateProductImage('${this.escapeJsHtml(p.id)}', this.value)"
+                                   placeholder="URL Image...">
+                        </td>
+                        <td>
+                            <input type="text" class="form-control form-control-sm" 
+                                   value="${this.escapeHtml(p.description || '')}" 
+                                   onchange="ContentManager.updateProductDesc('${this.escapeJsHtml(p.id)}', this.value)"
+                                   placeholder="URL Desc...">
+                        </td>
+                        <td>
+                            <div class="btn-group btn-group-sm">
+                                <button class="btn btn-outline-primary" onclick="this.searchImage('${this.escapeJsHtml(p.designation)}', 'google')" title="Google">
+                                    <i class="fab fa-google"></i>
+                                </button>
+                                <button class="btn btn-outline-info" onclick="this.searchImage('${this.escapeJsHtml(p.designation)}', 'bing')" title="Bing">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `).join('');
+            },
+
+            searchImage(term, provider) {
+                const query = encodeURIComponent(term);
+                let url = '';
+
+                switch (provider) {
+                    case 'google': url = `https://www.google.com/search?tbm=isch&q=${query}`; break;
+                    case 'bing': url = `https://www.bing.com/images/search?q=${query}`; break;
+                    case 'facebook': url = `https://www.facebook.com/search/photos/?q=${query}`; break;
                 }
 
-                const result = await response.json();
-                state.gistId = result.id;
-                state.lastSync = new Date().toISOString();
+                if (url) window.open(url, '_blank');
+            },
 
-                localStorage.setItem('varicom_gist_id', state.gistId);
-                localStorage.setItem('varicom_last_sync', state.lastSync);
+            getBadgeClass(type) {
+                switch (type) {
+                    case 'info': return 'info';
+                    case 'success': return 'success';
+                    case 'warning': return 'warning';
+                    case 'error': return 'danger';
+                    default: return 'secondary';
+                }
+            },
 
-                showStatus('✅ Synchronisation réussie! Données publiées.', 'success');
-                updateUI();
+            showStatus(msg, type) {
+                const el = document.getElementById('syncStatus');
+                el.textContent = msg;
+                el.className = 'sync-status';
+                el.classList.add(type === 'success' ? 'sync-success' : type === 'warning' ? 'sync-warning' : 'sync-error');
+                el.style.display = 'block';
+                
+                setTimeout(() => {
+                    el.style.display = 'none';
+                }, 3000);
+            },
 
-            } catch (err) {
-                console.error(err);
-                showStatus('Erreur Sync: ' + err.message, 'error');
-            } finally {
-                btn.innerHTML = originalText;
-                btn.disabled = false;
+            toggleToken() {
+                const input = document.getElementById('githubToken');
+                const icon = input.parentNode.querySelector('i');
+                if (input.type === 'password') {
+                    input.type = 'text';
+                    icon.classList.replace('fa-eye', 'fa-eye-slash');
+                } else {
+                    input.type = 'password';
+                    icon.classList.replace('fa-eye-slash', 'fa-eye');
+                }
             }
-        }
+        };
 
-        // UI Updates
-        function updateUI() {
-            // Stats
-            document.getElementById('statsProducts').textContent = state.products.length;
-            document.getElementById('statsNewProducts').textContent = state.newProducts.length;
-            document.getElementById('statsNotifications').textContent = state.notifications.length;
-            document.getElementById('statsStatus').textContent = state.gistId ? 'Actif' : 'Inactif';
-            document.getElementById('statsStatus').className = state.gistId ? 'text-success' : 'text-danger';
+        // Global Functions for HTML onclick
+        window.handleExcelUpload = (file) => ExcelManager.handleUpload(file);
+        window.addNewProduct = () => ContentManager.addNewProduct();
+        window.createNotification = () => ContentManager.createNotification();
+        window.removeNewProduct = (id) => ContentManager.removeNewProduct(id);
+        window.removeNotification = (id) => ContentManager.removeNotification(id);
+        window.openBulkImageModal = () => BulkManager.openModal();
+        window.updateBulkPreview = () => BulkManager.updatePreview();
+        window.applyBulkActions = () => BulkManager.applyBulkActions();
+        window.uploadToGitHubGist = () => SyncManager.uploadToGitHubGist();
+        window.generateClientLink = () => SyncManager.generateClientLink();
+        window.resetSync = () => SyncManager.resetSync();
+        window.downloadTemplate = () => ExcelManager.downloadTemplate();
+        window.toggleToken = () => UI.toggleToken();
+        window.searchImage = (term, provider) => UI.searchImage(term, provider);
+        window.updateProductImage = (id, url) => ContentManager.updateProductImage(id, url);
+        window.updateProductDesc = (id, url) => ContentManager.updateProductDesc(id, url);
 
-            // Helper to escape single quotes for JS strings (e.g. onclick parameters)
-            const escapeQuote = (str) => str ? str.toString().replace(/'/g, "\\'") : '';
-
-            // Helper to escape double quotes for HTML attributes (e.g. value, title)
-            const escapeHtml = (str) => str ? str.toString().replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;") : '';
-
-            // Combined helper for JS strings inside HTML attributes
-            const escapeJsHtml = (str) => escapeHtml(escapeQuote(str));
-
-            // Lists
-            const npList = document.getElementById('activeNewProducts');
-            npList.innerHTML = state.newProducts.map(p => `
-                <li class="list-group-item d-flex justify-content-between align-items-center">
-                    <div><strong>${escapeHtml(p.name)}</strong> - ${p.price} DA</div>
-                    <button class="btn btn-sm btn-outline-danger" onclick="removeNewProduct('${escapeJsHtml(p.id)}')"><i class="fas fa-times"></i></button>
-                </li>
-            `).join('');
-
-            const notifList = document.getElementById('activeNotifications');
-            notifList.innerHTML = state.notifications.map(n => `
-                <li class="list-group-item d-flex justify-content-between align-items-center">
-                    <div><span class="badge bg-${getBadgeClass(n.type)}">${n.type}</span> ${escapeHtml(n.title)}</div>
-                    <button class="btn btn-sm btn-outline-danger" onclick="removeNotification('${escapeJsHtml(n.id)}')"><i class="fas fa-times"></i></button>
-                </li>
-            `).join('');
-
-            // Catalog Table (Limit to 100 for performance)
-            const tableBody = document.getElementById('catalogTableBody');
-
-            tableBody.innerHTML = state.products.slice(0, 100).map(p => `
-                <tr>
-                    <td><small>${escapeHtml(p.ref)}</small></td>
-                    <td class="text-truncate" style="max-width: 150px;" title="${escapeHtml(p.designation)}">${escapeHtml(p.designation)}</td>
-                    <td>${p.prix}</td>
-                    <td>
-                        <input type="text" class="form-control form-control-sm" 
-                               value="${escapeHtml(p.image || '')}" 
-                               onchange="updateProductImage('${escapeJsHtml(p.id)}', this.value)"
-                               placeholder="URL Image...">
-                    </td>
-                    <td>
-                        <input type="text" class="form-control form-control-sm" 
-                               value="${escapeHtml(p.description || '')}" 
-                               onchange="updateProductDesc('${escapeJsHtml(p.id)}', this.value)"
-                               placeholder="URL Desc...">
-                    </td>
-                    <td>
-                        <div class="btn-group btn-group-sm">
-                            <button class="btn btn-outline-primary" onclick="searchImage('${escapeJsHtml(p.designation)}', 'google')" title="Google">
-                                <i class="fab fa-google"></i>
-                            </button>
-                            <button class="btn btn-outline-info" onclick="searchImage('${escapeJsHtml(p.designation)}', 'bing')" title="Bing">
-                                <i class="fas fa-search"></i>
-                            </button>
-                        </div>
-                    </td>
-                </tr>
-            `).join('');
-        }
-
-        function getBadgeClass(type) {
-            switch (type) {
-                case 'info': return 'info';
-                case 'success': return 'success';
-                case 'warning': return 'warning';
-                case 'error': return 'danger';
-                default: return 'secondary';
-            }
-        }
-
-        function showStatus(msg, type) {
-            const el = document.getElementById('syncStatus');
-            el.textContent = msg;
-            el.className = 'sync-status'; // Reset
-            el.classList.add(type === 'success' ? 'sync-success' : type === 'warning' ? 'sync-warning' : 'sync-error');
-            el.style.display = 'block';
-            setTimeout(() => {
-                el.style.display = 'none';
-            }, 3000);
-        }
-
-        function generateClientLink() {
-            if (!state.gistId) return showStatus('Veuillez d\'abord publier le catalogue', 'warning');
-
-            // FIX 2: Generate link to client.html instead of index.html
-            const path = window.location.pathname;
-            const dir = path.substring(0, path.lastIndexOf('/'));
-            const clientUrl = `${window.location.origin}${dir}/client.html?gist=${state.gistId}`;
-
-            navigator.clipboard.writeText(clientUrl);
-            showStatus('Lien client copié dans le presse-papier!', 'success');
-        }
-
-        function toggleToken() {
-            const input = document.getElementById('githubToken');
-            const icon = document.querySelector('.input-group .fa-eye, .input-group .fa-eye-slash');
-            if (input.type === 'password') {
-                input.type = 'text';
-                icon.classList.replace('fa-eye', 'fa-eye-slash');
-            } else {
-                input.type = 'password';
-                icon.classList.replace('fa-eye-slash', 'fa-eye');
-            }
-        }
-
-        function resetSync() {
-            if (confirm('Voulez-vous vraiment réinitialiser la synchronisation? Cela déconnectera le catalogue actuel.')) {
-                localStorage.removeItem('varicom_gist_id');
-                localStorage.removeItem('varicom_last_sync');
-                state.gistId = null;
-                state.lastSync = null;
-                updateUI();
-                showStatus('Synchronisation réinitialisée', 'info');
-            }
-        }
-
-        function downloadTemplate() {
-            const wb = XLSX.utils.book_new();
-            const ws = XLSX.utils.json_to_sheet([
-                { Ref: 'REF001', Designation: 'Exemple Produit', Famille: 'Informatique', Prix: 1000, Image: '', Description: '' }
-            ]);
-            XLSX.utils.book_append_sheet(wb, ws, "Modele");
-            XLSX.writeFile(wb, "modele_import_varicom.xlsx");
-        }
+        // Initialize application
+        document.addEventListener('DOMContentLoaded', () => {
+            StateManager.init();
+        });
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 </body>
-
 </html>
