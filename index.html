@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="fr" data-theme="light">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -144,38 +143,34 @@
             font-weight: bold;
         }
 
-        /* Animations */
         @keyframes shake {
-
-            0%,
-            100% {
-                transform: translateX(0);
-            }
-
-            10%,
-            30%,
-            50%,
-            70%,
-            90% {
-                transform: translateX(-2px);
-            }
-
-            20%,
-            40%,
-            60%,
-            80% {
-                transform: translateX(2px);
-            }
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-2px); }
+            20%, 40%, 60%, 80% { transform: translateX(2px); }
         }
 
         .animate-shake {
             animation: shake 2s infinite;
         }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #3498db;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 
 <body>
-
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg fixed-top">
         <div class="container">
@@ -183,10 +178,10 @@
                 <i class="fas fa-cube me-2"></i>VARICOM
             </a>
             <div class="d-flex align-items-center gap-3">
-                <button class="btn btn-outline-secondary btn-sm rounded-circle" onclick="toggleTheme()" id="themeBtn">
+                <button class="btn btn-outline-secondary btn-sm rounded-circle" onclick="App.toggleTheme()" id="themeBtn">
                     <i class="fas fa-moon" id="themeIcon"></i>
                 </button>
-                <div class="d-lg-none" onclick="openCart()">
+                <div class="d-lg-none" onclick="Cart.open()">
                     <i class="fas fa-shopping-basket fa-lg text-primary"></i>
                 </div>
             </div>
@@ -199,17 +194,14 @@
             <div class="row align-items-center">
                 <div class="col-lg-6">
                     <h1 class="display-4 fw-bold animate__animated animate__fadeInLeft">Découvrez Nos Produits</h1>
-                    <p class="lead animate__animated animate__fadeInLeft animate__delay-1s">La qualité professionnelle à
-                        portée de main.</p>
+                    <p class="lead animate__animated animate__fadeInLeft animate__delay-1s">La qualité professionnelle à portée de main.</p>
                     <div class="input-group mt-4 shadow-lg animate__animated animate__fadeInUp animate__delay-1s">
                         <span class="input-group-text border-0 bg-white"><i class="fas fa-search text-muted"></i></span>
-                        <input type="text" class="form-control border-0 p-3" id="searchInput"
-                            placeholder="Rechercher un produit..." oninput="filterProducts()">
+                        <input type="text" class="form-control border-0 p-3" id="searchInput" placeholder="Rechercher un produit..." oninput="Product.filter()">
                     </div>
                 </div>
                 <div class="col-lg-6 d-none d-lg-block text-center animate__animated animate__fadeInRight">
-                    <img src="https://cdn-icons-png.flaticon.com/512/3081/3081559.png" alt="Hero" class="img-fluid"
-                        style="max-height: 300px;">
+                    <img src="https://cdn-icons-png.flaticon.com/512/3081/3081559.png" alt="Hero" class="img-fluid" style="max-height: 300px;">
                 </div>
             </div>
         </div>
@@ -228,20 +220,22 @@
     <!-- Categories -->
     <div class="container mt-4 mb-4">
         <div class="d-flex gap-2 overflow-auto pb-2" id="categoryPills">
-            <button class="btn btn-primary rounded-pill px-4" onclick="filterCategory('all')">Tout</button>
-            <!-- Categories injected here -->
+            <button class="btn btn-primary rounded-pill px-4" onclick="Product.filterByCategory('all')">Tout</button>
         </div>
     </div>
 
     <!-- Products Grid -->
     <div class="container mb-5">
         <div class="row g-4" id="productGrid">
-            <!-- Products injected here -->
+            <div class="col-12 text-center py-5">
+                <div class="loading-spinner mx-auto mb-3"></div>
+                <p class="text-muted">Chargement du catalogue...</p>
+            </div>
         </div>
     </div>
 
     <!-- Floating Cart -->
-    <div class="floating-cart" onclick="openCart()">
+    <div class="floating-cart" onclick="Cart.open()">
         <i class="fas fa-shopping-cart fa-lg"></i>
         <span class="cart-badge" id="cartCount">0</span>
     </div>
@@ -276,12 +270,12 @@
                     </div>
                 </div>
                 <div class="modal-footer justify-content-between">
-                    <button type="button" class="btn btn-outline-danger" onclick="clearCart()">Vider</button>
+                    <button type="button" class="btn btn-outline-danger" onclick="Cart.clear()">Vider</button>
                     <div class="d-flex gap-2">
-                        <button type="button" class="btn btn-success" onclick="sendWhatsApp()">
+                        <button type="button" class="btn btn-success" onclick="Cart.sendWhatsApp()">
                             <i class="fab fa-whatsapp me-2"></i>Commander
                         </button>
-                        <button type="button" class="btn btn-dark" onclick="generatePDF()">
+                        <button type="button" class="btn btn-dark" onclick="Cart.generatePDF()">
                             <i class="fas fa-file-pdf me-2"></i>PDF
                         </button>
                     </div>
@@ -292,119 +286,140 @@
 
     <script>
         // Configuration
-        const urlParams = new URLSearchParams(window.location.search);
-        let gistId = urlParams.get('gist') || localStorage.getItem('varicom_gist_id');
-
-        // Clean up invalid gistId
-        if (gistId === 'null' || gistId === 'undefined') gistId = null;
-
-        const adminPhone = "213541527561"; // Replace with actual number
-
-        // State
-        let allProducts = [];
-        let newProducts = [];
-        let notifications = [];
-        let cart = JSON.parse(localStorage.getItem('varicom_cart')) || [];
-        let wishlist = JSON.parse(localStorage.getItem('varicom_wishlist')) || [];
-        let categoryAffinity = JSON.parse(localStorage.getItem('varicom_affinity')) || {};
-        let currentCategory = 'all';
-
-        // Initialization
-        document.addEventListener('DOMContentLoaded', () => {
-            // Apply theme on load
-            const savedTheme = localStorage.getItem('varicom_theme') || 'light';
-            applyTheme(savedTheme);
-            updateCartUI();
-
-            // FIX 3: Ensure loadData is called immediately if Gist ID is present
-            if (gistId) {
-                loadData();
-                localStorage.setItem('varicom_gist_id', gistId);
-            } else {
-                document.getElementById('productGrid').innerHTML = '<div class="col-12 text-center text-muted py-5">Veuillez utiliser le lien fourni par l\'administrateur.</div>';
+        const Config = {
+            adminPhone: "213541527561",
+            getGistId() {
+                const urlParams = new URLSearchParams(window.location.search);
+                let gistId = urlParams.get('gist') || localStorage.getItem('varicom_gist_id');
+                if (gistId === 'null' || gistId === 'undefined') gistId = null;
+                return gistId;
             }
-        });
+        };
 
-        async function loadData() {
-            try {
-                // FIX 4: Robust fetching with fallback to raw_url
-                let gistData;
-                try {
-                    const response = await fetch(`https://api.github.com/gists/${gistId}`);
-                    if (!response.ok) {
-                        if (response.status === 404) {
-                            throw new Error('Gist ID non trouvé. Vérifiez le lien.');
-                        } else if (response.status === 403) {
-                            throw new Error('Limite de requêtes API dépassée. Réessayez plus tard.');
-                        } else {
-                            throw new Error(`Erreur réseau: ${response.status}`);
-                        }
-                    }
-                    gistData = await response.json();
-                } catch (fetchError) {
-                    throw new Error(`Impossible de récupérer les données: ${fetchError.message}`);
+        // State Management
+        const State = {
+            allProducts: [],
+            newProducts: [],
+            notifications: [],
+            cart: JSON.parse(localStorage.getItem('varicom_cart')) || [],
+            wishlist: JSON.parse(localStorage.getItem('varicom_wishlist')) || [],
+            categoryAffinity: JSON.parse(localStorage.getItem('varicom_affinity')) || {},
+            currentCategory: 'all',
+            currentSearch: ''
+        };
+
+        // Data Loader
+        const DataLoader = {
+            async load() {
+                const gistId = Config.getGistId();
+                
+                if (!gistId) {
+                    this.showNoGistError();
+                    return;
                 }
 
+                try {
+                    const data = await this.fetchGistData(gistId);
+                    this.processData(data);
+                    this.showSuccess();
+                } catch (error) {
+                    this.showError(error);
+                }
+            },
+
+            async fetchGistData(gistId) {
+                // المحاولة الأولى: جلب البيانات من API
+                let response = await fetch(`https://api.github.com/gists/${gistId}`);
+                
+                if (!response.ok) {
+                    if (response.status === 404) {
+                        throw new Error('GIST_NOT_FOUND');
+                    } else if (response.status === 403) {
+                        throw new Error('RATE_LIMIT');
+                    } else {
+                        throw new Error(`HTTP_${response.status}`);
+                    }
+                }
+
+                const gistData = await response.json();
                 const file = gistData.files['varicom_data.json'];
+                
                 if (!file) {
-                    throw new Error('Format de données invalide: fichier varicom_data.json manquant');
+                    throw new Error('INVALID_FORMAT');
                 }
 
                 let fileContent;
                 
-                // Try to get content from file, with fallback to raw_url if truncated
+                // استخدام raw_url إذا كانت البيانات مقطوعة
                 if (file.truncated || !file.content) {
-                    try {
-                        const rawResponse = await fetch(file.raw_url);
-                        if (!rawResponse.ok) throw new Error('Erreur lors du téléchargement des données brutes');
-                        fileContent = await rawResponse.text();
-                    } catch (rawError) {
-                        throw new Error(`Données tronquées et impossible de récupérer les données brutes: ${rawError.message}`);
-                    }
+                    response = await fetch(file.raw_url);
+                    if (!response.ok) throw new Error('RAW_FETCH_FAILED');
+                    fileContent = await response.text();
                 } else {
                     fileContent = file.content;
                 }
 
-                let parsedData;
-                try {
-                    parsedData = JSON.parse(fileContent);
-                } catch (parseError) {
-                    throw new Error('Format de données invalide: JSON corrompu');
-                }
+                return JSON.parse(fileContent);
+            },
 
-                allProducts = parsedData.products || [];
-                newProducts = parsedData.newProducts || [];
-                notifications = parsedData.notifications || [];
+            processData(data) {
+                State.allProducts = data.products || [];
+                State.newProducts = data.newProducts || [];
+                State.notifications = data.notifications || [];
 
-                // Merge new products into main list
-                const existingIds = new Set(allProducts.map(p => p.id));
-                newProducts.forEach(p => {
+                // دمج المنتجات الجديدة
+                const existingIds = new Set(State.allProducts.map(p => p.id));
+                State.newProducts.forEach(p => {
                     if (!existingIds.has(p.id)) {
-                        allProducts.unshift(p);
+                        State.allProducts.unshift(p);
                     }
                 });
 
-                displayNotifications(notifications);
-                updateCategories();
-                filterProducts();
+                Notifications.display(State.notifications);
+                Product.updateCategories();
+                Product.filter();
+            },
 
-                // Show success message
-                showToast(`Catalogue chargé: ${allProducts.length} produits`, 'success');
+            showNoGistError() {
+                document.getElementById('productGrid').innerHTML = `
+                    <div class="col-12 text-center py-5">
+                        <div class="alert alert-warning">
+                            <i class="fas fa-link-slash fa-2x mb-3"></i>
+                            <h5>Lien catalogue non spécifié</h5>
+                            <p class="mb-3">Veuillez utiliser le lien fourni par l'administrateur.</p>
+                            <button class="btn btn-primary" onclick="location.reload()">
+                                <i class="fas fa-redo me-2"></i>Réessayer
+                            </button>
+                        </div>
+                    </div>
+                `;
+            },
 
-            } catch (error) {
+            showSuccess() {
+                App.showToast(`Catalogue chargé: ${State.allProducts.length} produits`, 'success');
+            },
+
+            showError(error) {
                 console.error('Erreur chargement données:', error);
                 
-                // FIX 5: Improved error messages displayed on UI
                 let errorMessage = 'Erreur de chargement du catalogue. ';
+                let errorDetail = error.message;
                 
-                if (error.message.includes('Gist ID non trouvé')) {
-                    errorMessage += 'Le lien fourni est incorrect ou a expiré.';
-                } else if (error.message.includes('Limite de requêtes')) {
-                    errorMessage += 'Trop de requêtes vers GitHub. Réessayez dans quelques minutes.';
-                } else if (error.message.includes('Format de données')) {
-                    errorMessage += 'Les données du catalogue sont corrompues.';
-                } else {
-                    errorMessage += 'Veuillez vérifier votre connexion et réessayer.';
+                switch (error.message) {
+                    case 'GIST_NOT_FOUND':
+                        errorMessage += 'Le lien fourni est incorrect ou a expiré.';
+                        break;
+                    case 'RATE_LIMIT':
+                        errorMessage += 'Trop de requêtes vers GitHub. Réessayez dans quelques minutes.';
+                        break;
+                    case 'INVALID_FORMAT':
+                        errorMessage += 'Les données du catalogue sont corrompues.';
+                        break;
+                    case 'RAW_FETCH_FAILED':
+                        errorMessage += 'Impossible de télécharger les données complètes.';
+                        break;
+                    default:
+                        errorMessage += 'Veuillez vérifier votre connexion et réessayer.';
                 }
                 
                 document.getElementById('productGrid').innerHTML = `
@@ -412,360 +427,385 @@
                         <div class="alert alert-danger">
                             <i class="fas fa-exclamation-triangle fa-2x mb-3"></i>
                             <h5>${errorMessage}</h5>
-                            <p class="small text-muted">Détail: ${error.message}</p>
-                            <button class="btn btn-primary mt-2" onclick="loadData()">
+                            <p class="small text-muted mb-3">Détail: ${errorDetail}</p>
+                            <button class="btn btn-primary" onclick="DataLoader.load()">
                                 <i class="fas fa-redo me-2"></i>Réessayer
                             </button>
                         </div>
                     </div>
                 `;
             }
-        }
+        };
 
-        function displayNotifications(notifs) {
-            const container = document.getElementById('adminNotifications');
-            if (!container || !notifs || notifs.length === 0) return;
+        // Product Management
+        const Product = {
+            filter() {
+                State.currentSearch = document.getElementById('searchInput').value.toLowerCase();
+                this.render();
+            },
 
-            container.innerHTML = notifs.map(notif => `
-                <div class="alert alert-${getBootstrapType(notif.type)} alert-dismissible fade show shadow-sm" role="alert">
-                    <i class="fas fa-info-circle me-2"></i><strong>${notif.title}:</strong> ${notif.message}
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                </div>
-            `).join('');
-        }
+            filterByCategory(cat) {
+                State.currentCategory = cat;
+                this.updateCategories();
+                this.render();
+            },
 
-        function getBootstrapType(type) {
-            switch (type) {
-                case 'info': return 'info';
-                case 'success': return 'success';
-                case 'warning': return 'warning';
-                case 'error': return 'danger';
-                default: return 'primary';
-            }
-        }
+            updateCategories() {
+                const categories = ['all', ...new Set(State.allProducts.map(p => p.famille))];
+                const container = document.getElementById('categoryPills');
 
-        function updateCategories() {
-            const categories = ['all', ...new Set(allProducts.map(p => p.famille))];
-            const container = document.getElementById('categoryPills');
+                container.innerHTML = categories.map(cat => `
+                    <button class="btn ${State.currentCategory === cat ? 'btn-primary' : 'btn-outline-primary'} rounded-pill px-4 text-capitalize" 
+                            onclick="Product.filterByCategory('${cat}')">
+                        ${cat === 'all' ? 'Tout' : cat}
+                    </button>
+                `).join('');
+            },
 
-            if (!container) return;
+            render() {
+                const filtered = State.allProducts.filter(p => {
+                    const matchesCat = State.currentCategory === 'all' || p.famille === State.currentCategory;
+                    const matchesSearch = (p.designation || '').toLowerCase().includes(State.currentSearch) || 
+                                        (p.ref || '').toLowerCase().includes(State.currentSearch);
+                    return matchesCat && matchesSearch;
+                });
 
-            container.innerHTML = categories.map(cat => `
-                <button class="btn ${currentCategory === cat ? 'btn-primary' : 'btn-outline-primary'} rounded-pill px-4 text-capitalize" 
-                        onclick="filterCategory('${cat}')">
-                    ${cat === 'all' ? 'Tout' : cat}
-                </button>
-            `).join('');
-        }
+                this.renderProducts(filtered);
+            },
 
-        function filterCategory(cat) {
-            currentCategory = cat;
-            updateCategories();
-            filterProducts();
-        }
+            renderProducts(products) {
+                const grid = document.getElementById('productGrid');
+                
+                if (products.length === 0) {
+                    grid.innerHTML = '<div class="col-12 text-center text-muted py-5">Aucun produit trouvé</div>';
+                    return;
+                }
 
-        function filterProducts() {
-            const term = document.getElementById('searchInput').value.toLowerCase();
-            const filtered = allProducts.filter(p => {
-                const matchesCat = currentCategory === 'all' || p.famille === currentCategory;
-                const matchesSearch = (p.designation || '').toLowerCase().includes(term) || (p.ref || '').toLowerCase().includes(term);
-                return matchesCat && matchesSearch;
-            });
+                grid.innerHTML = products.map(p => this.createProductCard(p)).join('');
+            },
 
-            renderProducts(filtered);
-        }
+            createProductCard(p) {
+                const isNew = p.id && p.id.startsWith('new_');
+                const badge = isNew ? '<span class="badge-new animate-shake">NOUVEAU</span>' : '';
+                const image = p.image || 'https://via.placeholder.com/300x200?text=No+Image';
+                const isInWishlist = State.wishlist.includes(p.id);
+                const descIcon = p.description ? 
+                    `<a href="${p.description}" target="_blank" class="text-info ms-2" title="Fiche Technique"><i class="fas fa-info-circle"></i></a>` : '';
 
-        function renderProducts(products) {
-            const grid = document.getElementById('productGrid');
-            if (!grid) return;
-
-            if (products.length === 0) {
-                grid.innerHTML = '<div class="col-12 text-center text-muted py-5">Aucun produit trouvé</div>';
-                return;
-            }
-
-            grid.innerHTML = products.map(p => createProductCard(p)).join('');
-        }
-
-        function createProductCard(p) {
-            const isNew = p.id && p.id.startsWith('new_');
-            const badge = isNew ? '<span class="badge-new animate-shake">NOUVEAU</span>' : '';
-            const image = p.image || 'https://via.placeholder.com/300x200?text=No+Image';
-
-            const descIcon = p.description ?
-                `<a href="${p.description}" target="_blank" class="text-info ms-2" title="Fiche Technique"><i class="fas fa-info-circle"></i></a>` : '';
-
-            return `
-                <div class="col-6 col-md-4 col-lg-3">
-                    <div class="product-card h-100 shadow-sm">
-                        <div class="product-img-container">
-                            ${badge}
-                            <img src="${image}" alt="${p.designation}" loading="lazy">
-                            <button class="btn btn-light btn-sm position-absolute top-0 end-0 m-2 rounded-circle shadow-sm" 
-                                    onclick="toggleWishlist('${p.id}')">
-                                <i class="${wishlist.includes(p.id) ? 'fas text-danger' : 'far'} fa-heart"></i>
-                            </button>
-                        </div>
-                        <div class="card-body d-flex flex-column p-3">
-                            <small class="text-muted mb-1">${p.ref}</small>
-                            <h6 class="card-title text-truncate mb-2" title="${p.designation}">${p.designation}</h6>
-                            <div class="mt-auto d-flex justify-content-between align-items-center">
-                                <span class="fw-bold text-primary">${formatPrice(p.prix)}${descIcon}</span>
-                                <button class="btn-add-cart" onclick="addToCart('${p.id}')">
-                                    <i class="fas fa-plus"></i>
+                return `
+                    <div class="col-6 col-md-4 col-lg-3">
+                        <div class="product-card h-100 shadow-sm">
+                            <div class="product-img-container">
+                                ${badge}
+                                <img src="${image}" alt="${p.designation}" loading="lazy" onerror="this.src='https://via.placeholder.com/300x200?text=Image+Non+Disponible'">
+                                <button class="btn btn-light btn-sm position-absolute top-0 end-0 m-2 rounded-circle shadow-sm" 
+                                        onclick="Wishlist.toggle('${p.id}')">
+                                    <i class="${isInWishlist ? 'fas text-danger' : 'far'} fa-heart"></i>
                                 </button>
+                            </div>
+                            <div class="card-body d-flex flex-column p-3">
+                                <small class="text-muted mb-1">${p.ref}</small>
+                                <h6 class="card-title text-truncate mb-2" title="${p.designation}">${p.designation}</h6>
+                                <div class="mt-auto d-flex justify-content-between align-items-center">
+                                    <span class="fw-bold text-primary">${this.formatPrice(p.prix)}${descIcon}</span>
+                                    <button class="btn-add-cart" onclick="Cart.add('${p.id}')">
+                                        <i class="fas fa-plus"></i>
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
-                </div>
-            `;
-        }
-
-        // --- Cart & Wishlist Logic ---
-
-        function addToCart(id) {
-            const product = allProducts.find(p => p.id === id);
-            if (!product) return;
-
-            const existing = cart.find(item => item.id === id);
-            if (existing) {
-                existing.qty++;
-            } else {
-                cart.push({ ...product, qty: 1 });
-            }
-
-            trackAffinity(product.famille, 5);
-            saveCart();
-            showToast(`Ajouté: ${product.designation}`);
-        }
-
-        function removeFromCart(id) {
-            cart = cart.filter(item => item.id !== id);
-            saveCart();
-            renderCartItems();
-        }
-
-        function updateQty(id, change) {
-            const item = cart.find(i => i.id === id);
-            if (item) {
-                item.qty += change;
-                if (item.qty <= 0) removeFromCart(id);
-                else saveCart();
-            }
-            renderCartItems();
-        }
-
-        function clearCart() {
-            if (confirm('Vider le panier?')) {
-                cart = [];
-                saveCart();
-                renderCartItems();
-            }
-        }
-
-        function saveCart() {
-            localStorage.setItem('varicom_cart', JSON.stringify(cart));
-            updateCartUI();
-        }
-
-        function updateCartUI() {
-            const count = cart.reduce((sum, item) => sum + item.qty, 0);
-            const badge = document.getElementById('cartCount');
-            if (badge) {
-                badge.textContent = count;
-                badge.classList.remove('animate__bounceIn');
-                void badge.offsetWidth;
-                badge.classList.add('animate__animated', 'animate__bounceIn');
-            }
-        }
-
-        function openCart() {
-            renderCartItems();
-            new bootstrap.Modal(document.getElementById('cartModal')).show();
-        }
-
-        function renderCartItems() {
-            const container = document.getElementById('cartItems');
-            const totalEl = document.getElementById('cartTotal');
-
-            if (cart.length === 0) {
-                container.innerHTML = '<div class="text-center py-5 text-muted"><i class="fas fa-shopping-basket fa-3x mb-3"></i><br>Votre panier est vide</div>';
-                totalEl.textContent = '0.00 DA';
-                return;
-            }
-
-            let html = '<ul class="list-group list-group-flush">';
-            let total = 0;
-
-            cart.forEach(item => {
-                const itemTotal = item.prix * item.qty;
-                total += itemTotal;
-                html += `
-                    <li class="list-group-item d-flex justify-content-between align-items-center bg-transparent">
-                        <div>
-                            <h6 class="mb-0 text-truncate" style="max-width: 200px;">${item.designation}</h6>
-                            <small class="text-muted">${formatPrice(item.prix)} x ${item.qty}</small>
-                        </div>
-                        <div class="d-flex align-items-center gap-2">
-                            <button class="btn btn-sm btn-outline-secondary rounded-circle" onclick="updateQty('${item.id}', -1)">-</button>
-                            <span class="fw-bold" style="width: 20px; text-align: center;">${item.qty}</span>
-                            <button class="btn btn-sm btn-outline-secondary rounded-circle" onclick="updateQty('${item.id}', 1)">+</button>
-                            <button class="btn btn-sm btn-outline-danger ms-2" onclick="removeFromCart('${item.id}')"><i class="fas fa-trash"></i></button>
-                        </div>
-                    </li>
                 `;
-            });
-            html += '</ul>';
+            },
 
-            container.innerHTML = html;
-            totalEl.textContent = formatPrice(total);
-        }
-
-        function toggleWishlist(id) {
-            const index = wishlist.indexOf(id);
-            const product = allProducts.find(p => p.id === id);
-
-            if (index === -1) {
-                wishlist.push(id);
-                showToast('Ajouté aux favoris ❤️');
-                if (product) trackAffinity(product.famille, 3);
-            } else {
-                wishlist.splice(index, 1);
+            formatPrice(price) {
+                return new Intl.NumberFormat('fr-DZ', { style: 'currency', currency: 'DZD' }).format(price);
             }
+        };
 
-            localStorage.setItem('varicom_wishlist', JSON.stringify(wishlist));
-            filterProducts();
-            updateRecommendations();
-        }
+        // Notifications
+        const Notifications = {
+            display(notifs) {
+                const container = document.getElementById('adminNotifications');
+                if (!container || !notifs || notifs.length === 0) return;
 
-        // --- Export Functions ---
-
-        function generatePDF() {
-            if (cart.length === 0) return alert('Le panier est vide!');
-
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-
-            const clientName = document.getElementById('clientName').value || 'Client';
-            const clientPhone = document.getElementById('clientPhone').value || '';
-            const date = new Date().toLocaleDateString('fr-FR');
-
-            doc.setFillColor(26, 58, 108);
-            doc.rect(0, 0, 210, 40, 'F');
-            doc.setTextColor(255, 255, 255);
-            doc.setFontSize(22);
-            doc.text('VARICOM', 15, 15);
-            doc.setFontSize(10);
-            doc.text('07 Boulevard MIRA Abderahmen Loc N°2, Oran', 15, 25);
-            doc.text('Tél: 05 41 52 75 61', 15, 32);
-
-            doc.setFontSize(16);
-            doc.text('BON DE COMMANDE', 195, 20, { align: 'right' });
-            doc.setFontSize(10);
-            doc.text(`Date: ${date}`, 195, 30, { align: 'right' });
-
-            doc.setTextColor(0, 0, 0);
-            doc.setFontSize(12);
-            doc.text(`Client: ${clientName}`, 15, 55);
-            if (clientPhone) doc.text(`Tél: ${clientPhone}`, 15, 62);
-
-            const tableData = cart.map(item => [
-                item.designation,
-                item.qty,
-                formatPrice(item.prix),
-                formatPrice(item.prix * item.qty)
-            ]);
-
-            const total = cart.reduce((sum, item) => sum + (item.prix * item.qty), 0);
-
-            doc.autoTable({
-                startY: 70,
-                head: [['Désignation', 'Qté', 'P.U', 'Total']],
-                body: tableData,
-                theme: 'striped',
-                headStyles: { fillColor: [26, 58, 108] },
-                foot: [['', '', 'Total Global:', formatPrice(total)]],
-                footStyles: { fillColor: [240, 240, 240], textColor: [0, 0, 0], fontStyle: 'bold' }
-            });
-
-            doc.save(`Commande_VARICOM_${Date.now()}.pdf`);
-        }
-
-        function sendWhatsApp() {
-            if (cart.length === 0) return alert('Le panier est vide!');
-
-            const clientName = document.getElementById('clientName').value || 'Client';
-            const clientPhone = document.getElementById('clientPhone').value || '';
-
-            let msg = `*Nouvelle Commande - VARICOM*\n`;
-            msg += `Client: ${clientName}\n`;
-            msg += `Tél: ${clientPhone}\n\n`;
-
-            let total = 0;
-            cart.forEach(item => {
-                const itemTotal = item.prix * item.qty;
-                total += itemTotal;
-                msg += `- ${item.designation} (x${item.qty}) : ${formatPrice(itemTotal)}\n`;
-            });
-
-            msg += `\n*TOTAL GLOBAL: ${formatPrice(total)}*`;
-
-            const url = `https://wa.me/${adminPhone}?text=${encodeURIComponent(msg)}`;
-            window.open(url, '_blank');
-        }
-
-        // --- Utility Functions ---
-
-        function formatPrice(price) {
-            return new Intl.NumberFormat('fr-DZ', { style: 'currency', currency: 'DZD' }).format(price);
-        }
-
-        function showToast(message, type = 'success') {
-            const toast = document.createElement('div');
-            toast.className = 'position-fixed bottom-0 end-0 p-3';
-            toast.style.zIndex = '1100';
-
-            const bgClass = type === 'error' ? 'bg-danger' : 'bg-success';
-
-            toast.innerHTML = `
-                <div class="toast show align-items-center text-white ${bgClass} border-0" role="alert">
-                    <div class="d-flex">
-                        <div class="toast-body">${message}</div>
-                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                container.innerHTML = notifs.map(notif => `
+                    <div class="alert alert-${this.getBootstrapType(notif.type)} alert-dismissible fade show shadow-sm" role="alert">
+                        <i class="fas fa-info-circle me-2"></i><strong>${notif.title}:</strong> ${notif.message}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                     </div>
-                </div>
-            `;
-            document.body.appendChild(toast);
-            setTimeout(() => toast.remove(), 3000);
-        }
+                `).join('');
+            },
 
-        function trackAffinity(category, score) {
-            if (!category) return;
-            categoryAffinity[category] = (categoryAffinity[category] || 0) + score;
-            localStorage.setItem('varicom_affinity', JSON.stringify(categoryAffinity));
-            updateRecommendations();
-        }
-
-        function updateRecommendations() {
-            // Simple recommendation logic based on affinity
-        }
-
-        function applyTheme(theme) {
-            document.documentElement.setAttribute('data-theme', theme);
-            localStorage.setItem('varicom_theme', theme);
-            const icon = document.getElementById('themeIcon');
-            if (icon) {
-                icon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+            getBootstrapType(type) {
+                switch (type) {
+                    case 'info': return 'info';
+                    case 'success': return 'success';
+                    case 'warning': return 'warning';
+                    case 'error': return 'danger';
+                    default: return 'primary';
+                }
             }
-        }
+        };
 
-        function toggleTheme() {
-            const current = localStorage.getItem('varicom_theme') || 'light';
-            const next = current === 'light' ? 'dark' : 'light';
-            applyTheme(next);
-        }
+        // Cart Management
+        const Cart = {
+            add(productId) {
+                const product = State.allProducts.find(p => p.id === productId);
+                if (!product) return;
+
+                const existing = State.cart.find(item => item.id === productId);
+                if (existing) {
+                    existing.qty++;
+                } else {
+                    State.cart.push({ ...product, qty: 1 });
+                }
+
+                this.trackAffinity(product.famille, 5);
+                this.save();
+                App.showToast(`Ajouté: ${product.designation}`);
+            },
+
+            remove(productId) {
+                State.cart = State.cart.filter(item => item.id !== productId);
+                this.save();
+                this.renderItems();
+            },
+
+            updateQty(productId, change) {
+                const item = State.cart.find(i => i.id === productId);
+                if (item) {
+                    item.qty += change;
+                    if (item.qty <= 0) this.remove(productId);
+                    else this.save();
+                }
+                this.renderItems();
+            },
+
+            clear() {
+                if (confirm('Vider le panier?')) {
+                    State.cart = [];
+                    this.save();
+                    this.renderItems();
+                }
+            },
+
+            save() {
+                localStorage.setItem('varicom_cart', JSON.stringify(State.cart));
+                this.updateUI();
+            },
+
+            updateUI() {
+                const count = State.cart.reduce((sum, item) => sum + item.qty, 0);
+                const badge = document.getElementById('cartCount');
+                if (badge) {
+                    badge.textContent = count;
+                    badge.classList.remove('animate__bounceIn');
+                    void badge.offsetWidth;
+                    badge.classList.add('animate__animated', 'animate__bounceIn');
+                }
+            },
+
+            open() {
+                this.renderItems();
+                new bootstrap.Modal(document.getElementById('cartModal')).show();
+            },
+
+            renderItems() {
+                const container = document.getElementById('cartItems');
+                const totalEl = document.getElementById('cartTotal');
+
+                if (State.cart.length === 0) {
+                    container.innerHTML = '<div class="text-center py-5 text-muted"><i class="fas fa-shopping-basket fa-3x mb-3"></i><br>Votre panier est vide</div>';
+                    totalEl.textContent = '0.00 DA';
+                    return;
+                }
+
+                let html = '<ul class="list-group list-group-flush">';
+                let total = 0;
+
+                State.cart.forEach(item => {
+                    const itemTotal = item.prix * item.qty;
+                    total += itemTotal;
+                    html += `
+                        <li class="list-group-item d-flex justify-content-between align-items-center bg-transparent">
+                            <div>
+                                <h6 class="mb-0 text-truncate" style="max-width: 200px;">${item.designation}</h6>
+                                <small class="text-muted">${Product.formatPrice(item.prix)} x ${item.qty}</small>
+                            </div>
+                            <div class="d-flex align-items-center gap-2">
+                                <button class="btn btn-sm btn-outline-secondary rounded-circle" onclick="Cart.updateQty('${item.id}', -1)">-</button>
+                                <span class="fw-bold" style="width: 20px; text-align: center;">${item.qty}</span>
+                                <button class="btn btn-sm btn-outline-secondary rounded-circle" onclick="Cart.updateQty('${item.id}', 1)">+</button>
+                                <button class="btn btn-sm btn-outline-danger ms-2" onclick="Cart.remove('${item.id}')"><i class="fas fa-trash"></i></button>
+                            </div>
+                        </li>
+                    `;
+                });
+                html += '</ul>';
+
+                container.innerHTML = html;
+                totalEl.textContent = Product.formatPrice(total);
+            },
+
+            generatePDF() {
+                if (State.cart.length === 0) {
+                    alert('Le panier est vide!');
+                    return;
+                }
+
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+
+                const clientName = document.getElementById('clientName').value || 'Client';
+                const clientPhone = document.getElementById('clientPhone').value || '';
+                const date = new Date().toLocaleDateString('fr-FR');
+
+                // Header
+                doc.setFillColor(26, 58, 108);
+                doc.rect(0, 0, 210, 40, 'F');
+                doc.setTextColor(255, 255, 255);
+                doc.setFontSize(22);
+                doc.text('VARICOM', 15, 15);
+                doc.setFontSize(10);
+                doc.text('07 Boulevard MIRA Abderahmen Loc N°2, Oran', 15, 25);
+                doc.text('Tél: 05 41 52 75 61', 15, 32);
+
+                doc.setFontSize(16);
+                doc.text('BON DE COMMANDE', 195, 20, { align: 'right' });
+                doc.setFontSize(10);
+                doc.text(`Date: ${date}`, 195, 30, { align: 'right' });
+
+                // Client Info
+                doc.setTextColor(0, 0, 0);
+                doc.setFontSize(12);
+                doc.text(`Client: ${clientName}`, 15, 55);
+                if (clientPhone) doc.text(`Tél: ${clientPhone}`, 15, 62);
+
+                // Table
+                const tableData = State.cart.map(item => [
+                    item.designation,
+                    item.qty,
+                    Product.formatPrice(item.prix),
+                    Product.formatPrice(item.prix * item.qty)
+                ]);
+
+                const total = State.cart.reduce((sum, item) => sum + (item.prix * item.qty), 0);
+
+                doc.autoTable({
+                    startY: 70,
+                    head: [['Désignation', 'Qté', 'P.U', 'Total']],
+                    body: tableData,
+                    theme: 'striped',
+                    headStyles: { fillColor: [26, 58, 108] },
+                    foot: [['', '', 'Total Global:', Product.formatPrice(total)]],
+                    footStyles: { fillColor: [240, 240, 240], textColor: [0, 0, 0], fontStyle: 'bold' }
+                });
+
+                doc.save(`Commande_VARICOM_${Date.now()}.pdf`);
+            },
+
+            sendWhatsApp() {
+                if (State.cart.length === 0) {
+                    alert('Le panier est vide!');
+                    return;
+                }
+
+                const clientName = document.getElementById('clientName').value || 'Client';
+                const clientPhone = document.getElementById('clientPhone').value || '';
+
+                let msg = `*Nouvelle Commande - VARICOM*\n`;
+                msg += `Client: ${clientName}\n`;
+                msg += `Tél: ${clientPhone}\n\n`;
+
+                let total = 0;
+                State.cart.forEach(item => {
+                    const itemTotal = item.prix * item.qty;
+                    total += itemTotal;
+                    msg += `- ${item.designation} (x${item.qty}) : ${Product.formatPrice(itemTotal)}\n`;
+                });
+
+                msg += `\n*TOTAL GLOBAL: ${Product.formatPrice(total)}*`;
+
+                const url = `https://wa.me/${Config.adminPhone}?text=${encodeURIComponent(msg)}`;
+                window.open(url, '_blank');
+            },
+
+            trackAffinity(category, score) {
+                if (!category) return;
+                State.categoryAffinity[category] = (State.categoryAffinity[category] || 0) + score;
+                localStorage.setItem('varicom_affinity', JSON.stringify(State.categoryAffinity));
+            }
+        };
+
+        // Wishlist Management
+        const Wishlist = {
+            toggle(productId) {
+                const index = State.wishlist.indexOf(productId);
+                const product = State.allProducts.find(p => p.id === productId);
+
+                if (index === -1) {
+                    State.wishlist.push(productId);
+                    App.showToast('Ajouté aux favoris ❤️');
+                    if (product) Cart.trackAffinity(product.famille, 3);
+                } else {
+                    State.wishlist.splice(index, 1);
+                    App.showToast('Retiré des favoris');
+                }
+
+                localStorage.setItem('varicom_wishlist', JSON.stringify(State.wishlist));
+                Product.render();
+            }
+        };
+
+        // Main Application
+        const App = {
+            init() {
+                this.applyTheme(localStorage.getItem('varicom_theme') || 'light');
+                Cart.updateUI();
+                DataLoader.load();
+            },
+
+            applyTheme(theme) {
+                document.documentElement.setAttribute('data-theme', theme);
+                localStorage.setItem('varicom_theme', theme);
+                const icon = document.getElementById('themeIcon');
+                if (icon) {
+                    icon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+                }
+            },
+
+            toggleTheme() {
+                const current = localStorage.getItem('varicom_theme') || 'light';
+                const next = current === 'light' ? 'dark' : 'light';
+                this.applyTheme(next);
+            },
+
+            showToast(message, type = 'success') {
+                const toast = document.createElement('div');
+                toast.className = 'position-fixed bottom-0 end-0 p-3';
+                toast.style.zIndex = '1100';
+
+                const bgClass = type === 'error' ? 'bg-danger' : type === 'warning' ? 'bg-warning' : 'bg-success';
+
+                toast.innerHTML = `
+                    <div class="toast show align-items-center text-white ${bgClass} border-0" role="alert">
+                        <div class="d-flex">
+                            <div class="toast-body">${message}</div>
+                            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+                        </div>
+                    </div>
+                `;
+                document.body.appendChild(toast);
+                setTimeout(() => toast.remove(), 3000);
+            }
+        };
+
+        // Initialize application
+        document.addEventListener('DOMContentLoaded', () => {
+            App.init();
+        });
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 </body>
-
 </html>
