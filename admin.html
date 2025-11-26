@@ -723,184 +723,35 @@
                         return { ...p, image: `${baseUrl}${safeVal}${ext}` };
                     });
                 }
-                saveData();
-                showStatus('Nouveautés mises à jour avec succès!', 'success');
-            }
-        }
-
-        // GitHub Sync
-        async function uploadToGitHubGist() {
-            if (state.products.length === 0) {
-                return showStatus('❌ La liste des produits est vide. Ajoutez des produits avant de publier.', 'warning');
-            }
-
-            const token = document.getElementById('githubToken').value;
-            if (!token) return showStatus('❌ Token GitHub manquant!', 'error');
-
-            const btn = document.getElementById('publishBtn');
-            const originalText = btn.innerHTML;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Synchronisation...';
-            btn.disabled = true;
-
-            const payload = {
-                description: "VARICOM Catalog Data",
-                public: true,
-                files: {
-                    "varicom_data.json": {
-                        content: JSON.stringify({
-                            products: state.products,
-                            newProducts: state.newProducts,
-                            notifications: state.notifications,
-                            lastUpdate: new Date().toISOString(),
-                            meta: { version: "2.0", source: "VaricomAdmin" }
-                        })
+                function toggleToken() {
+                    const input = document.getElementById('githubToken');
+                    const icon = document.querySelector('.input-group .fa-eye, .input-group .fa-eye-slash');
+                    if (input.type === 'password') {
+                        input.type = 'text';
+                        icon.classList.replace('fa-eye', 'fa-eye-slash');
+                    } else {
+                        input.type = 'password';
+                        icon.classList.replace('fa-eye-slash', 'fa-eye');
                     }
                 }
-            };
 
-            try {
-                let url = 'https://api.github.com/gists';
-                let method = 'POST';
-                if (state.gistId) {
-                    url += `/${state.gistId}`;
-                    method = 'PATCH';
-                }
-
-                const response = await fetch(url, {
-                    method: method,
-                    headers: { 'Authorization': `token ${token}`, 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-
-                if (!response.ok) {
-                    if (response.status === 404 && state.gistId) {
+                function resetSync() {
+                    if (confirm('Voulez-vous vraiment réinitialiser la synchronisation?')) {
+                        localStorage.removeItem('varicom_gist_id');
+                        localStorage.removeItem('varicom_last_sync');
                         state.gistId = null;
-                        return uploadToGitHubGist();
+                        state.lastSync = null;
+                        updateUI();
+                        showStatus('Synchronisation réinitialisée', 'info');
                     }
-                    throw new Error(`Erreur GitHub: ${response.status}`);
                 }
 
-                const result = await response.json();
-                state.gistId = result.id;
-                state.lastSync = new Date().toISOString();
-                localStorage.setItem('varicom_gist_id', state.gistId);
-                localStorage.setItem('varicom_last_sync', state.lastSync);
-                showStatus('✅ Synchronisation réussie!', 'success');
-                updateUI();
-            } catch (err) {
-                console.error(err);
-                showStatus('Erreur Sync: ' + err.message, 'error');
-            } finally {
-                btn.innerHTML = originalText;
-                btn.disabled = false;
-            }
-        }
-
-        // UI Updates
-        function updateUI() {
-            document.getElementById('statsProducts').textContent = state.products.length;
-            document.getElementById('statsNewProducts').textContent = state.newProducts.length;
-            document.getElementById('statsNotifications').textContent = state.notifications.length;
-            document.getElementById('statsStatus').textContent = state.gistId ? 'Actif' : 'Inactif';
-            document.getElementById('statsStatus').className = state.gistId ? 'text-success' : 'text-danger';
-
-            const escapeQuote = (str) => str ? str.toString().replace(/'/g, "\\'") : '';
-            const escapeHtml = (str) => str ? str.toString().replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;") : '';
-            const escapeJsHtml = (str) => escapeHtml(escapeQuote(str));
-
-            document.getElementById('activeNewProducts').innerHTML = state.newProducts.map(p => `
-                <li class="list-group-item d-flex justify-content-between align-items-center">
-                    <div><strong>${escapeHtml(p.designation)}</strong> - ${p.price} DA</div>
-                    <button class="btn btn-sm btn-outline-danger" onclick="removeNewProduct('${escapeJsHtml(p.id)}')"><i class="fas fa-times"></i></button>
-                </li>`).join('');
-
-            document.getElementById('activeNotifications').innerHTML = state.notifications.map(n => `
-                <li class="list-group-item d-flex justify-content-between align-items-center">
-                    <div><span class="badge bg-${getBadgeClass(n.type)}">${n.type}</span> ${escapeHtml(n.title)}</div>
-                    <button class="btn btn-sm btn-outline-danger" onclick="removeNotification('${escapeJsHtml(n.id)}')"><i class="fas fa-times"></i></button>
-                </li>`).join('');
-
-            document.getElementById('catalogTableBody').innerHTML = state.products.slice(0, 100).map(p => `
-                <tr>
-                    <td><small>${escapeHtml(p.ref)}</small></td>
-                    <td class="text-truncate" style="max-width: 150px;" title="${escapeHtml(p.designation)}">${escapeHtml(p.designation)}</td>
-                    <td>${p.prix}</td>
-                    <td><input type="text" class="form-control form-control-sm" value="${escapeHtml(p.image || '')}" onchange="updateProductImage('${escapeJsHtml(p.id)}', this.value)"></td>
-                    <td><input type="text" class="form-control form-control-sm" value="${escapeHtml(p.description || '')}" onchange="updateProductDesc('${escapeJsHtml(p.id)}', this.value)"></td>
-                    <td>
-                        <div class="btn-group btn-group-sm">
-                            <button class="btn btn-outline-primary" onclick="searchImage('${escapeJsHtml(p.designation)}', 'google')"><i class="fab fa-google"></i></button>
-                            <button class="btn btn-outline-info" onclick="searchImage('${escapeJsHtml(p.designation)}', 'bing')"><i class="fas fa-search"></i></button>
-                            <button class="btn btn-outline-primary" onclick="searchImage('${escapeJsHtml(p.designation)}', 'facebook')"><i class="fab fa-facebook"></i></button>
-                        </div>
-                    </td>
-                </tr>`).join('');
-        }
-
-        function getBadgeClass(type) {
-            switch (type) {
-                case 'info': return 'info';
-                case 'success': return 'success';
-                case 'warning': return 'warning';
-                case 'error': return 'danger';
-                default: return 'secondary';
-            }
-        }
-
-        function showStatus(msg, type) {
-            const el = document.getElementById('syncStatus');
-            el.textContent = msg;
-            el.className = 'sync-status';
-            el.classList.add(type === 'success' ? 'sync-success' : type === 'warning' ? 'sync-warning' : 'sync-error');
-            el.style.display = 'block';
-            setTimeout(() => { el.style.display = 'none'; }, 3000);
-        }
-
-        function generateClientLink() {
-            if (!state.gistId) return showStatus('⚠️ Veuillez d\'abord publier le catalogue', 'warning');
-
-            let clientBaseUrl = localStorage.getItem('varicom_client_url');
-            if (!clientBaseUrl) {
-                const path = window.location.pathname;
-                const dir = path.substring(0, path.lastIndexOf('/'));
-                clientBaseUrl = `${window.location.origin}${dir}/client.html`;
-            }
-            if (clientBaseUrl.endsWith('/')) clientBaseUrl = clientBaseUrl.slice(0, -1);
-
-            const clientUrl = `${clientBaseUrl}?gist=${state.gistId}`;
-            navigator.clipboard.writeText(clientUrl);
-            showStatus('✅ Lien client copié dans le presse-papier!', 'success');
-        }
-
-        function toggleToken() {
-            const input = document.getElementById('githubToken');
-            const icon = document.querySelector('.input-group .fa-eye, .input-group .fa-eye-slash');
-            if (input.type === 'password') {
-                input.type = 'text';
-                icon.classList.replace('fa-eye', 'fa-eye-slash');
-            } else {
-                input.type = 'password';
-                icon.classList.replace('fa-eye-slash', 'fa-eye');
-            }
-        }
-
-        function resetSync() {
-            if (confirm('Voulez-vous vraiment réinitialiser la synchronisation?')) {
-                localStorage.removeItem('varicom_gist_id');
-                localStorage.removeItem('varicom_last_sync');
-                state.gistId = null;
-                state.lastSync = null;
-                updateUI();
-                showStatus('Synchronisation réinitialisée', 'info');
-            }
-        }
-
-        function downloadTemplate() {
-            const wb = XLSX.utils.book_new();
-            const ws = XLSX.utils.json_to_sheet([{ Ref: 'REF001', Designation: 'Exemple', Famille: 'Info', Prix: 1000, Image: '', Description: '' }]);
-            XLSX.utils.book_append_sheet(wb, ws, "Modele");
-            XLSX.writeFile(wb, "modele_import_varicom.xlsx");
-        }
+                function downloadTemplate() {
+                    const wb = XLSX.utils.book_new();
+                    const ws = XLSX.utils.json_to_sheet([{ Ref: 'REF001', Designation: 'Exemple', Famille: 'Info', Prix: 1000, Image: '', Description: '' }]);
+                    XLSX.utils.book_append_sheet(wb, ws, "Modele");
+                    XLSX.writeFile(wb, "modele_import_varicom.xlsx");
+                }
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 </body>
