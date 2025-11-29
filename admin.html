@@ -427,199 +427,6 @@
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
                     <button type="button" class="btn btn-primary" onclick="applyBulkActions()">Appliquer à tous</button>
-                    <input type="text" class="form-control mb-2" id="newProductImage" placeholder="URL Image">
-                    <button class="btn btn-success w-100" onclick="addNewProduct()">
-                        <i class="fas fa-plus me-2"></i>Ajouter
-                    </button>
-                </div>
-                <hr>
-                <ul id="activeNewProducts" class="list-group list-group-flush small"
-                    style="max-height: 200px; overflow-y: auto;"></ul>
-            </div>
-        </div>
-    </div>
-
-    <!-- Notifications -->
-    <div class="col-md-6">
-        <div class="feature-card h-100">
-            <div class="card-header bg-warning text-dark">
-                <h5 class="mb-0"><i class="fas fa-bullhorn me-2"></i>Gérer Notifications</h5>
-            </div>
-            <div class="card-body">
-                <div class="mb-3">
-                    <input type="text" class="form-control mb-2" id="notifTitle" placeholder="Titre (ex: Promo)">
-                    <textarea class="form-control mb-2" id="notifMessage" rows="2" placeholder="Message..."></textarea>
-                    <select class="form-select" id="notifType">
-                        <option value="info">Information ℹ️</option>
-                        <option value="success">Succès ✅</option>
-                        <option value="warning">Attention ⚠️</option>
-                        <option value="error">Urgent ❌</option>
-                    </select>
-                </div>
-                <button class="btn btn-warning w-100" onclick="createNotification()">
-                    <i class="fas fa-paper-plane me-2"></i>Publier Notification
-                </button>
-                <hr>
-                <h6 class="text-muted">Notifications Actives:</h6>
-                <ul id="activeNotifications" class="list-group list-group-flush small"
-                    style="max-height: 200px; overflow-y: auto;"></ul>
-            </div>
-        </div>
-    </div>
-    </div>
-
-    <!-- Settings -->
-    <div class="row m-4">
-        <div class="col-12">
-            <div class="feature-card">
-                <div class="card-header bg-dark text-white">
-                    <h5 class="mb-0"><i class="fas fa-cogs me-2"></i>Configuration</h5>
-                </div>
-                <div class="card-body">
-                    <div class="row g-3">
-                        <div class="col-md-6">
-                            <label class="form-label">Token GitHub (Personnel Access Token)</label>
-                            <div class="input-group">
-                                <span class="input-group-text"><i class="fab fa-github"></i></span>
-                                <input type="password" class="form-control" id="githubToken"
-                                    placeholder="ghp_xxxxxxxxxxxxxxxxxxxx">
-                                <button class="btn btn-outline-secondary" type="button" onclick="toggleToken()">
-                                    <i class="fas fa-eye"></i>
-                                </button>
-                            </div>
-                            <small class="text-muted">Nécessaire pour la synchronisation.</small>
-                        </div>
-                        <div class="col-md-6">
-                            <label class="form-label">URL Page Client (Optionnel)</label>
-                            <input type="url" class="form-control" id="clientUrlConfig"
-                                placeholder="https://votre-site.github.io/client.html">
-                            <small class="text-muted">Pour corriger le lien généré si nécessaire.</small>
-                        </div>
-                        <div class="col-12 text-end">
-                            <button class="btn btn-danger" onclick="resetSync()">
-                                <i class="fas fa-trash-alt me-2"></i>Réinitialiser Sync
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Catalog Management -->
-    <div class="row m-4">
-        <div class="col-12">
-            <div class="feature-card">
-                <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0"><i class="fas fa-boxes me-2"></i>Gestion du Catalogue</h5>
-                    <button class="btn btn-light btn-sm text-primary fw-bold" onclick="openBulkImageModal()">
-                        <i class="fas fa-magic me-2"></i>Générateur de Liens Image/Desc
-                    </button>
-                </div>
-                <div class="card-body">
-                    <div class="table-responsive" style="max-height: 500px;">
-                        <table class="table table-hover align-middle">
-                            <thead class="table-light sticky-top">
-                                <tr>
-                                    <th>Ref</th>
-                                    <th>Désignation</th>
-                                    <th>Prix</th>
-                                    <th style="width: 30%;">Image URL</th>
-                                    <th style="width: 20%;">Description URL</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="catalogTableBody"></tbody>
-                        </table>
-                    </div>
-                    <div class="text-center mt-3">
-                        <small class="text-muted">Affichage limité aux 100 premiers produits pour la
-                            performance.</small>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-    </div>
-
-    <!-- Bulk Image Modal -->
-    <div class="modal fade" id="bulkImageModal" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title"><i class="fas fa-magic me-2"></i>Générateur de Liens Image/Desc</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <ul class="nav nav-tabs mb-3" id="bulkTabs" role="tablist">
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link active" id="mode-hosted-tab" data-bs-toggle="tab"
-                                data-bs-target="#mode-hosted" type="button" role="tab">📂 Images Hébergées</button>
-                        </li>
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link" id="mode-magic-tab" data-bs-toggle="tab"
-                                data-bs-target="#mode-magic" type="button" role="tab">✨ Images Magiques</button>
-                        </li>
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link" id="mode-desc-tab" data-bs-toggle="tab" data-bs-target="#mode-desc"
-                                type="button" role="tab">📝 Descriptions Auto</button>
-                        </li>
-                    </ul>
-
-                    <div class="tab-content" id="bulkTabsContent">
-                        <!-- Hosted Mode -->
-                        <div class="tab-pane fade show active" id="mode-hosted" role="tabpanel">
-                            <p class="small text-muted">Utilisez ce mode si vous avez vos propres images hébergées.</p>
-                            <div class="mb-3">
-                                <label class="form-label">Base URL</label>
-                                <input type="text" class="form-control" id="bulkBaseUrl"
-                                    placeholder="ex: https://monsite.com/images/">
-                            </div>
-                            <div class="row g-2 mb-3">
-                                <div class="col-6">
-                                    <label class="form-label">Champ</label>
-                                    <select class="form-select" id="bulkField">
-                                        <option value="ref">Référence</option>
-                                        <option value="designation">Désignation</option>
-                                    </select>
-                                </div>
-                                <div class="col-6">
-                                    <label class="form-label">Extension</label>
-                                    <select class="form-select" id="bulkExt">
-                                        <option value=".jpg">.jpg</option>
-                                        <option value=".png">.png</option>
-                                        <option value=".webp">.webp</option>
-                                        <option value="">(Aucune)</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Magic Mode -->
-                        <div class="tab-pane fade" id="mode-magic" role="tabpanel">
-                            <div class="alert alert-warning small">
-                                <i class="fas fa-exclamation-triangle me-2"></i><strong>Note:</strong> Fonctionne avec
-                                Bing.
-                            </div>
-                            <p class="small text-muted">Recherche automatique d'images sur Bing.</p>
-                        </div>
-
-                        <!-- Description Mode -->
-                        <div class="tab-pane fade" id="mode-desc" role="tabpanel">
-                            <div class="alert alert-info small">
-                                <i class="fas fa-info-circle me-2"></i><strong>Info:</strong> Génère un lien de
-                                recherche.
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="alert alert-info small mt-3">
-                        <strong>Aperçu:</strong> <span id="bulkPreview" class="text-break">...</span>
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-                    <button type="button" class="btn btn-primary" onclick="applyBulkActions()">Appliquer à tous</button>
                 </div>
             </div>
         </div>
@@ -1100,16 +907,27 @@
             if (!state.gistId) return showStatus('⚠️ Veuillez d\'abord publier le catalogue', 'warning');
 
             let clientBaseUrl = localStorage.getItem('varicom_client_url');
+
             if (!clientBaseUrl) {
                 const path = window.location.pathname;
                 const dir = path.substring(0, path.lastIndexOf('/'));
-                clientBaseUrl = `${window.location.origin}${dir}/client.html`;
+                const origin = window.location.origin;
+                clientBaseUrl = `${origin}${dir}/client.html`;
             }
+
             if (clientBaseUrl.endsWith('/')) clientBaseUrl = clientBaseUrl.slice(0, -1);
+            if (!clientBaseUrl.endsWith('client.html')) {
+                if (clientBaseUrl.endsWith('/')) {
+                    clientBaseUrl += 'client.html';
+                } else if (!clientBaseUrl.match(/\.[a-z]+$/)) {
+                    clientBaseUrl += '/client.html';
+                }
+            }
 
             const clientUrl = `${clientBaseUrl}?gist=${state.gistId}`;
             navigator.clipboard.writeText(clientUrl);
             showStatus('✅ Lien client copié dans le presse-papier!', 'success');
+            alert(`Lien copié: \n${clientUrl}`);
         }
 
         function toggleToken() {
