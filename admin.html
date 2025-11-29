@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="fr" dir="ltr">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -79,32 +78,13 @@
         }
 
         @keyframes slideInRight {
-            from {
-                transform: translateX(100%);
-                opacity: 0;
-            }
-
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
         }
 
-        .sync-success {
-            background: #28a745;
-            border-left: 5px solid #1e7e34;
-        }
-
-        .sync-warning {
-            background: #ffc107;
-            color: #000;
-            border-left: 5px solid #e0a800;
-        }
-
-        .sync-error {
-            background: #dc3545;
-            border-left: 5px solid #bd2130;
-        }
+        .sync-success { background: #28a745; border-left: 5px solid #1e7e34; }
+        .sync-warning { background: #ffc107; color: #000; border-left: 5px solid #e0a800; }
+        .sync-error { background: #dc3545; border-left: 5px solid #bd2130; }
 
         .stats-card {
             background: white;
@@ -115,9 +95,7 @@
             transition: transform 0.3s;
         }
 
-        .stats-card:hover {
-            transform: translateY(-5px);
-        }
+        .stats-card:hover { transform: translateY(-5px); }
 
         .feature-card {
             background: white;
@@ -126,9 +104,18 @@
             margin-bottom: 20px;
             overflow: hidden;
         }
+
+        .btn-pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.7); }
+            70% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(40, 167, 69, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(40, 167, 69, 0); }
+        }
     </style>
 </head>
-
 <body>
     <div id="syncStatus" class="sync-status"></div>
 
@@ -208,38 +195,34 @@
             <!-- New Products -->
             <div class="col-md-6">
                 <div class="feature-card h-100">
-                    <div class="card-header bg-success text-white d-flex justify-content-between align-items-center">
-                        <h5 class="mb-0"><i class="fas fa-star me-2"></i>Gérer Nouveautés</h5>
-                        <div>
-                            <button class="btn btn-sm btn-light text-success"
-                                onclick="document.getElementById('newProdExcel').click()" title="Importer Excel">
-                                <i class="fas fa-file-excel"></i>
-                            </button>
-                            <input type="file" id="newProdExcel" style="display:none"
-                                onchange="handleNewProductsExcelUpload(this.files[0])">
-                        </div>
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0"><i class="fas fa-plus-circle me-2"></i>Ajouter Produit / Nouveauté</h5>
                     </div>
                     <div class="card-body">
                         <div class="mb-3">
-                            <input type="text" class="form-control mb-2" id="newProductName"
-                                placeholder="Nom du produit">
-                            <div class="row g-2 mb-2">
+                            <input type="text" class="form-control mb-2" id="newProductName" placeholder="Nom du produit">
+                            <div class="row g-2">
                                 <div class="col-6">
-                                    <input type="number" class="form-control" id="newProductPrice" placeholder="Prix">
+                                    <input type="number" class="form-control" id="newProductPrice" placeholder="Prix (DA)">
                                 </div>
                                 <div class="col-6">
-                                    <input type="text" class="form-control" id="newProductCategory"
-                                        placeholder="Catégorie">
+                                    <select class="form-select" id="newProductCategory">
+                                        <option value="Général">Catégorie...</option>
+                                        <option value="Ordinateurs">Ordinateurs</option>
+                                        <option value="Téléphones">Téléphones</option>
+                                        <option value="Accessoires">Accessoires</option>
+                                    </select>
                                 </div>
                             </div>
-                            <input type="text" class="form-control mb-2" id="newProductImage" placeholder="URL Image">
-                            <button class="btn btn-success w-100" onclick="addNewProduct()">
-                                <i class="fas fa-plus me-2"></i>Ajouter
-                            </button>
+                            <input type="text" class="form-control mt-2" id="newProductImage" placeholder="URL de l'image (https://...)">
                         </div>
+                        <button class="btn btn-primary w-100" onclick="addNewProduct()">
+                            <i class="fas fa-plus me-2"></i>Ajouter à la liste
+                        </button>
+
                         <hr>
-                        <ul id="activeNewProducts" class="list-group list-group-flush small"
-                            style="max-height: 200px; overflow-y: auto;"></ul>
+                        <h6 class="text-muted">Produits Nouveaux Actifs:</h6>
+                        <ul id="activeNewProducts" class="list-group list-group-flush small" style="max-height: 200px; overflow-y: auto;"></ul>
                     </div>
                 </div>
             </div>
@@ -252,10 +235,8 @@
                     </div>
                     <div class="card-body">
                         <div class="mb-3">
-                            <input type="text" class="form-control mb-2" id="notifTitle"
-                                placeholder="Titre (ex: Promo)">
-                            <textarea class="form-control mb-2" id="notifMessage" rows="2"
-                                placeholder="Message..."></textarea>
+                            <input type="text" class="form-control mb-2" id="notifTitle" placeholder="Titre (ex: Promo)">
+                            <textarea class="form-control mb-2" id="notifMessage" rows="2" placeholder="Message..."></textarea>
                             <select class="form-select" id="notifType">
                                 <option value="info">Information ℹ️</option>
                                 <option value="success">Succès ✅</option>
@@ -266,10 +247,10 @@
                         <button class="btn btn-warning w-100" onclick="createNotification()">
                             <i class="fas fa-paper-plane me-2"></i>Publier Notification
                         </button>
+
                         <hr>
                         <h6 class="text-muted">Notifications Actives:</h6>
-                        <ul id="activeNotifications" class="list-group list-group-flush small"
-                            style="max-height: 200px; overflow-y: auto;"></ul>
+                        <ul id="activeNotifications" class="list-group list-group-flush small" style="max-height: 200px; overflow-y: auto;"></ul>
                     </div>
                 </div>
             </div>
@@ -283,27 +264,20 @@
                         <h5 class="mb-0"><i class="fas fa-cogs me-2"></i>Configuration</h5>
                     </div>
                     <div class="card-body">
-                        <div class="row g-3">
-                            <div class="col-md-6">
+                        <div class="row align-items-end">
+                            <div class="col-md-8">
                                 <label class="form-label">Token GitHub (Personnel Access Token)</label>
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="fab fa-github"></i></span>
-                                    <input type="password" class="form-control" id="githubToken"
-                                        placeholder="ghp_xxxxxxxxxxxxxxxxxxxx">
+                                    <input type="password" class="form-control" id="githubToken" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx">
                                     <button class="btn btn-outline-secondary" type="button" onclick="toggleToken()">
                                         <i class="fas fa-eye"></i>
                                     </button>
                                 </div>
-                                <small class="text-muted">Nécessaire pour la synchronisation.</small>
+                                <small class="text-muted">Nécessaire pour la synchronisation. Stocké localement.</small>
                             </div>
-                            <div class="col-md-6">
-                                <label class="form-label">URL Page Client (Optionnel)</label>
-                                <input type="url" class="form-control" id="clientUrlConfig"
-                                    placeholder="https://votre-site.github.io/client.html">
-                                <small class="text-muted">Pour corriger le lien généré si nécessaire.</small>
-                            </div>
-                            <div class="col-12 text-end">
-                                <button class="btn btn-danger" onclick="resetSync()">
+                            <div class="col-md-4">
+                                <button class="btn btn-danger w-100" onclick="resetSync()">
                                     <i class="fas fa-trash-alt me-2"></i>Réinitialiser Sync
                                 </button>
                             </div>
@@ -340,8 +314,7 @@
                             </table>
                         </div>
                         <div class="text-center mt-3">
-                            <small class="text-muted">Affichage limité aux 100 premiers produits pour la
-                                performance.</small>
+                            <small class="text-muted">Affichage limité aux 100 premiers produits pour la performance.</small>
                         </div>
                     </div>
                 </div>
@@ -360,27 +333,23 @@
                 <div class="modal-body">
                     <ul class="nav nav-tabs mb-3" id="bulkTabs" role="tablist">
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link active" id="mode-hosted-tab" data-bs-toggle="tab"
-                                data-bs-target="#mode-hosted" type="button" role="tab">📂 Images Hébergées</button>
+                            <button class="nav-link active" id="mode-hosted-tab" data-bs-toggle="tab" data-bs-target="#mode-hosted" type="button" role="tab">📂 Images Hébergées</button>
                         </li>
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link" id="mode-magic-tab" data-bs-toggle="tab"
-                                data-bs-target="#mode-magic" type="button" role="tab">✨ Images Magiques</button>
+                            <button class="nav-link" id="mode-magic-tab" data-bs-toggle="tab" data-bs-target="#mode-magic" type="button" role="tab">✨ Images Magiques</button>
                         </li>
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link" id="mode-desc-tab" data-bs-toggle="tab" data-bs-target="#mode-desc"
-                                type="button" role="tab">📝 Descriptions Auto</button>
+                            <button class="nav-link" id="mode-desc-tab" data-bs-toggle="tab" data-bs-target="#mode-desc" type="button" role="tab">📝 Descriptions Auto</button>
                         </li>
                     </ul>
 
                     <div class="tab-content" id="bulkTabsContent">
                         <!-- Hosted Mode -->
                         <div class="tab-pane fade show active" id="mode-hosted" role="tabpanel">
-                            <p class="small text-muted">Utilisez ce mode si vous avez vos propres images hébergées.</p>
+                            <p class="small text-muted">Utilisez ce mode si vous avez vos propres images hébergées (ex: GitHub Pages, Imgur).</p>
                             <div class="mb-3">
                                 <label class="form-label">Base URL</label>
-                                <input type="text" class="form-control" id="bulkBaseUrl"
-                                    placeholder="ex: https://monsite.com/images/">
+                                <input type="text" class="form-control" id="bulkBaseUrl" placeholder="ex: https://monsite.com/images/">
                             </div>
                             <div class="row g-2 mb-3">
                                 <div class="col-6">
@@ -405,18 +374,17 @@
                         <!-- Magic Mode -->
                         <div class="tab-pane fade" id="mode-magic" role="tabpanel">
                             <div class="alert alert-warning small">
-                                <i class="fas fa-exclamation-triangle me-2"></i><strong>Note:</strong> Fonctionne avec
-                                Bing.
+                                <i class="fas fa-exclamation-triangle me-2"></i><strong>Note:</strong> L'association <em>automatique</em> ne fonctionne qu'avec <strong>Bing</strong> pour des raisons techniques.
                             </div>
-                            <p class="small text-muted">Recherche automatique d'images sur Bing.</p>
+                            <p class="small text-muted">Recherche automatique d'images sur Bing via la Désignation.</p>
                         </div>
 
                         <!-- Description Mode -->
                         <div class="tab-pane fade" id="mode-desc" role="tabpanel">
                             <div class="alert alert-info small">
-                                <i class="fas fa-info-circle me-2"></i><strong>Info:</strong> Génère un lien de
-                                recherche.
+                                <i class="fas fa-info-circle me-2"></i><strong>Info:</strong> Génère un lien de recherche.
                             </div>
+                            <p class="small text-muted">Crée un lien "Fiche Technique" vers Bing pour chaque produit.</p>
                         </div>
                     </div>
 
@@ -449,17 +417,8 @@
 
             // Token listener
             const tokenInput = document.getElementById('githubToken');
-            if (tokenInput) {
-                tokenInput.value = localStorage.getItem('varicom_github_token') || '';
-                tokenInput.addEventListener('input', (e) => localStorage.setItem('varicom_github_token', e.target.value));
-            }
-
-            // Client URL listener
-            const clientUrlInput = document.getElementById('clientUrlConfig');
-            if (clientUrlInput) {
-                clientUrlInput.value = localStorage.getItem('varicom_client_url') || '';
-                clientUrlInput.addEventListener('input', (e) => localStorage.setItem('varicom_client_url', e.target.value));
-            }
+            tokenInput.value = localStorage.getItem('varicom_github_token') || '';
+            tokenInput.addEventListener('input', (e) => localStorage.setItem('varicom_github_token', e.target.value));
 
             // Bulk Preview Listener
             ['bulkBaseUrl', 'bulkField', 'bulkExt'].forEach(id => {
@@ -512,18 +471,12 @@
                     processExcelData(jsonData);
                 } catch (err) {
                     showStatus('Erreur lecture Excel: ' + err.message, 'error');
-                    console.error(err);
                 }
             };
             reader.readAsArrayBuffer(file);
         }
 
         function processExcelData(data) {
-            if (!data || data.length === 0) {
-                showStatus('Fichier Excel vide ou illisible', 'warning');
-                return;
-            }
-
             const processed = data.map((row, idx) => ({
                 id: `prod_${Date.now()}_${idx}`,
                 ref: row['Ref'] || row['Référence'] || row['Code'] || 'N/A',
@@ -533,11 +486,6 @@
                 image: row['Image'] || row['Photo'] || '',
                 description: row['Description'] || row['Desc'] || ''
             })).filter(p => p.prix > 0);
-
-            if (processed.length === 0) {
-                showStatus('Aucun produit valide trouvé (vérifiez les colonnes)', 'warning');
-                return;
-            }
 
             state.products = processed;
             saveData();
@@ -555,7 +503,7 @@
 
             state.newProducts.unshift({
                 id: `new_${Date.now()}`,
-                designation: name,
+                name,
                 price: parseFloat(price),
                 category: cat,
                 image: img,
@@ -601,65 +549,63 @@
 
         // --- Bulk Functions ---
         function openBulkImageModal() {
-            const modalEl = document.getElementById('bulkImageModal');
-            if (modalEl) {
-                new bootstrap.Modal(modalEl).show();
-                updateBulkPreview();
-            }
+            new bootstrap.Modal(document.getElementById('bulkImageModal')).show();
+            updateBulkPreview();
         }
 
         function updateBulkPreview() {
-            const activeTabEl = document.querySelector('.nav-link.active');
-            if (!activeTabEl) return;
-
-            const activeTab = activeTabEl.id;
-            const previewEl = document.getElementById('bulkPreview');
-            if (!previewEl) return;
+            const activeTab = document.querySelector('.nav-link.active').id;
 
             if (activeTab === 'mode-magic-tab') {
-                previewEl.textContent = `https://tse2.mm.bing.net/th?q=Exemple...`;
+                document.getElementById('bulkPreview').textContent = `https://tse2.mm.bing.net/th?q=Exemple...`;
             } else if (activeTab === 'mode-desc-tab') {
-                previewEl.textContent = `https://www.bing.com/search?q=fiche+technique+Exemple`;
+                document.getElementById('bulkPreview').textContent = `https://www.bing.com/search?q=fiche+technique+Exemple`;
             } else {
                 const baseUrl = document.getElementById('bulkBaseUrl').value || 'https://site.com/img/';
                 const field = document.getElementById('bulkField').value;
                 const ext = document.getElementById('bulkExt').value;
                 const example = field === 'ref' ? 'REF123' : 'Produit_Exemple';
-                previewEl.textContent = `${baseUrl}${example}${ext}`;
+                document.getElementById('bulkPreview').textContent = `${baseUrl}${example}${ext}`;
             }
         }
 
         function applyBulkActions() {
-            const activeTabEl = document.querySelector('.nav-link.active');
-            if (!activeTabEl) return;
-            const activeTab = activeTabEl.id;
+            const activeTab = document.querySelector('.nav-link.active').id;
 
             if (confirm(`Cela va modifier ${state.products.length} produits. Continuer?`)) {
+
                 if (activeTab === 'mode-magic-tab') {
+                    // Magic Images
                     state.products = state.products.map(p => ({
                         ...p,
-                        image: `https://tse2.mm.bing.net/th?q=${encodeURIComponent(p.designation + ' ' + (p.famille || ''))}&w=500&h=500&c=7&rs=1&p=0`
+                        image: `https://tse2.mm.bing.net/th?q=${encodeURIComponent(p.designation)}&w=500&h=500&c=7&rs=1&p=0`
                     }));
                 } else if (activeTab === 'mode-desc-tab') {
+                    // Magic Descriptions
                     state.products = state.products.map(p => ({
                         ...p,
                         description: `https://www.bing.com/search?q=fiche+technique+${encodeURIComponent(p.designation)}`
                     }));
                 } else {
+                    // Hosted Images
                     const baseUrl = document.getElementById('bulkBaseUrl').value;
                     const field = document.getElementById('bulkField').value;
                     const ext = document.getElementById('bulkExt').value;
+
                     if (!baseUrl) return alert('Veuillez entrer une URL de base');
+
                     state.products = state.products.map(p => {
                         const val = p[field] ? p[field].toString().trim() : '';
                         const safeVal = field === 'designation' ? val.replace(/[^a-zA-Z0-9-_]/g, '_') : val;
-                        return { ...p, image: `${baseUrl}${safeVal}${ext}` };
+                        return {
+                            ...p,
+                            image: `${baseUrl}${safeVal}${ext}`
+                        };
                     });
                 }
+
                 saveData();
-                const modalEl = document.getElementById('bulkImageModal');
-                const modal = bootstrap.Modal.getInstance(modalEl);
-                if (modal) modal.hide();
+                bootstrap.Modal.getInstance(document.getElementById('bulkImageModal')).hide();
                 showStatus('Mise à jour effectuée avec succès!', 'success');
             }
         }
@@ -667,106 +613,41 @@
         function searchImage(term, provider) {
             const query = encodeURIComponent(term);
             let url = '';
+
             switch (provider) {
                 case 'google': url = `https://www.google.com/search?tbm=isch&q=${query}`; break;
                 case 'bing': url = `https://www.bing.com/images/search?q=${query}`; break;
-                case 'facebook': url = `https://www.facebook.com/marketplace/search/?query=${query}`; break;
+                case 'facebook': url = `https://www.facebook.com/search/photos/?q=${query}`; break;
             }
+
             if (url) window.open(url, '_blank');
         }
 
         function updateProductImage(id, newUrl) {
             const p = state.products.find(p => p.id === id);
-            if (p) { p.image = newUrl; saveData(); }
+            if (p) {
+                p.image = newUrl;
+                saveData();
+            }
         }
 
         function updateProductDesc(id, newUrl) {
             const p = state.products.find(p => p.id === id);
-            if (p) { p.description = newUrl; saveData(); }
-        }
-
-        // --- New Products Logic ---
-        function handleNewProductsExcelUpload(file) {
-            if (!file) return;
-
-            showStatus('Lecture du fichier Nouveautés...', 'info');
-            const reader = new FileReader();
-
-            reader.onload = (e) => {
-                try {
-                    const data = new Uint8Array(e.target.result);
-                    const workbook = XLSX.read(data, { type: 'array' });
-                    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-                    const jsonData = XLSX.utils.sheet_to_json(firstSheet);
-
-                    processNewProductsExcelData(jsonData);
-                } catch (err) {
-                    showStatus('Erreur lecture Excel: ' + err.message, 'error');
-                }
-            };
-            reader.readAsArrayBuffer(file);
-        }
-
-        function processNewProductsExcelData(data) {
-            const processed = data.map((row, idx) => ({
-                id: `new_${Date.now()}_${idx}`,
-                designation: row['Designation'] || row['Désignation'] || row['Nom'] || 'Produit sans nom',
-                price: parseFloat(row['Prix'] || row['Price'] || 0),
-                category: row['Famille'] || row['Categorie'] || 'Général',
-                image: row['Image'] || row['Photo'] || '',
-                timestamp: new Date().toISOString()
-            })).filter(p => p.price > 0);
-
-            // Add to existing new products (prepend)
-            state.newProducts = [...processed, ...state.newProducts];
-            saveData();
-            showStatus(`${processed.length} nouveaux produits ajoutés!`, 'success');
-        }
-
-        function applyNewProductsBulkActions() {
-            const activeTabEl = document.querySelector('#npGenTabs .nav-link.active');
-            if (!activeTabEl) return;
-            const activeTab = activeTabEl.getAttribute('data-bs-target');
-
-            if (state.newProducts.length === 0) return showStatus('Aucun nouveau produit à traiter', 'warning');
-
-            if (confirm(`Cela va modifier ${state.newProducts.length} nouveaux produits. Continuer?`)) {
-                if (activeTab === '#np-mode-magic') {
-                    state.newProducts = state.newProducts.map(p => ({
-                        ...p,
-                        image: `https://tse2.mm.bing.net/th?q=${encodeURIComponent(p.designation + ' ' + (p.category || ''))}&w=500&h=500&c=7&rs=1&p=0`
-                    }));
-                } else if (activeTab === '#np-mode-desc') {
-                    state.newProducts = state.newProducts.map(p => ({
-                        ...p,
-                        description: `https://www.bing.com/search?q=fiche+technique+${encodeURIComponent(p.designation)}`
-                    }));
-                } else { // Hosted
-                    const baseUrl = document.getElementById('npBulkBaseUrl').value;
-                    const field = document.getElementById('npBulkField').value;
-                    const ext = document.getElementById('npBulkExt').value;
-
-                    if (!baseUrl) return showStatus('Veuillez entrer une URL de base', 'warning');
-
-                    state.newProducts = state.newProducts.map(p => {
-                        const val = field === 'id' ? p.id : p.designation;
-                        const safeVal = val.toString().trim().replace(/[^a-zA-Z0-9-_]/g, '_');
-                        return { ...p, image: `${baseUrl}${safeVal}${ext}` };
-                    });
-                }
+            if (p) {
+                p.description = newUrl;
                 saveData();
-                showStatus('Nouveautés mises à jour avec succès!', 'success');
             }
         }
 
         // GitHub Sync
         async function uploadToGitHubGist() {
-            if (state.products.length === 0) {
-                return showStatus('❌ La liste des produits est vide. Ajoutez des produits avant de publier.', 'warning');
-            }
-
             const token = document.getElementById('githubToken').value;
-            if (!token) return showStatus('❌ Token GitHub manquant!', 'error');
+            if (!token) return showStatus('Token GitHub manquant!', 'error');
+
+            // Validate that we have data to publish
+            if (state.products.length === 0 && state.newProducts.length === 0) {
+                return showStatus('Aucun produit à publier! Veuillez importer des données.', 'warning');
+            }
 
             const btn = document.getElementById('publishBtn');
             const originalText = btn.innerHTML;
@@ -792,6 +673,7 @@
             try {
                 let url = 'https://api.github.com/gists';
                 let method = 'POST';
+
                 if (state.gistId) {
                     url += `/${state.gistId}`;
                     method = 'PATCH';
@@ -799,7 +681,10 @@
 
                 const response = await fetch(url, {
                     method: method,
-                    headers: { 'Authorization': `token ${token}`, 'Content-Type': 'application/json' },
+                    headers: {
+                        'Authorization': `token ${token}`,
+                        'Content-Type': 'application/json'
+                    },
                     body: JSON.stringify(payload)
                 });
 
@@ -814,10 +699,13 @@
                 const result = await response.json();
                 state.gistId = result.id;
                 state.lastSync = new Date().toISOString();
+
                 localStorage.setItem('varicom_gist_id', state.gistId);
                 localStorage.setItem('varicom_last_sync', state.lastSync);
-                showStatus('✅ Synchronisation réussie!', 'success');
+
+                showStatus('✅ Synchronisation réussie! Données publiées.', 'success');
                 updateUI();
+
             } catch (err) {
                 console.error(err);
                 showStatus('Erreur Sync: ' + err.message, 'error');
@@ -829,58 +717,69 @@
 
         // UI Updates
         function updateUI() {
-            const setContent = (id, value) => {
-                const el = document.getElementById(id);
-                if (el) el.textContent = value;
-            };
+            // Stats
+            document.getElementById('statsProducts').textContent = state.products.length;
+            document.getElementById('statsNewProducts').textContent = state.newProducts.length;
+            document.getElementById('statsNotifications').textContent = state.notifications.length;
+            document.getElementById('statsStatus').textContent = state.gistId ? 'Actif' : 'Inactif';
+            document.getElementById('statsStatus').className = state.gistId ? 'text-success' : 'text-danger';
 
-            const setHtml = (id, html) => {
-                const el = document.getElementById(id);
-                if (el) el.innerHTML = html;
-            };
-
-            const setClass = (id, cls) => {
-                const el = document.getElementById(id);
-                if (el) el.className = cls;
-            };
-
-            setContent('statsProducts', state.products.length);
-            setContent('statsNewProducts', state.newProducts.length);
-            setContent('statsNotifications', state.notifications.length);
-            setContent('statsStatus', state.gistId ? 'Actif' : 'Inactif');
-            setClass('statsStatus', state.gistId ? 'text-success' : 'text-danger');
-
-            const escapeQuote = (str) => str ? str.toString().replace(/'/g, "\\'") : '';
+            // Helper functions for escaping
             const escapeHtml = (str) => str ? str.toString().replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;") : '';
-            const escapeJsHtml = (str) => escapeHtml(escapeQuote(str));
+            const escapeJs = (str) => str ? str.toString().replace(/'/g, "\\'") : '';
 
-            setHtml('activeNewProducts', state.newProducts.map(p => `
+            // Lists
+            const npList = document.getElementById('activeNewProducts');
+            npList.innerHTML = state.newProducts.map(p => `
                 <li class="list-group-item d-flex justify-content-between align-items-center">
-                    <div><strong>${escapeHtml(p.designation)}</strong> - ${p.price} DA</div>
-                    <button class="btn btn-sm btn-outline-danger" onclick="removeNewProduct('${escapeJsHtml(p.id)}')"><i class="fas fa-times"></i></button>
-                </li>`).join(''));
+                    <div><strong>${escapeHtml(p.name)}</strong> - ${p.price} DA</div>
+                    <button class="btn btn-sm btn-outline-danger" onclick="removeNewProduct('${escapeJs(p.id)}')">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </li>
+            `).join('');
 
-            setHtml('activeNotifications', state.notifications.map(n => `
+            const notifList = document.getElementById('activeNotifications');
+            notifList.innerHTML = state.notifications.map(n => `
                 <li class="list-group-item d-flex justify-content-between align-items-center">
                     <div><span class="badge bg-${getBadgeClass(n.type)}">${n.type}</span> ${escapeHtml(n.title)}</div>
-                    <button class="btn btn-sm btn-outline-danger" onclick="removeNotification('${escapeJsHtml(n.id)}')"><i class="fas fa-times"></i></button>
-                </li>`).join(''));
+                    <button class="btn btn-sm btn-outline-danger" onclick="removeNotification('${escapeJs(n.id)}')">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </li>
+            `).join('');
 
-            setHtml('catalogTableBody', state.products.slice(0, 100).map(p => `
+            // Catalog Table
+            const tableBody = document.getElementById('catalogTableBody');
+            tableBody.innerHTML = state.products.slice(0, 100).map(p => `
                 <tr>
                     <td><small>${escapeHtml(p.ref)}</small></td>
                     <td class="text-truncate" style="max-width: 150px;" title="${escapeHtml(p.designation)}">${escapeHtml(p.designation)}</td>
                     <td>${p.prix}</td>
-                    <td><input type="text" class="form-control form-control-sm" value="${escapeHtml(p.image || '')}" onchange="updateProductImage('${escapeJsHtml(p.id)}', this.value)"></td>
-                    <td><input type="text" class="form-control form-control-sm" value="${escapeHtml(p.description || '')}" onchange="updateProductDesc('${escapeJsHtml(p.id)}', this.value)"></td>
+                    <td>
+                        <input type="text" class="form-control form-control-sm" 
+                               value="${escapeHtml(p.image || '')}" 
+                               onchange="updateProductImage('${escapeJs(p.id)}', this.value)"
+                               placeholder="URL Image...">
+                    </td>
+                    <td>
+                        <input type="text" class="form-control form-control-sm" 
+                               value="${escapeHtml(p.description || '')}" 
+                               onchange="updateProductDesc('${escapeJs(p.id)}', this.value)"
+                               placeholder="URL Desc...">
+                    </td>
                     <td>
                         <div class="btn-group btn-group-sm">
-                            <button class="btn btn-outline-primary" onclick="searchImage('${escapeJsHtml(p.designation)}', 'google')"><i class="fab fa-google"></i></button>
-                            <button class="btn btn-outline-info" onclick="searchImage('${escapeJsHtml(p.designation)}', 'bing')"><i class="fas fa-search"></i></button>
-                            <button class="btn btn-outline-primary" onclick="searchImage('${escapeJsHtml(p.designation)}', 'facebook')"><i class="fab fa-facebook"></i></button>
+                            <button class="btn btn-outline-primary" onclick="searchImage('${escapeJs(p.designation)}', 'google')" title="Google">
+                                <i class="fab fa-google"></i>
+                            </button>
+                            <button class="btn btn-outline-info" onclick="searchImage('${escapeJs(p.designation)}', 'bing')" title="Bing">
+                                <i class="fas fa-search"></i>
+                            </button>
                         </div>
                     </td>
-                </tr>`).join(''));
+                </tr>
+            `).join('');
         }
 
         function getBadgeClass(type) {
@@ -895,44 +794,34 @@
 
         function showStatus(msg, type) {
             const el = document.getElementById('syncStatus');
-            if (!el) return;
             el.textContent = msg;
             el.className = 'sync-status';
             el.classList.add(type === 'success' ? 'sync-success' : type === 'warning' ? 'sync-warning' : 'sync-error');
             el.style.display = 'block';
-            setTimeout(() => { el.style.display = 'none'; }, 3000);
+            setTimeout(() => {
+                el.style.display = 'none';
+            }, 3000);
         }
 
         function generateClientLink() {
-            if (!state.gistId) return showStatus('⚠️ Veuillez d\'abord publier le catalogue', 'warning');
+            if (!state.gistId) return showStatus('Veuillez d\'abord publier le catalogue', 'warning');
 
-            let clientBaseUrl = localStorage.getItem('varicom_client_url');
+            // الحل النهائي: إنشاء رابط إلى index.html
+            const currentUrl = window.location.href;
+            const baseUrl = currentUrl.substring(0, currentUrl.lastIndexOf('/') + 1);
+            const clientUrl = `${baseUrl}index.html?gist=${state.gistId}`;
 
-            if (!clientBaseUrl) {
-                const path = window.location.pathname;
-                const dir = path.substring(0, path.lastIndexOf('/'));
-                const origin = window.location.origin;
-                clientBaseUrl = `${origin}${dir}/client.html`;
-            }
-
-            if (clientBaseUrl.endsWith('/')) clientBaseUrl = clientBaseUrl.slice(0, -1);
-            if (!clientBaseUrl.endsWith('client.html')) {
-                if (clientBaseUrl.endsWith('/')) {
-                    clientBaseUrl += 'client.html';
-                } else if (!clientBaseUrl.match(/\.[a-z]+$/)) {
-                    clientBaseUrl += '/client.html';
-                }
-            }
-
-            const clientUrl = `${clientBaseUrl}?gist=${state.gistId}`;
-            navigator.clipboard.writeText(clientUrl);
-            showStatus('✅ Lien client copié dans le presse-papier!', 'success');
-            alert(`Lien copié: \n${clientUrl}`);
+            navigator.clipboard.writeText(clientUrl).then(() => {
+                showStatus('✅ Lien client copié!', 'success');
+            }).catch(() => {
+                prompt('Copiez ce lien manuellement:', clientUrl);
+                showStatus('Lien prêt à être copié', 'info');
+            });
         }
 
         function toggleToken() {
             const input = document.getElementById('githubToken');
-            const icon = document.querySelector('.input-group .fa-eye, .input-group .fa-eye-slash');
+            const icon = input.parentNode.querySelector('i');
             if (input.type === 'password') {
                 input.type = 'text';
                 icon.classList.replace('fa-eye', 'fa-eye-slash');
@@ -943,7 +832,7 @@
         }
 
         function resetSync() {
-            if (confirm('Voulez-vous vraiment réinitialiser la synchronisation?')) {
+            if (confirm('Voulez-vous vraiment réinitialiser la synchronisation? Cela déconnectera le catalogue actuel.')) {
                 localStorage.removeItem('varicom_gist_id');
                 localStorage.removeItem('varicom_last_sync');
                 state.gistId = null;
@@ -955,12 +844,13 @@
 
         function downloadTemplate() {
             const wb = XLSX.utils.book_new();
-            const ws = XLSX.utils.json_to_sheet([{ Ref: 'REF001', Designation: 'Exemple', Famille: 'Info', Prix: 1000, Image: '', Description: '' }]);
+            const ws = XLSX.utils.json_to_sheet([
+                { Ref: 'REF001', Designation: 'Exemple Produit', Famille: 'Informatique', Prix: 1000, Image: '', Description: '' }
+            ]);
             XLSX.utils.book_append_sheet(wb, ws, "Modele");
             XLSX.writeFile(wb, "modele_import_varicom.xlsx");
         }
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 </body>
-
 </html>
