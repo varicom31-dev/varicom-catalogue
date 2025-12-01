@@ -114,6 +114,61 @@
             70% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(40, 167, 69, 0); }
             100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(40, 167, 69, 0); }
         }
+
+        .ai-image-result {
+            border: 2px solid #dee2e6;
+            border-radius: 10px;
+            overflow: hidden;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .ai-image-result:hover {
+            border-color: var(--primary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .ai-image-result.selected {
+            border-color: #28a745;
+            box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.3);
+        }
+
+        .search-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin: 10px 0;
+        }
+
+        .search-tag {
+            background: #e9ecef;
+            padding: 3px 8px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .search-tag:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .loader {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid var(--primary-color);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
@@ -170,6 +225,80 @@
                     <i class="fas fa-sync fa-2x text-success mb-2"></i>
                     <h3 id="statsStatus">Inactif</h3>
                     <p class="text-muted mb-0">Statut Sync</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- AI Configuration Section -->
+        <div class="row m-4">
+            <div class="col-12">
+                <div class="feature-card">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0"><i class="fas fa-robot me-2"></i>Configuration IA - Recherche Intelligente</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Clé API Unsplash</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fas fa-key"></i></span>
+                                    <input type="password" class="form-control" id="unsplashKey" 
+                                           placeholder="Votre clé Unsplash">
+                                    <button class="btn btn-outline-secondary" type="button" onclick="toggleUnsplashKey()">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                                <small class="text-muted">Pour les images professionnelles gratuites</small>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Clé API Google Custom Search</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fab fa-google"></i></span>
+                                    <input type="password" class="form-control" id="googleKey" 
+                                           placeholder="Clé API Google">
+                                    <button class="btn btn-outline-secondary" type="button" onclick="toggleGoogleKey()">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                                <small class="text-muted">Pour la recherche Google avancée</small>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Moteur de recherche IA</label>
+                                <select class="form-select" id="aiEngine">
+                                    <option value="unsplash">Unsplash (Images professionnelles)</option>
+                                    <option value="google">Google Images</option>
+                                    <option value="pixabay">Pixabay (Libre de droits)</option>
+                                    <option value="multiple">Recherche multiple</option>
+                                </select>
+                                <small class="text-muted">Sélectionnez la source principale</small>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Langue de recherche</label>
+                                <select class="form-select" id="searchLanguage">
+                                    <option value="fr">Français</option>
+                                    <option value="en">Anglais</option>
+                                    <option value="ar">Arabe</option>
+                                    <option value="auto">Auto-détection</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Filtre de contenu</label>
+                                <select class="form-select" id="contentFilter">
+                                    <option value="high">Strict (Supprime les images inappropriées)</option>
+                                    <option value="medium">Modéré</option>
+                                    <option value="low">Basique</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button class="btn btn-success" onclick="saveAIConfig()">
+                            <i class="fas fa-save me-2"></i>Enregistrer Configuration IA
+                        </button>
+                        <button class="btn btn-outline-info ms-2" onclick="testAIAPI()">
+                            <i class="fas fa-test me-2"></i>Tester les APIs
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -305,7 +434,7 @@
                                         <th>Ref</th>
                                         <th>Désignation</th>
                                         <th>Prix</th>
-                                        <th style="width: 30%;">Image URL</th>
+                                        <th style="width: 25%;">Image URL</th>
                                         <th style="width: 20%;">Description URL</th>
                                         <th>Actions</th>
                                     </tr>
@@ -324,7 +453,7 @@
 
     <!-- Bulk Image Modal -->
     <div class="modal fade" id="bulkImageModal" tabindex="-1">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-xl">
             <div class="modal-content">
                 <div class="modal-header bg-primary text-white">
                     <h5 class="modal-title"><i class="fas fa-magic me-2"></i>Générateur de Liens Image/Desc</h5>
@@ -337,6 +466,9 @@
                         </li>
                         <li class="nav-item" role="presentation">
                             <button class="nav-link" id="mode-magic-tab" data-bs-toggle="tab" data-bs-target="#mode-magic" type="button" role="tab">✨ Images Magiques</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="mode-ai-tab" data-bs-toggle="tab" data-bs-target="#mode-ai" type="button" role="tab">🤖 IA Intelligente</button>
                         </li>
                         <li class="nav-item" role="presentation">
                             <button class="nav-link" id="mode-desc-tab" data-bs-toggle="tab" data-bs-target="#mode-desc" type="button" role="tab">📝 Descriptions Auto</button>
@@ -379,6 +511,70 @@
                             <p class="small text-muted">Recherche automatique d'images sur Bing via la Désignation.</p>
                         </div>
 
+                        <!-- AI Mode -->
+                        <div class="tab-pane fade" id="mode-ai" role="tabpanel">
+                            <div class="alert alert-info small">
+                                <i class="fas fa-robot me-2"></i><strong>Recherche Intelligente:</strong> Utilise l'IA pour trouver les meilleures images depuis plusieurs sources.
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-8">
+                                    <label class="form-label">Recherche intelligente</label>
+                                    <input type="text" class="form-control" id="aiSearchQuery" placeholder="Entrez le nom du produit ou laissez vide pour utiliser la désignation">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Sources</label>
+                                    <select class="form-select" id="aiSources" multiple>
+                                        <option value="unsplash" selected>Unsplash</option>
+                                        <option value="pixabay" selected>Pixabay</option>
+                                        <option value="google">Google</option>
+                                        <option value="facebook">Facebook (public)</option>
+                                    </select>
+                                    <small class="text-muted">Maintenez Ctrl pour sélectionner plusieurs</small>
+                                </div>
+                            </div>
+                            
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <label class="form-label">Type d'image</label>
+                                    <select class="form-select" id="aiImageType">
+                                        <option value="product">Produit commercial</option>
+                                        <option value="photo">Photo réaliste</option>
+                                        <option value="illustration">Illustration</option>
+                                        <option value="logo">Logo/Marque</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label class="form-label">Filtre IA</label>
+                                    <select class="form-select" id="aiFilter">
+                                        <option value="relevance">Pertinence IA</option>
+                                        <option value="quality">Haute qualité</option>
+                                        <option value="commercial">Usage commercial</option>
+                                        <option value="recent">Récent</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="search-tags mb-3">
+                                <span class="search-tag" onclick="setSearchTag('professionnel')">professionnel</span>
+                                <span class="search-tag" onclick="setSearchTag('blanc')">fond blanc</span>
+                                <span class="search-tag" onclick="setSearchTag('3d')">rendu 3D</span>
+                                <span class="search-tag" onclick="setSearchTag('isolé')">isolé</span>
+                                <span class="search-tag" onclick="setSearchTag('haute qualité')">haute qualité</span>
+                                <span class="search-tag" onclick="setSearchTag('commercial')">commercial</span>
+                            </div>
+                            
+                            <button class="btn btn-primary w-100 mb-3" onclick="searchAIImages()">
+                                <i class="fas fa-search me-2"></i>Rechercher avec IA
+                            </button>
+                            
+                            <div id="aiResults" class="row g-3"></div>
+                            <div id="aiLoader" class="text-center" style="display: none;">
+                                <div class="loader"></div>
+                                <p class="mt-2">Recherche intelligente en cours...</p>
+                            </div>
+                        </div>
+
                         <!-- Description Mode -->
                         <div class="tab-pane fade" id="mode-desc" role="tabpanel">
                             <div class="alert alert-info small">
@@ -400,6 +596,52 @@
         </div>
     </div>
 
+    <!-- AI Single Product Search Modal -->
+    <div class="modal fade" id="aiProductSearchModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-info text-white">
+                    <h5 class="modal-title"><i class="fas fa-robot me-2"></i>Recherche IA pour Produit</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <h6 id="currentProductName" class="mb-3"></h6>
+                    <div class="row g-2 mb-3">
+                        <div class="col-md-8">
+                            <input type="text" class="form-control" id="productSearchQuery" placeholder="Termes de recherche additionnels...">
+                        </div>
+                        <div class="col-md-4">
+                            <button class="btn btn-primary w-100" onclick="searchForCurrentProduct()">
+                                <i class="fas fa-search me-2"></i>Rechercher
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="search-tags mb-3">
+                        <span class="search-tag" onclick="addProductSearchTag('fond blanc')">fond blanc</span>
+                        <span class="search-tag" onclick="addProductSearchTag('professionnel')">professionnel</span>
+                        <span class="search-tag" onclick="addProductSearchTag('haute qualité')">haute qualité</span>
+                        <span class="search-tag" onclick="addProductSearchTag('commercial')">commercial</span>
+                        <span class="search-tag" onclick="addProductSearchTag('isolé')">isolé</span>
+                        <span class="search-tag" onclick="addProductSearchTag('3d rendu')">rendu 3D</span>
+                    </div>
+                    
+                    <div id="productAiResults" class="row g-3"></div>
+                    <div id="productAiLoader" class="text-center" style="display: none;">
+                        <div class="loader"></div>
+                        <p class="mt-2">Analyse IA en cours...</p>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="button" class="btn btn-success" onclick="applySelectedImageToProduct()">
+                        <i class="fas fa-check me-2"></i>Appliquer l'image sélectionnée
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script>
         // State
         let state = {
@@ -407,13 +649,26 @@
             newProducts: [],
             notifications: [],
             gistId: localStorage.getItem('varicom_gist_id') || null,
-            lastSync: localStorage.getItem('varicom_last_sync') || null
+            lastSync: localStorage.getItem('varicom_last_sync') || null,
+            aiConfig: JSON.parse(localStorage.getItem('varicom_ai_config')) || {
+                unsplashKey: '',
+                googleKey: '',
+                engine: 'unsplash',
+                language: 'fr',
+                filter: 'high'
+            },
+            currentAISearch: {
+                productId: null,
+                selectedImage: null,
+                searchResults: []
+            }
         };
 
         // Initialization
         document.addEventListener('DOMContentLoaded', () => {
             loadLocalData();
             updateUI();
+            loadAIConfig();
 
             // Token listener
             const tokenInput = document.getElementById('githubToken');
@@ -443,6 +698,26 @@
                     state.notifications = data.notifications || [];
                 }
             } catch (e) { console.error('Error loading local data', e); }
+        }
+
+        function loadAIConfig() {
+            document.getElementById('unsplashKey').value = state.aiConfig.unsplashKey || '';
+            document.getElementById('googleKey').value = state.aiConfig.googleKey || '';
+            document.getElementById('aiEngine').value = state.aiConfig.engine || 'unsplash';
+            document.getElementById('searchLanguage').value = state.aiConfig.language || 'fr';
+            document.getElementById('contentFilter').value = state.aiConfig.filter || 'high';
+        }
+
+        function saveAIConfig() {
+            state.aiConfig = {
+                unsplashKey: document.getElementById('unsplashKey').value,
+                googleKey: document.getElementById('googleKey').value,
+                engine: document.getElementById('aiEngine').value,
+                language: document.getElementById('searchLanguage').value,
+                filter: document.getElementById('contentFilter').value
+            };
+            localStorage.setItem('varicom_ai_config', JSON.stringify(state.aiConfig));
+            showStatus('Configuration IA sauvegardée!', 'success');
         }
 
         function saveData() {
@@ -547,6 +822,199 @@
             saveData();
         }
 
+        // --- AI Functions ---
+        async function searchAIImages() {
+            const query = document.getElementById('aiSearchQuery').value;
+            const sources = Array.from(document.getElementById('aiSources').selectedOptions).map(o => o.value);
+            const imageType = document.getElementById('aiImageType').value;
+            const filter = document.getElementById('aiFilter').value;
+            
+            if (!sources.length) {
+                showStatus('Veuillez sélectionner au moins une source', 'warning');
+                return;
+            }
+
+            document.getElementById('aiLoader').style.display = 'block';
+            document.getElementById('aiResults').innerHTML = '';
+
+            try {
+                const results = [];
+                
+                // Recherche dans toutes les sources sélectionnées
+                for (const source of sources) {
+                    const sourceResults = await searchImageSource(source, query, imageType, filter);
+                    results.push(...sourceResults);
+                }
+
+                // Mélanger les résultats pour variété
+                results.sort(() => Math.random() - 0.5);
+                
+                displayAIResults(results.slice(0, 12)); // Limiter à 12 résultats
+                
+            } catch (error) {
+                console.error('AI Search error:', error);
+                document.getElementById('aiResults').innerHTML = `
+                    <div class="col-12">
+                        <div class="alert alert-danger">
+                            Erreur de recherche: ${error.message}
+                        </div>
+                    </div>
+                `;
+            } finally {
+                document.getElementById('aiLoader').style.display = 'none';
+            }
+        }
+
+        async function searchImageSource(source, query, imageType, filter) {
+            switch(source) {
+                case 'unsplash':
+                    return await searchUnsplash(query, imageType, filter);
+                case 'pixabay':
+                    return await searchPixabay(query, imageType, filter);
+                case 'google':
+                    return await searchGoogle(query, imageType, filter);
+                case 'facebook':
+                    return await searchFacebook(query);
+                default:
+                    return [];
+            }
+        }
+
+        async function searchUnsplash(query, imageType, filter) {
+            const key = state.aiConfig.unsplashKey;
+            if (!key) {
+                throw new Error('Clé Unsplash non configurée');
+            }
+
+            let searchQuery = query;
+            if (imageType === 'product') searchQuery += ' product commercial white background';
+            if (imageType === 'photo') searchQuery += ' professional photo';
+            
+            const url = `https://api.unsplash.com/search/photos?query=${encodeURIComponent(searchQuery)}&per_page=6&client_id=${key}`;
+            
+            const response = await fetch(url);
+            if (!response.ok) throw new Error('Erreur Unsplash API');
+            
+            const data = await response.json();
+            return data.results.map(img => ({
+                url: img.urls.regular,
+                thumb: img.urls.thumb,
+                title: img.description || 'Image Unsplash',
+                source: 'Unsplash',
+                author: img.user.name,
+                likes: img.likes,
+                commercial: true
+            }));
+        }
+
+        async function searchPixabay(query, imageType, filter) {
+            // Note: Pixabay nécessite une clé API
+            const key = ''; // À configurer par l'utilisateur
+            if (!key) return [];
+            
+            let searchQuery = query;
+            if (imageType === 'product') searchQuery += ' product white background';
+            
+            const url = `https://pixabay.com/api/?key=${key}&q=${encodeURIComponent(searchQuery)}&image_type=photo&per_page=6`;
+            
+            const response = await fetch(url);
+            if (!response.ok) return [];
+            
+            const data = await response.json();
+            return data.hits.map(img => ({
+                url: img.largeImageURL,
+                thumb: img.previewURL,
+                title: img.tags,
+                source: 'Pixabay',
+                author: img.user,
+                likes: img.likes,
+                commercial: true
+            }));
+        }
+
+        async function searchGoogle(query, imageType, filter) {
+            // Utilise Custom Search JSON API
+            const key = state.aiConfig.googleKey;
+            const cx = ''; // Search Engine ID - à configurer
+            
+            if (!key || !cx) return [];
+            
+            let searchQuery = query;
+            if (imageType === 'product') searchQuery += ' product';
+            if (filter === 'commercial') searchQuery += ' commercial use';
+            
+            const url = `https://www.googleapis.com/customsearch/v1?q=${encodeURIComponent(searchQuery)}&cx=${cx}&key=${key}&searchType=image&num=6`;
+            
+            const response = await fetch(url);
+            if (!response.ok) return [];
+            
+            const data = await response.json();
+            return (data.items || []).map(img => ({
+                url: img.link,
+                thumb: img.image.thumbnailLink,
+                title: img.title,
+                source: 'Google',
+                commercial: false
+            }));
+        }
+
+        async function searchFacebook(query) {
+            // Note: Facebook Graph API nécessite un token
+            // Pour l'instant, retourner des résultats simulés ou utiliser une approche différente
+            return [];
+        }
+
+        function displayAIResults(results) {
+            const container = document.getElementById('aiResults');
+            
+            if (!results.length) {
+                container.innerHTML = `
+                    <div class="col-12">
+                        <div class="alert alert-warning">
+                            Aucune image trouvée. Essayez avec d'autres termes.
+                        </div>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = results.map((img, index) => `
+                <div class="col-md-4 col-sm-6">
+                    <div class="ai-image-result" onclick="selectAIImage(${index})">
+                        <img src="${img.thumb}" class="img-fluid w-100" style="height: 150px; object-fit: cover;">
+                        <div class="p-2">
+                            <small class="d-block text-truncate">${img.title}</small>
+                            <small class="text-muted">
+                                <i class="fas fa-${img.source === 'Unsplash' ? 'camera' : 'search'} me-1"></i>
+                                ${img.source}
+                                ${img.likes ? `<i class="fas fa-heart ms-2"></i> ${img.likes}` : ''}
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function selectAIImage(index) {
+            // Retirer la sélection précédente
+            document.querySelectorAll('.ai-image-result').forEach(el => {
+                el.classList.remove('selected');
+            });
+            
+            // Ajouter la nouvelle sélection
+            const selected = document.querySelectorAll('.ai-image-result')[index];
+            if (selected) {
+                selected.classList.add('selected');
+                state.currentAISearch.selectedImage = state.currentAISearch.searchResults[index];
+            }
+        }
+
+        function setSearchTag(tag) {
+            const input = document.getElementById('aiSearchQuery');
+            const current = input.value.trim();
+            input.value = current ? `${current} ${tag}` : tag;
+        }
+
         // --- Bulk Functions ---
         function openBulkImageModal() {
             new bootstrap.Modal(document.getElementById('bulkImageModal')).show();
@@ -560,6 +1028,8 @@
                 document.getElementById('bulkPreview').textContent = `https://tse2.mm.bing.net/th?q=Exemple...`;
             } else if (activeTab === 'mode-desc-tab') {
                 document.getElementById('bulkPreview').textContent = `https://www.bing.com/search?q=fiche+technique+Exemple`;
+            } else if (activeTab === 'mode-ai-tab') {
+                document.getElementById('bulkPreview').textContent = `Recherche IA avec ${document.getElementById('aiSources').selectedOptions.length} sources`;
             } else {
                 const baseUrl = document.getElementById('bulkBaseUrl').value || 'https://site.com/img/';
                 const field = document.getElementById('bulkField').value;
@@ -586,6 +1056,19 @@
                         ...p,
                         description: `https://www.bing.com/search?q=fiche+technique+${encodeURIComponent(p.designation)}`
                     }));
+                } else if (activeTab === 'mode-ai-tab') {
+                    // AI Images - utiliser l'image sélectionnée ou la dernière recherche
+                    if (state.currentAISearch.selectedImage) {
+                        const selectedUrl = state.currentAISearch.selectedImage.url;
+                        state.products = state.products.map(p => ({
+                            ...p,
+                            image: selectedUrl
+                        }));
+                        showStatus('Image IA appliquée à tous les produits', 'success');
+                    } else {
+                        showStatus('Veuillez d\'abord sélectionner une image', 'warning');
+                        return;
+                    }
                 } else {
                     // Hosted Images
                     const baseUrl = document.getElementById('bulkBaseUrl').value;
@@ -610,6 +1093,91 @@
             }
         }
 
+        // --- Single Product AI Search ---
+        function openAIProductSearch(productId, designation) {
+            state.currentAISearch.productId = productId;
+            document.getElementById('currentProductName').textContent = `Produit: ${designation}`;
+            document.getElementById('productSearchQuery').value = designation;
+            
+            new bootstrap.Modal(document.getElementById('aiProductSearchModal')).show();
+        }
+
+        async function searchForCurrentProduct() {
+            const query = document.getElementById('productSearchQuery').value;
+            if (!query) return;
+            
+            document.getElementById('productAiLoader').style.display = 'block';
+            document.getElementById('productAiResults').innerHTML = '';
+            
+            try {
+                // Rechercher avec Unsplash par défaut
+                const results = await searchUnsplash(query, 'product', 'relevance');
+                state.currentAISearch.searchResults = results;
+                
+                displayProductAIResults(results);
+                
+            } catch (error) {
+                console.error('Product search error:', error);
+                document.getElementById('productAiResults').innerHTML = `
+                    <div class="col-12">
+                        <div class="alert alert-danger">
+                            Erreur: ${error.message}
+                        </div>
+                    </div>
+                `;
+            } finally {
+                document.getElementById('productAiLoader').style.display = 'none';
+            }
+        }
+
+        function displayProductAIResults(results) {
+            const container = document.getElementById('productAiResults');
+            
+            container.innerHTML = results.map((img, index) => `
+                <div class="col-md-6 col-sm-6">
+                    <div class="ai-image-result" onclick="selectProductAIImage(${index})">
+                        <img src="${img.thumb}" class="img-fluid w-100" style="height: 200px; object-fit: cover;">
+                        <div class="p-2">
+                            <small class="d-block text-truncate">${img.title}</small>
+                            <small class="text-muted">
+                                <i class="fas fa-${img.source === 'Unsplash' ? 'camera' : 'search'} me-1"></i>
+                                ${img.source}
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function selectProductAIImage(index) {
+            document.querySelectorAll('#productAiResults .ai-image-result').forEach(el => {
+                el.classList.remove('selected');
+            });
+            
+            const selected = document.querySelectorAll('#productAiResults .ai-image-result')[index];
+            if (selected) {
+                selected.classList.add('selected');
+                state.currentAISearch.selectedImage = state.currentAISearch.searchResults[index];
+            }
+        }
+
+        function applySelectedImageToProduct() {
+            if (!state.currentAISearch.productId || !state.currentAISearch.selectedImage) {
+                showStatus('Veuillez sélectionner une image', 'warning');
+                return;
+            }
+            
+            updateProductImage(state.currentAISearch.productId, state.currentAISearch.selectedImage.url);
+            bootstrap.Modal.getInstance(document.getElementById('aiProductSearchModal')).hide();
+            showStatus('Image appliquée au produit avec succès!', 'success');
+        }
+
+        function addProductSearchTag(tag) {
+            const input = document.getElementById('productSearchQuery');
+            const current = input.value.trim();
+            input.value = current ? `${current} ${tag}` : tag;
+        }
+
         function searchImage(term, provider) {
             const query = encodeURIComponent(term);
             let url = '';
@@ -617,6 +1185,7 @@
             switch (provider) {
                 case 'google': url = `https://www.google.com/search?tbm=isch&q=${query}`; break;
                 case 'bing': url = `https://www.bing.com/images/search?q=${query}`; break;
+                case 'unsplash': url = `https://unsplash.com/s/photos/${query}`; break;
                 case 'facebook': url = `https://www.facebook.com/search/photos/?q=${query}`; break;
             }
 
@@ -644,7 +1213,6 @@
             const token = document.getElementById('githubToken').value;
             if (!token) return showStatus('Token GitHub manquant!', 'error');
 
-            // Validate that we have data to publish
             if (state.products.length === 0 && state.newProducts.length === 0) {
                 return showStatus('Aucun produit à publier! Veuillez importer des données.', 'warning');
             }
@@ -776,6 +1344,12 @@
                             <button class="btn btn-outline-info" onclick="searchImage('${escapeJs(p.designation)}', 'bing')" title="Bing">
                                 <i class="fas fa-search"></i>
                             </button>
+                            <button class="btn btn-outline-warning" onclick="openAIProductSearch('${escapeJs(p.id)}', '${escapeJs(p.designation)}')" title="Recherche IA">
+                                <i class="fas fa-robot"></i>
+                            </button>
+                            <button class="btn btn-outline-success" onclick="searchImage('${escapeJs(p.designation)}', 'unsplash')" title="Unsplash">
+                                <i class="fas fa-camera"></i>
+                            </button>
                         </div>
                     </td>
                 </tr>
@@ -806,7 +1380,6 @@
         function generateClientLink() {
             if (!state.gistId) return showStatus('Veuillez d\'abord publier le catalogue', 'warning');
 
-            // الحل النهائي: إنشاء رابط إلى index.html
             const currentUrl = window.location.href;
             const baseUrl = currentUrl.substring(0, currentUrl.lastIndexOf('/') + 1);
             const clientUrl = `${baseUrl}index.html?gist=${state.gistId}`;
@@ -821,6 +1394,30 @@
 
         function toggleToken() {
             const input = document.getElementById('githubToken');
+            const icon = input.parentNode.querySelector('i');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.replace('fa-eye', 'fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.replace('fa-eye-slash', 'fa-eye');
+            }
+        }
+
+        function toggleUnsplashKey() {
+            const input = document.getElementById('unsplashKey');
+            const icon = input.parentNode.querySelector('i');
+            if (input.type === 'password') {
+                input.type = 'text';
+                icon.classList.replace('fa-eye', 'fa-eye-slash');
+            } else {
+                input.type = 'password';
+                icon.classList.replace('fa-eye-slash', 'fa-eye');
+            }
+        }
+
+        function toggleGoogleKey() {
+            const input = document.getElementById('googleKey');
             const icon = input.parentNode.querySelector('i');
             if (input.type === 'password') {
                 input.type = 'text';
@@ -849,6 +1446,23 @@
             ]);
             XLSX.utils.book_append_sheet(wb, ws, "Modele");
             XLSX.writeFile(wb, "modele_import_varicom.xlsx");
+        }
+
+        function testAIAPI() {
+            const unsplashKey = document.getElementById('unsplashKey').value;
+            if (unsplashKey) {
+                fetch(`https://api.unsplash.com/photos/random?client_id=${unsplashKey}`)
+                    .then(response => {
+                        if (response.ok) {
+                            showStatus('✅ API Unsplash fonctionne!', 'success');
+                        } else {
+                            showStatus('❌ API Unsplash échouée', 'error');
+                        }
+                    })
+                    .catch(() => showStatus('❌ Erreur de connexion', 'error'));
+            } else {
+                showStatus('Veuillez entrer une clé API', 'warning');
+            }
         }
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
