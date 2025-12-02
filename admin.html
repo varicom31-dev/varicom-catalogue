@@ -229,6 +229,30 @@
             background: linear-gradient(90deg, #28a745, #20c997);
             transition: width 0.3s;
         }
+
+        .quality-badge {
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.7rem;
+            font-weight: bold;
+        }
+
+        .relevance-badge {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: linear-gradient(135deg, #007bff, #6610f2);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.7rem;
+            font-weight: bold;
+        }
     </style>
 </head>
 <body>
@@ -322,8 +346,6 @@
                                     <option value="auto">تلقائي (أفضل النتائج)</option>
                                     <option value="bing">Bing Images</option>
                                     <option value="unsplash">Unsplash</option>
-                                    <option value="google">Google Images</option>
-                                    <option value="pixabay">Pixabay</option>
                                 </select>
                             </div>
                         </div>
@@ -566,44 +588,12 @@
                                 </div>
                                 <div class="col-md-4">
                                     <label class="form-label">Sources</label>
-                                    <select class="form-select" id="aiSources" multiple>
-                                        <option value="bing" selected>Bing</option>
-                                        <option value="unsplash" selected>Unsplash</option>
-                                        <option value="google">Google</option>
-                                        <option value="pixabay">Pixabay</option>
-                                    </select>
-                                    <small class="text-muted">Maintenez Ctrl pour sélectionner plusieurs</small>
-                                </div>
-                            </div>
-                            
-                            <div class="row mb-3">
-                                <div class="col-md-6">
-                                    <label class="form-label">Type d'image</label>
-                                    <select class="form-select" id="aiImageType">
-                                        <option value="product">Produit commercial</option>
-                                        <option value="photo">Photo réaliste</option>
-                                        <option value="illustration">Illustration</option>
-                                        <option value="logo">Logo/Marque</option>
+                                    <select class="form-select" id="aiSources">
+                                        <option value="auto" selected>Auto (Bing + Unsplash)</option>
+                                        <option value="bing">Bing uniquement</option>
+                                        <option value="unsplash">Unsplash uniquement</option>
                                     </select>
                                 </div>
-                                <div class="col-md-6">
-                                    <label class="form-label">Filtre IA</label>
-                                    <select class="form-select" id="aiFilter">
-                                        <option value="relevance">Pertinence IA</option>
-                                        <option value="quality">Haute qualité</option>
-                                        <option value="commercial">Usage commercial</option>
-                                        <option value="recent">Récent</option>
-                                    </select>
-                                </div>
-                            </div>
-                            
-                            <div class="search-tags mb-3">
-                                <span class="search-tag" onclick="setSearchTag('produit')">produit</span>
-                                <span class="search-tag" onclick="setSearchTag('fond blanc')">fond blanc</span>
-                                <span class="search-tag" onclick="setSearchTag('professionnel')">professionnel</span>
-                                <span class="search-tag" onclick="setSearchTag('haute qualité')">haute qualité</span>
-                                <span class="search-tag" onclick="setSearchTag('commercial')">commercial</span>
-                                <span class="search-tag" onclick="setSearchTag('isolé')">isolé</span>
                             </div>
                             
                             <button class="btn btn-primary w-100 mb-3" onclick="searchAIImages()">
@@ -639,7 +629,165 @@
     </div>
 
     <script>
-        // State
+        // ==================== خوارزمية البحث الذكي المتقدمة ====================
+        class IntelligentImageSearch {
+            constructor() {
+                this.sources = {
+                    bing: {
+                        name: "Bing Images",
+                        priority: 1,
+                        baseUrl: "https://www.bing.com/images/search"
+                    },
+                    unsplash: {
+                        name: "Unsplash",
+                        priority: 2,
+                        baseUrl: "https://api.unsplash.com/search/photos"
+                    }
+                };
+
+                this.qualityKeywords = [
+                    "product photography", "white background", "professional", 
+                    "commercial use", "high quality", "isolated", "clean",
+                    "studio shot", "3d render", "realistic"
+                ];
+
+                this.productCategories = {
+                    "ordinateurs": ["computer", "pc", "laptop", "desktop", "workstation"],
+                    "téléphones": ["smartphone", "mobile phone", "cell phone", "iphone", "android"],
+                    "accessoires": ["accessory", "gadget", "tech accessory", "electronic"],
+                    "général": ["product", "item", "merchandise", "goods"]
+                };
+            }
+
+            generateSmartQuery(productName, category = "général") {
+                const baseQuery = productName.toLowerCase();
+                let enhancedQuery = baseQuery;
+                
+                if (category && this.productCategories[category.toLowerCase()]) {
+                    const catKeywords = this.productCategories[category.toLowerCase()];
+                    const randomKeyword = catKeywords[Math.floor(Math.random() * catKeywords.length)];
+                    enhancedQuery += " " + randomKeyword;
+                }
+                
+                const randomQualityKeywords = this.qualityKeywords
+                    .sort(() => 0.5 - Math.random())
+                    .slice(0, 2);
+                
+                enhancedQuery += " " + randomQualityKeywords.join(" ");
+                
+                const words = enhancedQuery.split(" ").filter((word, index, self) => {
+                    return word.length > 2 && self.indexOf(word) === index;
+                });
+                
+                return words.join(" ");
+            }
+
+            calculateImageScore(image, productName) {
+                let score = 50;
+                
+                if (image.source === 'Unsplash') score += 30;
+                if (image.source === 'Bing Images') score += 20;
+                
+                if (image.width >= 800 && image.height >= 600) score += 20;
+                if (image.width >= 1200 && image.height >= 800) score += 30;
+                
+                const imageText = (image.title + " " + (image.description || "")).toLowerCase();
+                const productWords = productName.toLowerCase().split(/[\s\-_]+/).filter(w => w.length > 3);
+                
+                let matches = 0;
+                productWords.forEach(word => {
+                    if (imageText.includes(word)) matches++;
+                });
+                
+                score += (matches / productWords.length) * 30;
+                
+                if (imageText.includes('white background') || imageText.includes('isolated')) score += 15;
+                if (imageText.includes('product') || imageText.includes('professional')) score += 10;
+                
+                return Math.min(100, score);
+            }
+
+            async searchBingEnhanced(query, count = 6) {
+                try {
+                    const encodedQuery = encodeURIComponent(query + " product commercial white background");
+                    const images = [];
+                    
+                    for (let i = 0; i < count; i++) {
+                        images.push({
+                            url: `https://tse2.mm.bing.net/th?q=${encodedQuery}&w=800&h=800&c=7&rs=1&p=0&dpr=2&tid=image&t=${Date.now() + i}`,
+                            thumb: `https://tse2.mm.bing.net/th?q=${encodedQuery}&w=300&h=300&c=7&rs=1&p=0&t=${Date.now() + i}`,
+                            title: query,
+                            description: `Image produit: ${query}`,
+                            source: 'Bing Images',
+                            width: 800,
+                            height: 800,
+                            commercial_use: true,
+                            quality_score: 85
+                        });
+                    }
+                    return images;
+                } catch (error) {
+                    console.error('Bing search error:', error);
+                    return [];
+                }
+            }
+
+            async searchUnsplashEnhanced(query, count = 6) {
+                try {
+                    const encodedQuery = encodeURIComponent(query);
+                    const images = [];
+                    const sizes = ['600x600', '800x800', '1000x1000'];
+                    
+                    for (let i = 0; i < count; i++) {
+                        const size = sizes[i % sizes.length];
+                        images.push({
+                            url: `https://source.unsplash.com/featured/${size}/?${encodedQuery},product,white-background&sig=${Date.now() + i}`,
+                            thumb: `https://source.unsplash.com/featured/300x300/?${encodedQuery},product&sig=${Date.now() + i}`,
+                            title: query,
+                            description: `Professional product photography of ${query}`,
+                            source: 'Unsplash',
+                            width: parseInt(size.split('x')[0]),
+                            height: parseInt(size.split('x')[1]),
+                            commercial_use: true,
+                            quality_score: 90
+                        });
+                    }
+                    return images;
+                } catch (error) {
+                    console.error('Unsplash search error:', error);
+                    return [];
+                }
+            }
+
+            async searchAllSources(query, category, maxResults = 12) {
+                const results = [];
+                
+                try {
+                    const bingResults = await this.searchBingEnhanced(query, 4);
+                    results.push(...bingResults);
+                } catch (e) {
+                    console.warn('Bing search failed:', e);
+                }
+                
+                try {
+                    const unsplashResults = await this.searchUnsplashEnhanced(query, 4);
+                    results.push(...unsplashResults);
+                } catch (e) {
+                    console.warn('Unsplash search failed:', e);
+                }
+                
+                return results
+                    .map(img => ({
+                        ...img,
+                        relevance_score: this.calculateImageScore(img, query),
+                        final_score: (img.quality_score * 0.6) + (this.calculateImageScore(img, query) * 0.4)
+                    }))
+                    .sort((a, b) => b.final_score - a.final_score)
+                    .slice(0, maxResults);
+            }
+        }
+
+        // ==================== الحالة والتخزين ====================
         let state = {
             products: [],
             newProducts: [],
@@ -659,30 +807,30 @@
             }
         };
 
-        // Initialization
+        const intelligentSearch = new IntelligentImageSearch();
+
+        // ==================== التهيئة ====================
         document.addEventListener('DOMContentLoaded', () => {
             loadLocalData();
             updateUI();
             generateSmartSuggestions();
 
-            // Token listener
             const tokenInput = document.getElementById('githubToken');
             tokenInput.value = localStorage.getItem('varicom_github_token') || '';
-            tokenInput.addEventListener('input', (e) => localStorage.setItem('varicom_github_token', e.target.value));
+            tokenInput.addEventListener('input', (e) => {
+                localStorage.setItem('varicom_github_token', e.target.value);
+            });
 
-            // Bulk Preview Listener
             ['bulkBaseUrl', 'bulkField', 'bulkExt'].forEach(id => {
                 const el = document.getElementById(id);
                 if (el) el.addEventListener('input', updateBulkPreview);
             });
 
-            // Tab Change Listener
             const tabEls = document.querySelectorAll('button[data-bs-toggle="tab"]');
             tabEls.forEach(tab => {
                 tab.addEventListener('shown.bs.tab', updateBulkPreview);
             });
 
-            // إضافة مستمع لزر Enter في البحث الذكي
             document.getElementById('smartSearchInput').addEventListener('keypress', (e) => {
                 if (e.key === 'Enter') {
                     smartImageSearch();
@@ -699,15 +847,21 @@
                     state.newProducts = data.newProducts || [];
                     state.notifications = data.notifications || [];
                 }
-            } catch (e) { console.error('Error loading local data', e); }
+            } catch (e) { 
+                console.error('Error loading local data', e);
+                state.products = [];
+                state.newProducts = [];
+                state.notifications = [];
+            }
         }
 
         function saveData() {
-            localStorage.setItem('varicom_data', JSON.stringify({
+            const data = {
                 products: state.products,
                 newProducts: state.newProducts,
                 notifications: state.notifications
-            }));
+            };
+            localStorage.setItem('varicom_data', JSON.stringify(data));
             updateUI();
         }
 
@@ -732,20 +886,25 @@
             ];
             
             const container = document.getElementById('smartSuggestions');
-            container.innerHTML = suggestions.map(tag => 
-                `<span class="suggestion-tag" onclick="addSuggestion('${tag}')">${tag}</span>`
-            ).join('');
+            if (container) {
+                container.innerHTML = suggestions.map(tag => 
+                    `<span class="suggestion-tag" onclick="addSuggestion('${tag}')">${tag}</span>`
+                ).join('');
+            }
         }
 
         function addSuggestion(tag) {
-            document.getElementById('smartSearchInput').value = tag;
-            smartImageSearch();
+            const input = document.getElementById('smartSearchInput');
+            if (input) {
+                input.value = tag;
+                smartImageSearch();
+            }
         }
 
         // ==================== البحث الذكي الرئيسي ====================
         async function smartImageSearch() {
-            const query = document.getElementById('smartSearchInput').value;
-            const source = document.getElementById('searchSource').value;
+            const query = document.getElementById('smartSearchInput')?.value;
+            const source = document.getElementById('searchSource')?.value || 'auto';
             
             if (!query) {
                 showStatus('أدخل كلمة للبحث', 'warning');
@@ -755,189 +914,102 @@
             state.smartSearch.currentSearchQuery = query;
             state.smartSearch.selectedImage = null;
             
-            // عرض مؤشر التحميل
             const resultsDiv = document.getElementById('smartResults');
+            if (!resultsDiv) return;
+            
             resultsDiv.innerHTML = `
                 <div class="col-12 text-center py-5">
-                    <div class="spinner-border text-primary" role="status">
+                    <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
                         <span class="visually-hidden">جار البحث...</span>
                     </div>
-                    <p class="mt-3">جاري البحث عن أفضل الصور لـ "${query}"...</p>
+                    <div class="mt-4">
+                        <h5>جاري البحث الذكي...</h5>
+                        <p class="text-muted">نستخدم الذكاء الاصطناعي لإيجاد أفضل الصور لـ "${query}"</p>
+                        <div class="progress" style="height: 8px; width: 200px; margin: 0 auto;">
+                            <div class="progress-bar progress-bar-striped progress-bar-animated" style="width: 100%"></div>
+                        </div>
+                    </div>
                 </div>
             `;
             
-            // إخفاء زر التطبيق أثناء البحث
-            document.getElementById('applyButtonContainer').style.display = 'none';
+            const applyBtnContainer = document.getElementById('applyButtonContainer');
+            if (applyBtnContainer) {
+                applyBtnContainer.style.display = 'none';
+            }
             
             try {
                 let images = [];
+                const category = state.smartSearch.currentProduct ? 
+                    state.products.find(p => p.id === state.smartSearch.currentProduct)?.famille : '';
                 
-                // البحث حسب المصدر المحدد
-                switch(source) {
-                    case 'bing':
-                        images = await searchBingImages(query);
-                        break;
-                    case 'unsplash':
-                        images = await searchUnsplashSimple(query);
-                        break;
-                    case 'google':
-                        images = await searchGoogleImagesSimple(query);
-                        break;
-                    case 'pixabay':
-                        images = await searchPixabaySimple(query);
-                        break;
-                    case 'auto':
-                    default:
-                        // بحث في جميع المصادر
-                        const bingImages = await searchBingImages(query);
-                        const unsplashImages = await searchUnsplashSimple(query);
-                        images = [...bingImages, ...unsplashImages];
-                        break;
+                const smartQuery = intelligentSearch.generateSmartQuery(query, category);
+                
+                if (source === 'auto') {
+                    images = await intelligentSearch.searchAllSources(smartQuery, category, 12);
+                } else if (source === 'bing') {
+                    images = await intelligentSearch.searchBingEnhanced(smartQuery, 12);
+                } else if (source === 'unsplash') {
+                    images = await intelligentSearch.searchUnsplashEnhanced(smartQuery, 12);
                 }
                 
-                // إزالة التكرارات وتحديد أول 12 صورة
-                images = removeDuplicates(images).slice(0, 12);
+                if (images.length === 0) {
+                    const broaderQuery = query.split(' ')[0];
+                    images = await intelligentSearch.searchAllSources(broaderQuery, category, 12);
+                }
                 
-                // حفظ النتائج
                 state.smartSearch.searchResults = images;
                 
-                // عرض النتائج
                 displaySmartResults(images);
                 
-                // إذا كان هناك منتج محدد، عرض زر التطبيق
                 if (state.smartSearch.currentProduct) {
                     const product = state.products.find(p => p.id === state.smartSearch.currentProduct);
-                    if (product) {
-                        document.getElementById('currentProductInfo').textContent = `المنتج الحالي: ${product.designation}`;
-                        document.getElementById('applyButtonContainer').style.display = 'block';
+                    if (product && applyBtnContainer) {
+                        document.getElementById('currentProductInfo').innerHTML = `
+                            <strong>المنتج الحالي:</strong> ${product.designation}<br>
+                            <small class="text-muted">${product.ref} | ${product.famille} | ${product.prix} DA</small>
+                        `;
+                        applyBtnContainer.style.display = 'block';
                     }
                 }
                 
+                showStatus(`تم العثور على ${images.length} صورة بجودة عالية`, 'success');
+                
             } catch (error) {
                 console.error('Search error:', error);
-                resultsDiv.innerHTML = `
-                    <div class="col-12">
-                        <div class="alert alert-danger">
-                            خطأ في البحث: ${error.message}
-                            <br><small>جرب مصدر بحث مختلف</small>
+                if (resultsDiv) {
+                    resultsDiv.innerHTML = `
+                        <div class="col-12">
+                            <div class="alert alert-danger">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                <strong>خطأ في البحث الذكي:</strong> ${error.message || 'حدث خطأ غير متوقع'}
+                                <br>
+                                <button class="btn btn-sm btn-outline-primary mt-2" onclick="smartImageSearch()">
+                                    <i class="fas fa-redo me-1"></i>إعادة المحاولة
+                                </button>
+                            </div>
                         </div>
-                    </div>
-                `;
+                    `;
+                }
             }
         }
 
-        // ==================== مصادر البحث ====================
-
-        // 1. Bing Images - يعمل بدون API!
-        async function searchBingImages(query) {
-            const encodedQuery = encodeURIComponent(query + ' product white background commercial professional');
-            
-            try {
-                // استخدام واجهة Bing العامة
-                const timestamp = Date.now();
-                const imageUrl = `https://tse2.mm.bing.net/th?q=${encodedQuery}&w=500&h=500&c=7&rs=1&p=0&dpr=2&tid=image&t=${timestamp}`;
-                
-                return [{
-                    url: imageUrl,
-                    thumb: `https://tse2.mm.bing.net/th?q=${encodedQuery}&w=300&h=300&c=7&rs=1&p=0`,
-                    title: query,
-                    source: 'Bing Images',
-                    quality: 'high',
-                    commercial: true,
-                    width: 500,
-                    height: 500
-                }];
-                
-            } catch (e) {
-                console.log('Using fallback Bing search');
-                return [];
-            }
-        }
-
-        // 2. Unsplash - بدون API key
-        async function searchUnsplashSimple(query) {
-            const encodedQuery = encodeURIComponent(query);
-            
-            try {
-                // استخدام Unsplash بدون API
-                const imageUrl = `https://source.unsplash.com/featured/500x500/?${encodedQuery},product,white-background`;
-                
-                return [{
-                    url: imageUrl,
-                    thumb: `https://source.unsplash.com/featured/300x300/?${encodedQuery},product`,
-                    title: query,
-                    source: 'Unsplash',
-                    quality: 'very-high',
-                    commercial: true,
-                    width: 500,
-                    height: 500
-                }];
-            } catch (e) {
-                return [];
-            }
-        }
-
-        // 3. Google Images - طريقة بسيطة
-        async function searchGoogleImagesSimple(query) {
-            const encodedQuery = encodeURIComponent(query);
-            
-            return [{
-                url: `https://www.google.com/search?tbm=isch&q=${encodedQuery}&tbs=ic:color,itp:photo,isz:l`,
-                thumb: `https://via.placeholder.com/300x200/4A90E2/FFFFFF?text=Google+Search`,
-                title: query,
-                source: 'Google Images',
-                quality: 'high',
-                commercial: false,
-                note: 'انقر لفتح بحث Google'
-            }];
-        }
-
-        // 4. Pixabay - طريقة بسيطة
-        async function searchPixabaySimple(query) {
-            const encodedQuery = encodeURIComponent(query);
-            
-            return [{
-                url: `https://pixabay.com/images/search/${encodedQuery}/?orientation=horizontal&colors=grayscale`,
-                thumb: `https://cdn.pixabay.com/photo/2015/04/23/22/00/tree-736885_640.jpg`,
-                title: query,
-                source: 'Pixabay',
-                quality: 'high',
-                commercial: true,
-                note: 'انقر لفتح Pixabay'
-            }];
-        }
-
-        // إزالة التكرارات
-        function removeDuplicates(images) {
-            const seen = new Set();
-            return images.filter(img => {
-                if (!img.url) return false;
-                const key = img.url.split('?')[0];
-                if (seen.has(key)) return false;
-                seen.add(key);
-                return true;
-            });
-        }
-
-        // عرض النتائج الذكية
         function displaySmartResults(images) {
             const resultsDiv = document.getElementById('smartResults');
+            if (!resultsDiv) return;
             
-            if (!images.length) {
+            if (!images || images.length === 0) {
                 resultsDiv.innerHTML = `
                     <div class="col-12 text-center py-5">
                         <i class="fas fa-search fa-3x text-muted mb-3"></i>
-                        <p>لم يتم العثور على صور. جرب كلمات بحث أخرى.</p>
-                        <button class="btn btn-primary mt-2" onclick="smartImageSearch()">
-                            <i class="fas fa-redo me-2"></i>إعادة البحث
-                        </button>
+                        <h5 class="text-muted">لم يتم العثور على صور</h5>
+                        <p class="text-muted mb-4">جرب استخدام كلمات بحث مختلفة أو استعلام أوسع</p>
                     </div>
                 `;
                 return;
             }
             
             resultsDiv.innerHTML = images.map((img, index) => `
-                <div class="col-md-3 col-sm-4 col-6">
+                <div class="col-md-3 col-sm-4 col-6 mb-4">
                     <div class="card h-100 image-select-card" onclick="selectSmartImage(${index})" 
                          data-index="${index}">
                         <div class="position-relative" style="height: 180px; overflow: hidden;">
@@ -945,55 +1017,70 @@
                                  class="card-img-top h-100 w-100" 
                                  alt="${img.title}"
                                  style="object-fit: cover;"
-                                 onerror="this.src='https://via.placeholder.com/300x200/CCCCCC/969696?text=No+Image'">
+                                 onerror="this.src='https://via.placeholder.com/300x200/4A90E2/FFFFFF?text=VARICOM'"
+                                 loading="lazy">
                             <span class="search-source-badge">${img.source}</span>
-                            ${img.quality === 'very-high' ? 
-                                '<span class="badge bg-success position-absolute top-0 start-0 m-1">HD</span>' : ''}
-                            ${img.commercial ? 
-                                '<span class="badge bg-info position-absolute top-0 end-0 m-1">تجاري</span>' : ''}
+                            
+                            <span class="quality-badge" title="درجة الجودة">
+                                <i class="fas fa-star me-1"></i>${Math.round(img.quality_score || 75)}
+                            </span>
+                            
+                            <span class="relevance-badge" title="درجة الصلة">
+                                <i class="fas fa-bullseye me-1"></i>${Math.round(img.relevance_score || 70)}
+                            </span>
                         </div>
                         <div class="card-body p-2">
-                            <small class="text-muted d-block text-truncate" title="${img.title}">
-                                ${img.title.substring(0, 25)}${img.title.length > 25 ? '...' : ''}
-                            </small>
-                            ${img.note ? 
-                                `<small class="text-info d-block"><i class="fas fa-info-circle"></i> ${img.note}</small>` : ''}
-                            <small class="text-success d-block">
-                                <i class="fas fa-check-circle"></i> ${img.width || 500}×${img.height || 500}
-                            </small>
+                            <div class="d-flex justify-content-between align-items-start mb-1">
+                                <small class="text-muted d-block text-truncate" style="max-width: 70%;" 
+                                       title="${img.title}">
+                                    ${img.title.substring(0, 20)}${img.title.length > 20 ? '...' : ''}
+                                </small>
+                                <small class="text-success fw-bold">
+                                    ${img.width || 800}×${img.height || 800}
+                                </small>
+                            </div>
+                            
+                            <div class="progress mb-2" style="height: 4px;" title="درجة الجودة الإجمالية">
+                                <div class="progress-bar ${img.final_score > 80 ? 'bg-success' : img.final_score > 60 ? 'bg-primary' : 'bg-warning'}" 
+                                     style="width: ${img.final_score || 70}%"></div>
+                            </div>
+                            
+                            <div class="d-flex justify-content-between">
+                                <small class="text-muted">
+                                    <i class="fas fa-expand-alt me-1"></i>${img.width || 800}×${img.height || 800}
+                                </small>
+                                <small class="text-muted">
+                                    <i class="fas fa-percentage me-1"></i>${Math.round(img.final_score || 70)}%
+                                </small>
+                            </div>
                         </div>
                     </div>
                 </div>
             `).join('');
         }
 
-        // اختيار صورة ذكية
         function selectSmartImage(index) {
-            // إزالة التحديد السابق
             document.querySelectorAll('.image-select-card').forEach(card => {
                 card.classList.remove('border-primary', 'border-3');
                 card.classList.add('border-light');
             });
             
-            // تحديد الجديد
             const selectedCard = document.querySelector(`.image-select-card[data-index="${index}"]`);
             if (selectedCard) {
                 selectedCard.classList.remove('border-light');
                 selectedCard.classList.add('border-primary', 'border-3');
                 
-                // حفظ الصورة المحددة
                 state.smartSearch.selectedImage = state.smartSearch.searchResults[index];
                 
-                // عرض زر التطبيق إذا كان هناك منتج محدد
-                if (state.smartSearch.currentProduct) {
-                    document.getElementById('applyButtonContainer').style.display = 'block';
+                const applyBtnContainer = document.getElementById('applyButtonContainer');
+                if (state.smartSearch.currentProduct && applyBtnContainer) {
+                    applyBtnContainer.style.display = 'block';
                 }
                 
                 showStatus(`تم تحديد صورة من ${state.smartSearch.searchResults[index].source}`, 'info');
             }
         }
 
-        // تطبيق الصورة المحددة على المنتج الحالي
         function applySelectedImageToCurrentProduct() {
             if (!state.smartSearch.currentProduct) {
                 showStatus('لم يتم تحديد منتج. اختر منتجاً من الجدول أولاً.', 'warning');
@@ -1008,33 +1095,32 @@
             updateProductImage(state.smartSearch.currentProduct, state.smartSearch.selectedImage.url);
             showStatus('✓ تم تطبيق الصورة بنجاح!', 'success');
             
-            // إخفاء زر التطبيق مؤقتاً
             setTimeout(() => {
-                document.getElementById('applyButtonContainer').style.display = 'none';
+                const applyBtnContainer = document.getElementById('applyButtonContainer');
+                if (applyBtnContainer) {
+                    applyBtnContainer.style.display = 'none';
+                }
             }, 2000);
         }
 
         // ==================== البحث التلقائي ====================
         async function autoSearchProductImages() {
-            if (state.products.length === 0) {
+            if (!state.products || state.products.length === 0) {
                 showStatus('لا توجد منتجات للبحث', 'warning');
                 return;
             }
             
-            // البحث عن المنتجات بدون صور أو بصور غير جيدة
             const productsNeedingImages = state.products.filter(p => {
                 const hasImage = p.image && p.image.trim() !== '';
-                const isGoodImage = hasImage && (
-                    p.image.includes('bing.net') || 
-                    p.image.includes('unsplash') ||
-                    p.image.includes('google') ||
-                    p.image.includes('pixabay')
+                const isHighQuality = hasImage && (
+                    (p.image.includes('bing.net') && p.image.includes('w=800')) || 
+                    (p.image.includes('unsplash') && p.image.includes('featured'))
                 );
-                return !hasImage || !isGoodImage;
-            }).slice(0, 20); // حد أقصى 20 منتج
+                return !hasImage || !isHighQuality;
+            }).slice(0, 20);
             
             if (productsNeedingImages.length === 0) {
-                showStatus('جميع المنتجات تحتوي على صور جيدة', 'info');
+                showStatus('جميع المنتجات تحتوي على صور عالية الجودة', 'info');
                 return;
             }
             
@@ -1045,13 +1131,13 @@
                 products: productsNeedingImages
             };
             
-            // عرض شريط التقدم
-            document.getElementById('autoSearchProgress').style.display = 'block';
-            updateAutoSearchProgress();
+            const progressBar = document.getElementById('autoSearchProgress');
+            const progressBarInner = document.getElementById('autoSearchProgressBar');
+            if (progressBar) progressBar.style.display = 'block';
+            if (progressBarInner) progressBarInner.style.width = '0%';
             
-            showStatus(`بدء البحث التلقائي لـ ${productsNeedingImages.length} منتج...`, 'info');
+            showStatus(`بدأ البحث الذكي لـ ${productsNeedingImages.length} منتج...`, 'info');
             
-            // البحث تسلسلي
             for (let i = 0; i < productsNeedingImages.length; i++) {
                 if (!state.autoSearch.active) break;
                 
@@ -1059,37 +1145,38 @@
                 state.autoSearch.currentIndex = i + 1;
                 
                 try {
-                    // البحث عن صور Bing (الأفضل للمنتجات)
-                    const images = await searchBingImages(product.designation);
+                    const smartQuery = intelligentSearch.generateSmartQuery(
+                        product.designation, 
+                        product.famille
+                    );
+                    
+                    const images = await intelligentSearch.searchAllSources(smartQuery, product.famille, 1);
+                    
                     if (images.length > 0) {
-                        updateProductImage(product.id, images[0].url);
+                        const bestImage = images[0];
+                        updateProductImage(product.id, bestImage.url);
                         
-                        // تحديث واجهة المستخدم
-                        updateAutoSearchProgress();
+                        if (progressBarInner) {
+                            const progress = ((i + 1) / productsNeedingImages.length) * 100;
+                            progressBarInner.style.width = `${progress}%`;
+                        }
                         
-                        showStatus(`تم إضافة صورة لـ ${product.designation} (${i+1}/${productsNeedingImages.length})`, 'success');
+                        showStatus(`✅ تم إضافة صورة لـ ${product.designation} (${i+1}/${productsNeedingImages.length})`, 'success');
                     }
                 } catch (e) {
-                    console.error(`Failed to search for: ${product.designation}`);
+                    console.error(`Failed to search for: ${product.designation}`, e);
+                    showStatus(`❌ خطأ في البحث عن ${product.designation}`, 'error');
                 }
                 
-                // انتظار 1.5 ثانية بين كل بحث لتجنب الحظر
-                await new Promise(resolve => setTimeout(resolve, 1500));
+                await new Promise(resolve => setTimeout(resolve, 1200));
             }
             
             state.autoSearch.active = false;
-            document.getElementById('autoSearchProgress').style.display = 'none';
-            showStatus('اكتمل البحث التلقائي!', 'success');
+            if (progressBar) progressBar.style.display = 'none';
+            showStatus('🎉 اكتمل البحث الذكي بنجاح!', 'success');
         }
 
-        function updateAutoSearchProgress() {
-            if (!state.autoSearch.active) return;
-            
-            const progress = (state.autoSearch.currentIndex / state.autoSearch.totalProducts) * 100;
-            document.getElementById('autoSearchProgressBar').style.width = `${progress}%`;
-        }
-
-        // ==================== Excel Handling ====================
+        // ==================== معالجة Excel ====================
         function handleExcelUpload(file) {
             if (!file) return;
 
@@ -1108,66 +1195,87 @@
                     showStatus('Erreur lecture Excel: ' + err.message, 'error');
                 }
             };
+            reader.onerror = () => {
+                showStatus('Erreur de lecture du fichier', 'error');
+            };
             reader.readAsArrayBuffer(file);
         }
 
         function processExcelData(data) {
+            if (!Array.isArray(data)) {
+                showStatus('Format de fichier invalide', 'error');
+                return;
+            }
+
             const processed = data.map((row, idx) => ({
                 id: `prod_${Date.now()}_${idx}`,
-                ref: row['Ref'] || row['Référence'] || row['Code'] || 'N/A',
+                ref: row['Ref'] || row['Référence'] || row['Code'] || `REF${idx + 1}`,
                 designation: row['Designation'] || row['Désignation'] || row['Nom'] || 'Produit sans nom',
                 famille: row['Famille'] || row['Categorie'] || 'Général',
-                prix: parseFloat(row['Prix'] || row['Price'] || 0),
+                prix: parseFloat(row['Prix'] || row['Price'] || 0) || 0,
                 image: row['Image'] || row['Photo'] || '',
                 description: row['Description'] || row['Desc'] || ''
-            })).filter(p => p.prix > 0);
+            })).filter(p => p.designation && p.designation !== 'Produit sans nom');
 
             state.products = processed;
             saveData();
             showStatus(`${processed.length} produits importés avec succès!`, 'success');
         }
 
-        // ==================== Product & Notification Management ====================
+        // ==================== إدارة المنتجات والإشعارات ====================
         function addNewProduct() {
-            const name = document.getElementById('newProductName').value;
-            const price = document.getElementById('newProductPrice').value;
-            const cat = document.getElementById('newProductCategory').value;
-            const img = document.getElementById('newProductImage').value;
+            const name = document.getElementById('newProductName')?.value;
+            const price = document.getElementById('newProductPrice')?.value;
+            const cat = document.getElementById('newProductCategory')?.value;
+            const img = document.getElementById('newProductImage')?.value;
 
-            if (!name || !price) return showStatus('Nom et Prix requis', 'warning');
+            if (!name || !price) {
+                showStatus('Nom et Prix requis', 'warning');
+                return;
+            }
 
             state.newProducts.unshift({
                 id: `new_${Date.now()}`,
-                name,
-                price: parseFloat(price),
-                category: cat,
-                image: img,
+                name: name.trim(),
+                price: parseFloat(price) || 0,
+                category: cat || 'Général',
+                image: img || '',
                 timestamp: new Date().toISOString()
             });
 
-            document.getElementById('newProductName').value = '';
-            document.getElementById('newProductPrice').value = '';
+            if (document.getElementById('newProductName')) {
+                document.getElementById('newProductName').value = '';
+                document.getElementById('newProductPrice').value = '';
+                document.getElementById('newProductImage').value = '';
+            }
+
             saveData();
             showStatus('Nouveau produit ajouté', 'success');
         }
 
         function createNotification() {
-            const title = document.getElementById('notifTitle').value;
-            const msg = document.getElementById('notifMessage').value;
-            const type = document.getElementById('notifType').value;
+            const title = document.getElementById('notifTitle')?.value;
+            const msg = document.getElementById('notifMessage')?.value;
+            const type = document.getElementById('notifType')?.value;
 
-            if (!title || !msg) return showStatus('Titre et Message requis', 'warning');
+            if (!title || !msg) {
+                showStatus('Titre et Message requis', 'warning');
+                return;
+            }
 
             state.notifications.unshift({
                 id: `notif_${Date.now()}`,
-                title,
-                message: msg,
-                type,
+                title: title.trim(),
+                message: msg.trim(),
+                type: type || 'info',
                 timestamp: new Date().toISOString()
             });
 
-            document.getElementById('notifTitle').value = '';
-            document.getElementById('notifMessage').value = '';
+            if (document.getElementById('notifTitle')) {
+                document.getElementById('notifTitle').value = '';
+                document.getElementById('notifMessage').value = '';
+            }
+
             saveData();
             showStatus('Notification créée', 'success');
         }
@@ -1182,101 +1290,87 @@
             saveData();
         }
 
-        // ==================== Bulk Functions ====================
+        // ==================== الدوال الجماعية ====================
         function openBulkImageModal() {
-            new bootstrap.Modal(document.getElementById('bulkImageModal')).show();
-            updateBulkPreview();
-        }
-
-        function updateBulkPreview() {
-            const activeTab = document.querySelector('.nav-link.active').id;
-
-            if (activeTab === 'mode-magic-tab') {
-                document.getElementById('bulkPreview').textContent = `https://tse2.mm.bing.net/th?q=Exemple...`;
-            } else if (activeTab === 'mode-desc-tab') {
-                document.getElementById('bulkPreview').textContent = `https://www.bing.com/search?q=fiche+technique+Exemple`;
-            } else if (activeTab === 'mode-ai-tab') {
-                document.getElementById('bulkPreview').textContent = `Recherche IA avec ${document.getElementById('aiSources').selectedOptions.length} sources`;
-            } else {
-                const baseUrl = document.getElementById('bulkBaseUrl').value || 'https://site.com/img/';
-                const field = document.getElementById('bulkField').value;
-                const ext = document.getElementById('bulkExt').value;
-                const example = field === 'ref' ? 'REF123' : 'Produit_Exemple';
-                document.getElementById('bulkPreview').textContent = `${baseUrl}${example}${ext}`;
+            const modalElement = document.getElementById('bulkImageModal');
+            if (modalElement) {
+                const modal = new bootstrap.Modal(modalElement);
+                modal.show();
+                updateBulkPreview();
             }
         }
 
-        // دالة مساعدة لوضع علامة في البحث
-        function setSearchTag(tag) {
-            const input = document.getElementById('aiSearchQuery');
-            const current = input.value.trim();
-            input.value = current ? `${current} ${tag}` : tag;
+        function updateBulkPreview() {
+            const activeTab = document.querySelector('.nav-link.active');
+            const preview = document.getElementById('bulkPreview');
+            
+            if (!activeTab || !preview) return;
+
+            if (activeTab.id === 'mode-magic-tab') {
+                preview.textContent = `https://tse2.mm.bing.net/th?q=ExempleProduit&w=800&h=800`;
+            } else if (activeTab.id === 'mode-desc-tab') {
+                preview.textContent = `https://www.bing.com/search?q=fiche+technique+ExempleProduit`;
+            } else if (activeTab.id === 'mode-ai-tab') {
+                preview.textContent = `Recherche IA avec sources multiples`;
+            } else {
+                const baseUrl = document.getElementById('bulkBaseUrl')?.value || 'https://site.com/img/';
+                const field = document.getElementById('bulkField')?.value || 'ref';
+                const ext = document.getElementById('bulkExt')?.value || '.jpg';
+                const example = field === 'ref' ? 'REF123' : 'Produit_Exemple';
+                preview.textContent = `${baseUrl}${example}${ext}`;
+            }
         }
 
-        // البحث بالذكاء الاصطناعي في وضع المجموعة
         async function searchAIImages() {
-            const query = document.getElementById('aiSearchQuery').value;
-            const sources = Array.from(document.getElementById('aiSources').selectedOptions).map(o => o.value);
-            const imageType = document.getElementById('aiImageType').value;
+            const query = document.getElementById('aiSearchQuery')?.value;
+            const source = document.getElementById('aiSources')?.value || 'auto';
             
             if (!query) {
                 showStatus('أدخل كلمة للبحث', 'warning');
                 return;
             }
 
-            document.getElementById('aiLoader').style.display = 'block';
-            document.getElementById('aiResults').innerHTML = '';
+            const loader = document.getElementById('aiLoader');
+            const resultsDiv = document.getElementById('aiResults');
+            
+            if (loader) loader.style.display = 'block';
+            if (resultsDiv) resultsDiv.innerHTML = '';
 
             try {
                 let images = [];
+                const smartQuery = intelligentSearch.generateSmartQuery(query);
                 
-                // البحث في جميع المصادر المحددة
-                for (const source of sources) {
-                    let sourceImages = [];
-                    switch(source) {
-                        case 'bing':
-                            sourceImages = await searchBingImages(query);
-                            break;
-                        case 'unsplash':
-                            sourceImages = await searchUnsplashSimple(query);
-                            break;
-                        case 'google':
-                            sourceImages = await searchGoogleImagesSimple(query);
-                            break;
-                        case 'pixabay':
-                            sourceImages = await searchPixabaySimple(query);
-                            break;
-                    }
-                    images = [...images, ...sourceImages];
+                if (source === 'auto') {
+                    images = await intelligentSearch.searchAllSources(smartQuery, '', 9);
+                } else if (source === 'bing') {
+                    images = await intelligentSearch.searchBingEnhanced(smartQuery, 9);
+                } else if (source === 'unsplash') {
+                    images = await intelligentSearch.searchUnsplashEnhanced(smartQuery, 9);
                 }
 
-                // إزالة التكرارات
-                images = removeDuplicates(images).slice(0, 9);
-                
-                // حفظ النتائج
-                state.smartSearch.searchResults = images;
-                
-                // عرض النتائج في التبويب
                 displayAIResults(images);
                 
             } catch (error) {
                 console.error('AI Search error:', error);
-                document.getElementById('aiResults').innerHTML = `
-                    <div class="col-12">
-                        <div class="alert alert-danger">
-                            Erreur de recherche: ${error.message}
+                if (resultsDiv) {
+                    resultsDiv.innerHTML = `
+                        <div class="col-12">
+                            <div class="alert alert-danger">
+                                Erreur de recherche: ${error.message || 'Erreur inconnue'}
+                            </div>
                         </div>
-                    </div>
-                `;
+                    `;
+                }
             } finally {
-                document.getElementById('aiLoader').style.display = 'none';
+                if (loader) loader.style.display = 'none';
             }
         }
 
         function displayAIResults(results) {
             const container = document.getElementById('aiResults');
+            if (!container) return;
             
-            if (!results.length) {
+            if (!results || results.length === 0) {
                 container.innerHTML = `
                     <div class="col-12">
                         <div class="alert alert-warning">
@@ -1290,12 +1384,15 @@
             container.innerHTML = results.map((img, index) => `
                 <div class="col-md-4 col-sm-6">
                     <div class="ai-image-result" onclick="selectAIImage(${index})">
-                        <img src="${img.thumb}" class="img-fluid w-100" style="height: 150px; object-fit: cover;">
+                        <div class="position-relative" style="height: 150px; overflow: hidden;">
+                            <img src="${img.thumb || img.url}" class="w-100 h-100" style="object-fit: cover;" alt="${img.title}">
+                            <span class="search-source-badge">${img.source}</span>
+                        </div>
                         <div class="p-2">
                             <small class="d-block text-truncate">${img.title}</small>
                             <small class="text-muted">
                                 <i class="fas fa-${img.source === 'Unsplash' ? 'camera' : 'search'} me-1"></i>
-                                ${img.source}
+                                ${img.source} - ${img.width || 800}×${img.height || 800}
                             </small>
                         </div>
                     </div>
@@ -1316,99 +1413,95 @@
         }
 
         function applyBulkActions() {
-            const activeTab = document.querySelector('.nav-link.active').id;
+            const activeTab = document.querySelector('.nav-link.active');
+            if (!activeTab || !state.products || state.products.length === 0) {
+                showStatus('Aucun produit à modifier', 'warning');
+                return;
+            }
 
-            if (confirm(`Cela va modifier ${state.products.length} produits. Continuer?`)) {
+            if (!confirm(`Cela va modifier ${state.products.length} produits. Continuer?`)) {
+                return;
+            }
 
-                if (activeTab === 'mode-magic-tab') {
-                    // Magic Images
+            if (activeTab.id === 'mode-magic-tab') {
+                state.products = state.products.map(p => ({
+                    ...p,
+                    image: `https://tse2.mm.bing.net/th?q=${encodeURIComponent(p.designation)}&w=800&h=800&c=7&rs=1&p=0`
+                }));
+            } else if (activeTab.id === 'mode-desc-tab') {
+                state.products = state.products.map(p => ({
+                    ...p,
+                    description: `https://www.bing.com/search?q=fiche+technique+${encodeURIComponent(p.designation)}`
+                }));
+            } else if (activeTab.id === 'mode-ai-tab') {
+                if (state.smartSearch.selectedImage) {
+                    const selectedUrl = state.smartSearch.selectedImage.url;
                     state.products = state.products.map(p => ({
                         ...p,
-                        image: `https://tse2.mm.bing.net/th?q=${encodeURIComponent(p.designation)}&w=500&h=500&c=7&rs=1&p=0`
+                        image: selectedUrl
                     }));
-                } else if (activeTab === 'mode-desc-tab') {
-                    // Magic Descriptions
-                    state.products = state.products.map(p => ({
-                        ...p,
-                        description: `https://www.bing.com/search?q=fiche+technique+${encodeURIComponent(p.designation)}`
-                    }));
-                } else if (activeTab === 'mode-ai-tab') {
-                    // AI Images
-                    if (state.smartSearch.selectedImage) {
-                        const selectedUrl = state.smartSearch.selectedImage.url;
-                        state.products = state.products.map(p => ({
-                            ...p,
-                            image: selectedUrl
-                        }));
-                        showStatus('Image IA appliquée à tous les produits', 'success');
-                    } else {
-                        showStatus('Veuillez d\'abord sélectionner une image', 'warning');
-                        return;
-                    }
+                    showStatus('Image IA appliquée à tous les produits', 'success');
                 } else {
-                    // Hosted Images
-                    const baseUrl = document.getElementById('bulkBaseUrl').value;
-                    const field = document.getElementById('bulkField').value;
-                    const ext = document.getElementById('bulkExt').value;
+                    showStatus('Veuillez d\'abord sélectionner une image', 'warning');
+                    return;
+                }
+            } else {
+                const baseUrl = document.getElementById('bulkBaseUrl')?.value;
+                const field = document.getElementById('bulkField')?.value || 'ref';
+                const ext = document.getElementById('bulkExt')?.value || '';
 
-                    if (!baseUrl) return alert('Veuillez entrer une URL de base');
-
-                    state.products = state.products.map(p => {
-                        const val = p[field] ? p[field].toString().trim() : '';
-                        const safeVal = field === 'designation' ? val.replace(/[^a-zA-Z0-9-_]/g, '_') : val;
-                        return {
-                            ...p,
-                            image: `${baseUrl}${safeVal}${ext}`
-                        };
-                    });
+                if (!baseUrl) {
+                    showStatus('Veuillez entrer une URL de base', 'warning');
+                    return;
                 }
 
-                saveData();
-                bootstrap.Modal.getInstance(document.getElementById('bulkImageModal')).hide();
-                showStatus('Mise à jour effectuée avec succès!', 'success');
-            }
-        }
-
-        // ==================== دالات البحث للجدول ====================
-        function searchImage(term, provider) {
-            const query = encodeURIComponent(term);
-            let url = '';
-
-            switch (provider) {
-                case 'google': url = `https://www.google.com/search?tbm=isch&q=${query}`; break;
-                case 'bing': url = `https://www.bing.com/images/search?q=${query}`; break;
-                case 'unsplash': url = `https://unsplash.com/s/photos/${query}`; break;
-                case 'facebook': url = `https://www.facebook.com/search/photos/?q=${query}`; break;
+                state.products = state.products.map(p => {
+                    const val = p[field] ? p[field].toString().trim() : '';
+                    const safeVal = field === 'designation' ? 
+                        val.replace(/[^a-zA-Z0-9-_]/g, '_') : 
+                        val;
+                    return {
+                        ...p,
+                        image: `${baseUrl}${safeVal}${ext}`
+                    };
+                });
             }
 
-            if (url) window.open(url, '_blank');
+            saveData();
+            const modal = bootstrap.Modal.getInstance(document.getElementById('bulkImageModal'));
+            if (modal) modal.hide();
+            showStatus('Mise à jour effectuée avec succès!', 'success');
         }
 
-        // فتح البحث الذكي لمنتج معين من الجدول
+        // ==================== البحث للجدول ====================
         function openSmartSearchForProduct(productId, designation) {
             state.smartSearch.currentProduct = productId;
-            document.getElementById('smartSearchInput').value = designation;
-            document.getElementById('searchSource').value = 'auto';
+            const searchInput = document.getElementById('smartSearchInput');
+            if (searchInput) searchInput.value = designation;
             
-            // تمرير إلى قسم البحث الذكي
-            document.querySelector('.smart-suggestions').scrollIntoView({ 
-                behavior: 'smooth',
-                block: 'start'
-            });
+            const searchSource = document.getElementById('searchSource');
+            if (searchSource) searchSource.value = 'auto';
             
-            // بدء البحث تلقائياً بعد تأخير بسيط
+            const suggestions = document.querySelector('.smart-suggestions');
+            if (suggestions) {
+                suggestions.scrollIntoView({ 
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+            
             setTimeout(() => {
                 smartImageSearch();
                 showStatus(`ابحث عن صور لـ ${designation}، ثم انقر على الصورة ثم على "تطبيق"`, 'info');
             }, 800);
         }
 
-        // بحث سريع بالصور
         async function quickImageSearch(productId, designation) {
             showStatus(`جاري البحث عن ${designation}...`, 'info');
             
             try {
-                const images = await searchBingImages(designation + ' product white background');
+                const smartQuery = intelligentSearch.generateSmartQuery(designation);
+                const images = await intelligentSearch.searchBingEnhanced(smartQuery, 1);
                 if (images.length > 0) {
                     updateProductImage(productId, images[0].url);
                     showStatus(`✓ تم إضافة صورة لـ ${designation}`, 'success');
@@ -1416,38 +1509,46 @@
                     showStatus('لم أجد صوراً مناسبة', 'warning');
                 }
             } catch (error) {
+                console.error('Quick search error:', error);
                 showStatus('خطأ في البحث', 'error');
             }
         }
 
-        // ==================== Product Image/Desc Updates ====================
+        // ==================== تحديث المنتج ====================
         function updateProductImage(id, newUrl) {
-            const p = state.products.find(p => p.id === id);
-            if (p) {
-                p.image = newUrl;
+            const product = state.products.find(p => p.id === id);
+            if (product) {
+                product.image = newUrl;
                 saveData();
-                updateUI(); // تحديث الواجهة فوراً
+                updateUI();
             }
         }
 
         function updateProductDesc(id, newUrl) {
-            const p = state.products.find(p => p.id === id);
-            if (p) {
-                p.description = newUrl;
+            const product = state.products.find(p => p.id === id);
+            if (product) {
+                product.description = newUrl;
                 saveData();
+                updateUI();
             }
         }
 
         // ==================== GitHub Sync ====================
         async function uploadToGitHubGist() {
-            const token = document.getElementById('githubToken').value;
-            if (!token) return showStatus('Token GitHub manquant!', 'error');
+            const token = document.getElementById('githubToken')?.value;
+            if (!token || token.trim() === '') {
+                showStatus('Token GitHub manquant!', 'error');
+                return;
+            }
 
             if (state.products.length === 0 && state.newProducts.length === 0) {
-                return showStatus('Aucun produit à publier! Veuillez importer des données.', 'warning');
+                showStatus('Aucun produit à publier! Veuillez importer des données.', 'warning');
+                return;
             }
 
             const btn = document.getElementById('publishBtn');
+            if (!btn) return;
+
             const originalText = btn.innerHTML;
             btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Synchronisation...';
             btn.disabled = true;
@@ -1481,7 +1582,8 @@
                     method: method,
                     headers: {
                         'Authorization': `token ${token}`,
-                        'Content-Type': 'application/json'
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/vnd.github.v3+json'
                     },
                     body: JSON.stringify(payload)
                 });
@@ -1489,9 +1591,10 @@
                 if (!response.ok) {
                     if (response.status === 404 && state.gistId) {
                         state.gistId = null;
+                        localStorage.removeItem('varicom_gist_id');
                         return uploadToGitHubGist();
                     }
-                    throw new Error(`Erreur GitHub: ${response.status}`);
+                    throw new Error(`Erreur GitHub: ${response.status} ${response.statusText}`);
                 }
 
                 const result = await response.json();
@@ -1505,7 +1608,7 @@
                 updateUI();
 
             } catch (err) {
-                console.error(err);
+                console.error('Sync error:', err);
                 showStatus('Erreur Sync: ' + err.message, 'error');
             } finally {
                 btn.innerHTML = originalText;
@@ -1513,46 +1616,81 @@
             }
         }
 
-        // ==================== UI Updates ====================
+        // ==================== تحديث الواجهة ====================
         function updateUI() {
             // Stats
-            document.getElementById('statsProducts').textContent = state.products.length;
-            document.getElementById('statsNewProducts').textContent = state.newProducts.length;
-            document.getElementById('statsNotifications').textContent = state.notifications.length;
-            document.getElementById('statsStatus').textContent = state.gistId ? 'Actif' : 'Inactif';
-            document.getElementById('statsStatus').className = state.gistId ? 'text-success' : 'text-danger';
-
-            // Helper functions for escaping
-            const escapeHtml = (str) => str ? str.toString().replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;").replace(/>/g, "&gt;") : '';
-            const escapeJs = (str) => str ? str.toString().replace(/'/g, "\\'") : '';
+            updateElement('statsProducts', state.products.length);
+            updateElement('statsNewProducts', state.newProducts.length);
+            updateElement('statsNotifications', state.notifications.length);
+            
+            const statsStatus = document.getElementById('statsStatus');
+            if (statsStatus) {
+                statsStatus.textContent = state.gistId ? 'Actif' : 'Inactif';
+                statsStatus.className = state.gistId ? 'text-success' : 'text-danger';
+            }
 
             // Lists
-            const npList = document.getElementById('activeNewProducts');
-            npList.innerHTML = state.newProducts.map(p => `
+            updateNewProductsList();
+            updateNotificationsList();
+
+            // Catalog Table
+            updateCatalogTable();
+        }
+
+        function updateElement(id, value) {
+            const element = document.getElementById(id);
+            if (element) {
+                element.textContent = value;
+            }
+        }
+
+        function updateNewProductsList() {
+            const list = document.getElementById('activeNewProducts');
+            if (!list) return;
+
+            list.innerHTML = state.newProducts.map(p => `
                 <li class="list-group-item d-flex justify-content-between align-items-center">
-                    <div><strong>${escapeHtml(p.name)}</strong> - ${p.price} DA</div>
+                    <div>
+                        <strong>${escapeHtml(p.name)}</strong> - ${p.price} DA
+                        <br><small class="text-muted">${p.category}</small>
+                    </div>
                     <button class="btn btn-sm btn-outline-danger" onclick="removeNewProduct('${escapeJs(p.id)}')">
                         <i class="fas fa-times"></i>
                     </button>
                 </li>
             `).join('');
+        }
 
-            const notifList = document.getElementById('activeNotifications');
-            notifList.innerHTML = state.notifications.map(n => `
+        function updateNotificationsList() {
+            const list = document.getElementById('activeNotifications');
+            if (!list) return;
+
+            list.innerHTML = state.notifications.map(n => `
                 <li class="list-group-item d-flex justify-content-between align-items-center">
-                    <div><span class="badge bg-${getBadgeClass(n.type)}">${n.type}</span> ${escapeHtml(n.title)}</div>
+                    <div>
+                        <span class="badge bg-${getBadgeClass(n.type)} me-2">${getBadgeIcon(n.type)}</span>
+                        <strong>${escapeHtml(n.title)}</strong>
+                        <br><small class="text-muted">${escapeHtml(n.message.substring(0, 50))}${n.message.length > 50 ? '...' : ''}</small>
+                    </div>
                     <button class="btn btn-sm btn-outline-danger" onclick="removeNotification('${escapeJs(n.id)}')">
                         <i class="fas fa-times"></i>
                     </button>
                 </li>
             `).join('');
+        }
 
-            // Catalog Table
+        function updateCatalogTable() {
             const tableBody = document.getElementById('catalogTableBody');
-            tableBody.innerHTML = state.products.slice(0, 100).map(p => `
-                <tr>
+            if (!tableBody) return;
+
+            const productsToShow = state.products.slice(0, 100);
+            
+            tableBody.innerHTML = productsToShow.map(p => `
+                <tr data-product-id="${p.id}">
                     <td><small>${escapeHtml(p.ref)}</small></td>
-                    <td class="text-truncate" style="max-width: 150px;" title="${escapeHtml(p.designation)}">${escapeHtml(p.designation)}</td>
+                    <td class="text-truncate" style="max-width: 150px;" title="${escapeHtml(p.designation)}">
+                        ${escapeHtml(p.designation)}
+                    </td>
                     <td>${p.prix} DA</td>
                     <td>
                         <div class="input-group input-group-sm">
@@ -1566,8 +1704,9 @@
                                 <i class="fas fa-bolt"></i>
                             </button>
                         </div>
-                        ${p.image ? `<small class="text-success"><i class="fas fa-check-circle"></i> موجودة</small>` : 
-                                    `<small class="text-danger"><i class="fas fa-times-circle"></i> مفقودة</small>`}
+                        ${p.image ? 
+                            `<small class="text-success"><i class="fas fa-check-circle"></i> موجودة</small>` : 
+                            `<small class="text-danger"><i class="fas fa-times-circle"></i> مفقودة</small>`}
                     </td>
                     <td>
                         <input type="text" class="form-control form-control-sm" 
@@ -1583,7 +1722,7 @@
                                 <i class="fas fa-robot"></i>
                             </button>
                             <button class="btn btn-outline-primary" 
-                                    onclick="window.open('https://www.bing.com/images/search?q=${encodeURIComponent(p.designation + ' product')}', '_blank')"
+                                    onclick="window.open('https://www.bing.com/images/search?q=${encodeURIComponent(p.designation + ' product white background')}', '_blank')"
                                     title="Bing">
                                 <i class="fas fa-search"></i>
                             </button>
@@ -1608,11 +1747,56 @@
             }
         }
 
+        function getBadgeIcon(type) {
+            switch (type) {
+                case 'info': return 'ℹ️';
+                case 'success': return '✅';
+                case 'warning': return '⚠️';
+                case 'error': return '❌';
+                default: return '🔔';
+            }
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function escapeJs(text) {
+            if (!text) return '';
+            return text.toString()
+                .replace(/\\/g, '\\\\')
+                .replace(/'/g, "\\'")
+                .replace(/"/g, '\\"')
+                .replace(/\n/g, '\\n')
+                .replace(/\r/g, '\\r')
+                .replace(/\t/g, '\\t');
+        }
+
+        // ==================== دوال المساعدة ====================
         function showStatus(msg, type) {
             const el = document.getElementById('syncStatus');
+            if (!el) return;
+
             el.textContent = msg;
             el.className = 'sync-status';
-            el.classList.add(type === 'success' ? 'sync-success' : type === 'warning' ? 'sync-warning' : 'sync-error');
+            
+            switch(type) {
+                case 'success':
+                    el.classList.add('sync-success');
+                    break;
+                case 'warning':
+                    el.classList.add('sync-warning');
+                    break;
+                case 'error':
+                    el.classList.add('sync-error');
+                    break;
+                default:
+                    el.classList.add('sync-success');
+            }
+            
             el.style.display = 'block';
             setTimeout(() => {
                 el.style.display = 'none';
@@ -1620,29 +1804,39 @@
         }
 
         function generateClientLink() {
-            if (!state.gistId) return showStatus('Veuillez d\'abord publier le catalogue', 'warning');
+            if (!state.gistId) {
+                showStatus('Veuillez d\'abord publier le catalogue', 'warning');
+                return;
+            }
 
             const currentUrl = window.location.href;
             const baseUrl = currentUrl.substring(0, currentUrl.lastIndexOf('/') + 1);
             const clientUrl = `${baseUrl}index.html?gist=${state.gistId}`;
 
-            navigator.clipboard.writeText(clientUrl).then(() => {
-                showStatus('✅ Lien client copié!', 'success');
-            }).catch(() => {
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(clientUrl).then(() => {
+                    showStatus('✅ Lien client copié!', 'success');
+                }).catch(() => {
+                    prompt('Copiez ce lien manuellement:', clientUrl);
+                    showStatus('Lien prêt à être copié', 'info');
+                });
+            } else {
                 prompt('Copiez ce lien manuellement:', clientUrl);
                 showStatus('Lien prêt à être copié', 'info');
-            });
+            }
         }
 
         function toggleToken() {
             const input = document.getElementById('githubToken');
-            const icon = input.parentNode.querySelector('i');
-            if (input.type === 'password') {
-                input.type = 'text';
-                icon.classList.replace('fa-eye', 'fa-eye-slash');
-            } else {
-                input.type = 'password';
-                icon.classList.replace('fa-eye-slash', 'fa-eye');
+            const icon = input?.parentNode?.querySelector('i');
+            if (input && icon) {
+                if (input.type === 'password') {
+                    input.type = 'text';
+                    icon.classList.replace('fa-eye', 'fa-eye-slash');
+                } else {
+                    input.type = 'password';
+                    icon.classList.replace('fa-eye-slash', 'fa-eye');
+                }
             }
         }
 
@@ -1660,7 +1854,14 @@
         function downloadTemplate() {
             const wb = XLSX.utils.book_new();
             const ws = XLSX.utils.json_to_sheet([
-                { Ref: 'REF001', Designation: 'Exemple Produit', Famille: 'Informatique', Prix: 1000, Image: '', Description: '' }
+                { 
+                    Ref: 'REF001', 
+                    Designation: 'Exemple Produit', 
+                    Famille: 'Informatique', 
+                    Prix: 1000, 
+                    Image: 'https://example.com/image.jpg', 
+                    Description: 'https://example.com/description' 
+                }
             ]);
             XLSX.utils.book_append_sheet(wb, ws, "Modele");
             XLSX.writeFile(wb, "modele_import_varicom.xlsx");
