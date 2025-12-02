@@ -182,114 +182,354 @@
             animation: shake 2s infinite;
         }
 
-        /* Image Zoom Modal Styles */
+        /* ==================== نظام تكبير الصور المتقدم ==================== */
         .image-zoom-modal .modal-dialog {
             max-width: 95vw;
             max-height: 95vh;
-            margin: 1rem auto;
+            margin: 10px auto;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .image-zoom-modal .modal-content {
-            background: rgba(0, 0, 0, 0.9);
+            background: rgba(0, 0, 0, 0.95);
             border: none;
-            border-radius: 15px;
+            border-radius: 0;
+            width: 100%;
+            height: 100%;
             overflow: hidden;
         }
 
         .image-zoom-modal .modal-header {
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            padding: 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+            padding: 15px 20px;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1001;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
         }
 
         .image-zoom-modal .modal-body {
             padding: 0;
+            width: 100%;
+            height: 100%;
             display: flex;
             align-items: center;
             justify-content: center;
-            min-height: 70vh;
-            max-height: 80vh;
             overflow: hidden;
+            position: relative;
         }
 
-        .image-zoom-modal img {
+        .zoom-image-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: auto;
+            padding: 60px 20px 20px;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .zoom-image-container img {
             max-width: 100%;
             max-height: 100%;
             object-fit: contain;
+            transition: transform 0.3s ease;
             cursor: grab;
-            transition: transform 0.1s;
+            user-select: none;
+            -webkit-user-drag: none;
+            touch-action: manipulation;
         }
 
-        .image-zoom-modal img:active {
+        .zoom-image-container img:active {
             cursor: grabbing;
         }
 
         .zoom-controls {
-            position: absolute;
-            bottom: 20px;
+            position: fixed;
+            bottom: 30px;
             right: 20px;
             z-index: 1000;
             display: flex;
+            flex-direction: column;
             gap: 10px;
-            background: rgba(0, 0, 0, 0.6);
-            padding: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 15px;
             border-radius: 25px;
             backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
         }
 
         .zoom-controls button {
-            width: 45px;
-            height: 45px;
+            width: 50px;
+            height: 50px;
             border-radius: 50%;
-            background: rgba(255, 255, 255, 0.15);
-            border: 1px solid rgba(255, 255, 255, 0.3);
+            background: linear-gradient(135deg, rgba(26, 58, 108, 0.9), rgba(42, 157, 143, 0.9));
+            border: 2px solid rgba(255, 255, 255, 0.2);
             color: white;
             display: flex;
             align-items: center;
             justify-content: center;
             transition: all 0.3s;
-            font-size: 1.1rem;
-        }
-
-        .zoom-controls button:hover {
-            background: rgba(255, 255, 255, 0.25);
-            transform: scale(1.1);
+            font-size: 1.2rem;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
         }
 
-        .image-info {
-            position: absolute;
-            bottom: 20px;
+        .zoom-controls button:hover {
+            background: linear-gradient(135deg, rgba(42, 157, 143, 0.9), rgba(26, 58, 108, 0.9));
+            transform: scale(1.1);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+        }
+
+        .zoom-controls button:active {
+            transform: scale(0.95);
+        }
+
+        .image-info-panel {
+            position: fixed;
+            bottom: 30px;
             left: 20px;
+            right: 100px;
+            z-index: 1000;
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.85), rgba(26, 58, 108, 0.85));
             color: white;
-            background: rgba(0, 0, 0, 0.6);
-            padding: 12px 18px;
-            border-radius: 12px;
-            max-width: 350px;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            border-radius: 15px;
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            max-width: 400px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
         }
 
-        .image-info h6 {
-            margin-bottom: 5px;
+        .image-info-panel h6 {
+            font-size: 1.1rem;
+            margin-bottom: 10px;
             font-weight: 600;
+            color: #fff;
         }
 
-        .image-info small {
+        .image-info-panel .product-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            font-size: 0.9rem;
             opacity: 0.9;
-            line-height: 1.4;
+        }
+
+        .image-info-panel .product-details div {
+            padding: 5px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
 
         .zoom-indicator {
-            position: absolute;
-            top: 20px;
+            position: fixed;
+            top: 80px;
             right: 20px;
-            background: rgba(0, 0, 0, 0.6);
+            z-index: 1000;
+            background: rgba(0, 0, 0, 0.7);
             color: white;
-            padding: 8px 15px;
+            padding: 10px 20px;
             border-radius: 20px;
             font-size: 0.9rem;
             backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .zoom-indicator i {
+            color: #4CAF50;
+        }
+
+        .btn-close-zoom {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+            transition: all 0.3s;
+        }
+
+        .btn-close-zoom:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: rotate(90deg);
+        }
+
+        .touch-zoom-hint {
+            position: fixed;
+            bottom: 150px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 0.9rem;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            z-index: 1000;
+            animation: pulse-hint 2s infinite;
+            display: none;
+        }
+
+        @keyframes pulse-hint {
+            0%, 100% { opacity: 0.7; }
+            50% { opacity: 1; }
+        }
+
+        .image-loading {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+        }
+
+        [data-theme="dark"] .image-loading {
+            background: linear-gradient(90deg, #2a2a2a 25%, #333 50%, #2a2a2a 75%);
+        }
+
+        @keyframes loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        .high-resolution-mode {
+            image-rendering: -webkit-optimize-contrast;
+            image-rendering: crisp-edges;
+        }
+
+        .disable-scroll {
+            overflow: hidden;
+            position: fixed;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* تحسينات للموبايل */
+        @media (max-width: 768px) {
+            .image-zoom-modal .modal-dialog {
+                margin: 0;
+                max-width: 100vw;
+                max-height: 100vh;
+                border-radius: 0;
+            }
+            
+            .image-zoom-modal .modal-content {
+                border-radius: 0;
+            }
+            
+            .zoom-controls {
+                bottom: 20px;
+                right: 15px;
+                padding: 12px;
+                gap: 8px;
+            }
+            
+            .zoom-controls button {
+                width: 45px;
+                height: 45px;
+                font-size: 1.1rem;
+            }
+            
+            .image-info-panel {
+                bottom: 20px;
+                left: 15px;
+                right: 90px;
+                padding: 15px;
+                max-width: calc(100vw - 120px);
+            }
+            
+            .image-info-panel h6 {
+                font-size: 1rem;
+            }
+            
+            .image-info-panel .product-details {
+                grid-template-columns: 1fr;
+                font-size: 0.85rem;
+            }
+            
+            .zoom-indicator {
+                top: 70px;
+                right: 15px;
+                padding: 8px 15px;
+                font-size: 0.85rem;
+            }
+            
+            .btn-close-zoom {
+                width: 35px;
+                height: 35px;
+                font-size: 1rem;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .zoom-controls {
+                flex-direction: row;
+                bottom: 15px;
+                right: 50%;
+                transform: translateX(50%);
+                width: auto;
+            }
+            
+            .zoom-controls button {
+                width: 40px;
+                height: 40px;
+                font-size: 1rem;
+            }
+            
+            .image-info-panel {
+                left: 10px;
+                right: 10px;
+                bottom: 80px;
+                max-width: 100%;
+            }
+            
+            .zoom-indicator {
+                top: 60px;
+                right: 10px;
+                padding: 6px 12px;
+            }
+            
+            .product-img-container {
+                height: 180px;
+            }
+            
+            .product-img-container img {
+                max-height: 160px;
+            }
+        }
+
+        /* تحسينات للأجهزة اللوحية */
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .product-img-container {
+                height: 220px;
+            }
+            
+            .product-img-container img {
+                max-height: 200px;
+            }
+            
+            .zoom-controls {
+                bottom: 25px;
+                right: 25px;
+            }
+            
+            .image-info-panel {
+                max-width: 350px;
+            }
         }
 
         /* Toast Notification */
@@ -333,9 +573,17 @@
             background: linear-gradient(90deg, #2a2a2a 25%, #333 50%, #2a2a2a 75%);
         }
 
-        @keyframes loading {
-            0% { background-position: 200% 0; }
-            100% { background-position: -200% 0; }
+        /* تحسينات إضافية */
+        .row-cols-2 .product-card {
+            margin-bottom: 15px;
+        }
+
+        .row-cols-md-3 .product-card {
+            margin-bottom: 20px;
+        }
+
+        .row-cols-lg-4 .product-card {
+            margin-bottom: 25px;
         }
     </style>
 </head>
@@ -466,38 +714,55 @@
         </div>
     </div>
 
-    <!-- Image Zoom Modal -->
+    <!-- Image Zoom Modal - النسخة المحسنة -->
     <div class="modal fade image-zoom-modal" id="imageZoomModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-dialog">
             <div class="modal-content">
-                <div class="modal-header border-0">
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                <div class="modal-header">
+                    <div class="d-flex justify-content-between align-items-center w-100">
+                        <h6 class="mb-0 text-white">
+                            <i class="fas fa-expand-alt me-2"></i>عرض الصورة
+                        </h6>
+                        <button type="button" class="btn-close-zoom" data-bs-dismiss="modal">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
                 </div>
-                <div class="modal-body position-relative">
-                    <img id="zoomedImage" src="" alt="Zoomed Image" class="img-fluid">
+                <div class="modal-body">
+                    <div class="zoom-image-container">
+                        <img id="zoomedImage" src="" alt="Zoomed Image" class="img-fluid high-resolution-mode">
+                    </div>
+                    
                     <div class="zoom-controls">
-                        <button onclick="zoomImage(1.2)" title="تكبير">
+                        <button onclick="zoomImage(1.3)" title="تكبير">
                             <i class="fas fa-search-plus"></i>
                         </button>
-                        <button onclick="zoomImage(0.8)" title="تصغير">
+                        <button onclick="zoomImage(0.7)" title="تصغير">
                             <i class="fas fa-search-minus"></i>
                         </button>
                         <button onclick="resetZoom()" title="إعادة تعيين">
                             <i class="fas fa-sync-alt"></i>
                         </button>
-                        <button onclick="rotateImage(90)" title="تدوير">
+                        <button onclick="rotateImage(90)" title="تدوير 90°">
                             <i class="fas fa-redo"></i>
                         </button>
-                        <button onclick="downloadZoomedImage()" title="تحميل">
+                        <button onclick="downloadZoomedImage()" title="تحميل الصورة">
                             <i class="fas fa-download"></i>
                         </button>
                     </div>
-                    <div class="image-info">
-                        <h6 id="zoomImageTitle" class="mb-1"></h6>
-                        <small id="zoomImageInfo" class="text-light"></small>
+                    
+                    <div class="image-info-panel">
+                        <h6 id="zoomImageTitle"></h6>
+                        <div class="product-details" id="zoomImageInfo"></div>
                     </div>
+                    
                     <div class="zoom-indicator">
+                        <i class="fas fa-expand-alt"></i>
                         <span id="zoomPercentage">100%</span>
+                    </div>
+                    
+                    <div class="touch-zoom-hint" id="touchZoomHint">
+                        <i class="fas fa-hand-pointer me-2"></i>اسحب بإصبعين للتكبير/التصغير
                     </div>
                 </div>
             </div>
@@ -533,6 +798,8 @@
         let currentProductInfo = null;
         let isDragging = false;
         let startX, startY, scrollLeft, scrollTop;
+        let lastTouchDistance = null;
+        let isPinching = false;
 
         // ==================== التهيئة ====================
         document.addEventListener('DOMContentLoaded', () => {
@@ -547,8 +814,349 @@
             }
 
             initBackButtonLogic();
-            initImageZoomEvents();
+            initImageZoomSystem();
+            setupResponsiveDesign();
         });
+
+        // ==================== نظام تكبير الصور المتقدم ====================
+        function initImageZoomSystem() {
+            const modal = document.getElementById('imageZoomModal');
+            if (!modal) return;
+            
+            // منع التمرير عند فتح المودال
+            modal.addEventListener('show.bs.modal', function() {
+                document.body.classList.add('disable-scroll');
+                showTouchHint();
+            });
+            
+            modal.addEventListener('hidden.bs.modal', function() {
+                document.body.classList.remove('disable-scroll');
+                resetZoom();
+                hideTouchHint();
+            });
+            
+            // تهيئة الأحداث عند عرض المودال
+            modal.addEventListener('shown.bs.modal', function() {
+                const img = document.getElementById('zoomedImage');
+                if (!img) return;
+                
+                // إضافة أحداث الفأرة
+                img.addEventListener('mousedown', startDrag);
+                img.addEventListener('wheel', handleZoomWheel);
+                
+                // إضافة أحداث اللمس
+                img.addEventListener('touchstart', handleTouchStart);
+                img.addEventListener('touchmove', handleTouchMove);
+                img.addEventListener('touchend', handleTouchEnd);
+                
+                // إضافة أحداث الحركة
+                document.addEventListener('mousemove', dragImage);
+                document.addEventListener('mouseup', stopDrag);
+                
+                // تحسين جودة الصورة
+                img.classList.add('high-resolution-mode');
+                
+                // تطبيق التكبير الحالي
+                applyZoom();
+            });
+        }
+
+        // إظهار تلميح اللمس
+        function showTouchHint() {
+            const hint = document.getElementById('touchZoomHint');
+            if (!hint) return;
+            
+            // إظهار التلميح فقط على الأجهزة المحمولة
+            if ('ontouchstart' in window || navigator.maxTouchPoints) {
+                hint.style.display = 'block';
+                setTimeout(() => {
+                    if (hint) hint.style.display = 'none';
+                }, 3000);
+            }
+        }
+
+        function hideTouchHint() {
+            const hint = document.getElementById('touchZoomHint');
+            if (hint) hint.style.display = 'none';
+        }
+
+        // فتح تكبير الصورة
+        function openImageZoom(imageUrl, productInfo) {
+            const zoomedImage = document.getElementById('zoomedImage');
+            const zoomImageTitle = document.getElementById('zoomImageTitle');
+            const zoomImageInfo = document.getElementById('zoomImageInfo');
+            
+            if (!zoomedImage || !zoomImageTitle || !zoomImageInfo) return;
+            
+            try {
+                if (typeof productInfo === 'string') {
+                    productInfo = JSON.parse(productInfo);
+                }
+            } catch (e) {
+                console.error('Error parsing product info:', e);
+                productInfo = null;
+            }
+            
+            // إظهار مؤشر التحميل
+            zoomedImage.classList.add('image-loading');
+            
+            // تحميل الصورة أولاً للحصول على أبعادها
+            const tempImg = new Image();
+            tempImg.onload = function() {
+                zoomedImage.src = imageUrl;
+                zoomedImage.classList.remove('image-loading');
+                applyZoom();
+                
+                if (productInfo) {
+                    currentProductInfo = productInfo;
+                    zoomImageTitle.textContent = productInfo.designation || 'صورة المنتج';
+                    
+                    let infoHTML = '';
+                    if (productInfo.ref) {
+                        infoHTML += `<div><strong>المرجع:</strong> ${productInfo.ref}</div>`;
+                    }
+                    if (productInfo.prix) {
+                        infoHTML += `<div><strong>السعر:</strong> ${formatPrice(productInfo.prix)}</div>`;
+                    }
+                    if (productInfo.famille) {
+                        infoHTML += `<div><strong>الفئة:</strong> ${productInfo.famille}</div>`;
+                    }
+                    if (tempImg.width && tempImg.height) {
+                        infoHTML += `<div><strong>الأبعاد:</strong> ${tempImg.width} × ${tempImg.height} بكسل</div>`;
+                    }
+                    
+                    zoomImageInfo.innerHTML = infoHTML;
+                }
+                
+                updateZoomIndicator();
+            };
+            
+            tempImg.onerror = function() {
+                zoomedImage.src = 'https://via.placeholder.com/800x600/1a3a6c/ffffff?text=صورة+غير+متوفرة';
+                zoomedImage.classList.remove('image-loading');
+                zoomImageTitle.textContent = 'صورة غير متوفرة';
+                zoomImageInfo.innerHTML = '<div>تعذر تحميل الصورة</div>';
+            };
+            
+            tempImg.src = imageUrl;
+            
+            // فتح المودال
+            const modal = new bootstrap.Modal(document.getElementById('imageZoomModal'));
+            modal.show();
+        }
+
+        // تطبيق التكبير والتدوير
+        function applyZoom() {
+            const zoomedImage = document.getElementById('zoomedImage');
+            if (!zoomedImage) return;
+            
+            zoomedImage.style.transform = `
+                scale(${currentZoom}) 
+                rotate(${currentRotation}deg)
+                translate(${0}px, ${0}px)
+            `;
+            updateZoomIndicator();
+        }
+
+        // التكبير
+        function zoomImage(factor) {
+            currentZoom *= factor;
+            
+            if (currentZoom < 0.1) currentZoom = 0.1;
+            if (currentZoom > 10) currentZoom = 10;
+            
+            applyZoom();
+        }
+
+        // إعادة تعيين التكبير
+        function resetZoom() {
+            currentZoom = 1;
+            currentRotation = 0;
+            applyZoom();
+        }
+
+        // تدوير الصورة
+        function rotateImage(degrees) {
+            currentRotation += degrees;
+            applyZoom();
+        }
+
+        // تحديث مؤشر التكبير
+        function updateZoomIndicator() {
+            const indicator = document.getElementById('zoomPercentage');
+            if (indicator) {
+                indicator.textContent = `${Math.round(currentZoom * 100)}%`;
+            }
+        }
+
+        // تحميل الصورة المكبرة
+        function downloadZoomedImage() {
+            const zoomedImage = document.getElementById('zoomedImage');
+            if (zoomedImage && currentProductInfo) {
+                const link = document.createElement('a');
+                link.href = zoomedImage.src;
+                
+                let fileName = 'image';
+                if (currentProductInfo.ref) {
+                    fileName = currentProductInfo.ref;
+                }
+                if (currentProductInfo.designation) {
+                    fileName += '_' + currentProductInfo.designation;
+                }
+                fileName = fileName.replace(/[^a-z0-9]/gi, '_') + '.jpg';
+                
+                link.download = fileName;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                showToast('تم تحميل الصورة', 'success');
+            }
+        }
+
+        // التحكم بالسحب
+        function startDrag(e) {
+            if (currentZoom <= 1) return;
+            
+            isDragging = true;
+            if (e.type === 'mousedown') {
+                startX = e.pageX;
+                startY = e.pageY;
+            } else if (e.type === 'touchstart' && e.touches.length === 1) {
+                startX = e.touches[0].pageX;
+                startY = e.touches[0].pageY;
+            }
+            
+            const container = document.querySelector('.zoom-image-container');
+            if (container) {
+                scrollLeft = container.scrollLeft;
+                scrollTop = container.scrollTop;
+            }
+            
+            e.preventDefault();
+        }
+
+        function dragImage(e) {
+            if (!isDragging || currentZoom <= 1) return;
+            
+            e.preventDefault();
+            
+            let x, y;
+            if (e.type === 'mousemove') {
+                x = e.pageX;
+                y = e.pageY;
+            } else if (e.type === 'touchmove' && e.touches.length === 1) {
+                x = e.touches[0].pageX;
+                y = e.touches[0].pageY;
+            } else {
+                return;
+            }
+            
+            const walkX = (x - startX) * 2;
+            const walkY = (y - startY) * 2;
+            const container = document.querySelector('.zoom-image-container');
+            
+            if (container) {
+                container.scrollLeft = scrollLeft - walkX;
+                container.scrollTop = scrollTop - walkY;
+            }
+        }
+
+        function stopDrag() {
+            isDragging = false;
+        }
+
+        // التحكم باللمس (التكبير بإصبعين)
+        function handleTouchStart(e) {
+            if (e.touches.length === 2) {
+                isPinching = true;
+                lastTouchDistance = getTouchDistance(e.touches);
+                e.preventDefault();
+            } else if (e.touches.length === 1) {
+                startDrag(e);
+            }
+        }
+
+        function handleTouchMove(e) {
+            if (isPinching && e.touches.length === 2) {
+                const currentDistance = getTouchDistance(e.touches);
+                if (lastTouchDistance !== null) {
+                    const scaleFactor = currentDistance / lastTouchDistance;
+                    zoomImage(scaleFactor);
+                }
+                lastTouchDistance = currentDistance;
+                e.preventDefault();
+            } else if (e.touches.length === 1) {
+                dragImage(e);
+            }
+        }
+
+        function handleTouchEnd(e) {
+            if (e.touches.length < 2) {
+                isPinching = false;
+                lastTouchDistance = null;
+            }
+            if (e.touches.length === 0) {
+                stopDrag();
+            }
+        }
+
+        function getTouchDistance(touches) {
+            const dx = touches[0].pageX - touches[1].pageX;
+            const dy = touches[0].pageY - touches[1].pageY;
+            return Math.sqrt(dx * dx + dy * dy);
+        }
+
+        // التحكم بالعجلة
+        function handleZoomWheel(e) {
+            e.preventDefault();
+            const delta = e.deltaY > 0 ? 0.9 : 1.1;
+            zoomImage(delta);
+        }
+
+        // ==================== تحسينات إضافية للعرض ====================
+        function setupResponsiveDesign() {
+            function adjustGridColumns() {
+                const screenWidth = window.innerWidth;
+                const productGrid = document.getElementById('productGrid');
+                
+                if (!productGrid) return;
+                
+                productGrid.className = 'row g-4';
+                
+                if (screenWidth < 576) {
+                    productGrid.classList.add('row-cols-2');
+                } else if (screenWidth < 768) {
+                    productGrid.classList.add('row-cols-2');
+                } else if (screenWidth < 992) {
+                    productGrid.classList.add('row-cols-md-3');
+                } else {
+                    productGrid.classList.add('row-cols-lg-4');
+                }
+            }
+            
+            function adjustFontSizes() {
+                const screenWidth = window.innerWidth;
+                
+                if (screenWidth < 576) {
+                    document.documentElement.style.fontSize = '14px';
+                } else if (screenWidth < 768) {
+                    document.documentElement.style.fontSize = '15px';
+                } else {
+                    document.documentElement.style.fontSize = '16px';
+                }
+            }
+            
+            window.addEventListener('load', () => {
+                adjustGridColumns();
+                adjustFontSizes();
+            });
+            
+            window.addEventListener('resize', () => {
+                adjustGridColumns();
+                adjustFontSizes();
+            });
+        }
 
         // ==================== تحميل البيانات ====================
         async function loadData() {
@@ -573,7 +1181,6 @@
                 let fileContent = data.files[fileKey].content;
 
                 if (data.files[fileKey].truncated) {
-                    console.log('Contenu tronqué, téléchargement via raw_url...');
                     const rawResponse = await fetch(data.files[fileKey].raw_url);
                     if (!rawResponse.ok) {
                         throw new Error('Erreur lors du téléchargement du contenu brut.');
@@ -787,16 +1394,18 @@
             const hasImage = image && !image.includes('placeholder');
             
             const zoomButton = hasImage ? 
-                `<button class="btn btn-light btn-sm position-absolute bottom-0 start-0 m-2 rounded-circle shadow-sm" 
+                `<button class="btn btn-light btn-sm position-absolute bottom-0 start-0 m-2 rounded-circle shadow-lg" 
                         onclick="openImageZoom('${escapeJs(image)}', ${escapeJs(JSON.stringify(p))})"
-                        title="تكبير الصورة">
+                        title="تكبير الصورة"
+                        style="width: 40px; height: 40px; backdrop-filter: blur(10px);">
                     <i class="fas fa-expand-alt"></i>
                 </button>` : '';
             
             const wishlistButton = `
-                <button class="btn btn-light btn-sm position-absolute top-0 end-0 m-2 rounded-circle shadow-sm" 
+                <button class="btn btn-light btn-sm position-absolute top-0 end-0 m-2 rounded-circle shadow-lg" 
                         onclick="toggleWishlist('${escapeJs(p.id)}')"
-                        title="${wishlist.includes(p.id) ? 'Retirer des favoris' : 'Ajouter aux favoris'}">
+                        title="${wishlist.includes(p.id) ? 'Retirer des favoris' : 'Ajouter aux favoris'}"
+                        style="width: 40px; height: 40px; backdrop-filter: blur(10px);">
                     <i class="${wishlist.includes(p.id) ? 'fas text-danger' : 'far'} fa-heart"></i>
                 </button>`;
             
@@ -809,13 +1418,15 @@
                 <div class="col-6 col-md-4 col-lg-3">
                     <div class="product-card h-100">
                         <div class="product-img-container" 
-                             onclick="openImageZoom('${escapeJs(image)}', ${escapeJs(JSON.stringify(p))})">
+                             onclick="openImageZoom('${escapeJs(image)}', ${escapeJs(JSON.stringify(p))})"
+                             style="cursor: pointer;">
                             ${badge}
                             <img src="${hasImage ? 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 200"%3E%3C/svg%3E' : image}" 
                                  data-src="${hasImage ? image : ''}"
                                  alt="${escapeHtml(p.designation)}" 
                                  loading="lazy"
-                                 class="${hasImage ? 'lazy-image' : ''}">
+                                 class="${hasImage ? 'lazy-image' : ''}"
+                                 style="width: 100%; height: 100%; object-fit: contain;">
                             ${zoomButton}
                             ${wishlistButton}
                         </div>
@@ -1018,155 +1629,6 @@
             localStorage.setItem('varicom_affinity', JSON.stringify(categoryAffinity));
         }
 
-        // ==================== تكبير الصورة ====================
-        function initImageZoomEvents() {
-            const modal = document.getElementById('imageZoomModal');
-            if (modal) {
-                modal.addEventListener('shown.bs.modal', function() {
-                    const img = document.getElementById('zoomedImage');
-                    if (img) {
-                        img.addEventListener('wheel', handleZoomWheel);
-                        img.addEventListener('mousedown', startDrag);
-                        document.addEventListener('mousemove', dragImage);
-                        document.addEventListener('mouseup', stopDrag);
-                    }
-                });
-
-                modal.addEventListener('hidden.bs.modal', function() {
-                    const img = document.getElementById('zoomedImage');
-                    if (img) {
-                        img.removeEventListener('wheel', handleZoomWheel);
-                        img.removeEventListener('mousedown', startDrag);
-                        document.removeEventListener('mousemove', dragImage);
-                        document.removeEventListener('mouseup', stopDrag);
-                    }
-                    resetZoom();
-                });
-            }
-        }
-
-        function openImageZoom(imageUrl, productInfo) {
-            const zoomedImage = document.getElementById('zoomedImage');
-            const zoomImageTitle = document.getElementById('zoomImageTitle');
-            const zoomImageInfo = document.getElementById('zoomImageInfo');
-            
-            if (!zoomedImage || !zoomImageTitle || !zoomImageInfo) return;
-            
-            try {
-                if (typeof productInfo === 'string') {
-                    productInfo = JSON.parse(productInfo);
-                }
-            } catch (e) {
-                console.error('Error parsing product info:', e);
-                productInfo = null;
-            }
-            
-            zoomedImage.src = imageUrl;
-            zoomedImage.style.transform = `scale(${currentZoom}) rotate(${currentRotation}deg)`;
-            zoomedImage.style.transition = 'transform 0.3s ease';
-            
-            if (productInfo) {
-                currentProductInfo = productInfo;
-                zoomImageTitle.textContent = productInfo.designation;
-                zoomImageInfo.innerHTML = `
-                    Réf: ${productInfo.ref || 'N/A'}<br>
-                    Prix: ${formatPrice(productInfo.prix)}<br>
-                    ${productInfo.famille ? `Catégorie: ${productInfo.famille}` : ''}
-                `;
-            }
-            
-            updateZoomIndicator();
-            
-            const modal = new bootstrap.Modal(document.getElementById('imageZoomModal'));
-            modal.show();
-        }
-
-        function zoomImage(factor) {
-            const zoomedImage = document.getElementById('zoomedImage');
-            if (zoomedImage) {
-                currentZoom *= factor;
-                if (currentZoom < 0.1) currentZoom = 0.1;
-                if (currentZoom > 10) currentZoom = 10;
-                zoomedImage.style.transform = `scale(${currentZoom}) rotate(${currentRotation}deg)`;
-                updateZoomIndicator();
-            }
-        }
-
-        function handleZoomWheel(e) {
-            e.preventDefault();
-            const delta = e.deltaY > 0 ? 0.9 : 1.1;
-            zoomImage(delta);
-        }
-
-        function resetZoom() {
-            currentZoom = 1;
-            currentRotation = 0;
-            const zoomedImage = document.getElementById('zoomedImage');
-            if (zoomedImage) {
-                zoomedImage.style.transform = `scale(1) rotate(0deg)`;
-                updateZoomIndicator();
-            }
-        }
-
-        function rotateImage(degrees) {
-            currentRotation += degrees;
-            const zoomedImage = document.getElementById('zoomedImage');
-            if (zoomedImage) {
-                zoomedImage.style.transform = `scale(${currentZoom}) rotate(${currentRotation}deg)`;
-            }
-        }
-
-        function downloadZoomedImage() {
-            const zoomedImage = document.getElementById('zoomedImage');
-            if (zoomedImage && currentProductInfo) {
-                const link = document.createElement('a');
-                link.href = zoomedImage.src;
-                link.download = `${currentProductInfo.ref || 'image'}_${currentProductInfo.designation.replace(/[^a-z0-9]/gi, '_')}.jpg`;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                showToast('Image téléchargée', 'success');
-            }
-        }
-
-        function updateZoomIndicator() {
-            const indicator = document.getElementById('zoomPercentage');
-            if (indicator) {
-                indicator.textContent = `${Math.round(currentZoom * 100)}%`;
-            }
-        }
-
-        function startDrag(e) {
-            if (currentZoom <= 1) return;
-            isDragging = true;
-            startX = e.pageX;
-            startY = e.pageY;
-            const modalBody = document.querySelector('.image-zoom-modal .modal-body');
-            if (modalBody) {
-                scrollLeft = modalBody.scrollLeft;
-                scrollTop = modalBody.scrollTop;
-            }
-            e.preventDefault();
-        }
-
-        function dragImage(e) {
-            if (!isDragging) return;
-            e.preventDefault();
-            const x = e.pageX;
-            const y = e.pageY;
-            const walkX = (x - startX) * 2;
-            const walkY = (y - startY) * 2;
-            const modalBody = document.querySelector('.image-zoom-modal .modal-body');
-            if (modalBody) {
-                modalBody.scrollLeft = scrollLeft - walkX;
-                modalBody.scrollTop = scrollTop - walkY;
-            }
-        }
-
-        function stopDrag() {
-            isDragging = false;
-        }
-
         // ==================== التصدير والطلب ====================
         function generatePDF() {
             if (cart.length === 0) {
@@ -1183,7 +1645,6 @@
                 const date = new Date().toLocaleDateString('fr-FR');
                 const time = new Date().toLocaleTimeString('fr-FR');
 
-                // Header
                 doc.setFillColor(26, 58, 108);
                 doc.rect(0, 0, 210, 40, 'F');
                 doc.setTextColor(255, 255, 255);
@@ -1202,13 +1663,11 @@
                 doc.setFont('helvetica', 'normal');
                 doc.text(`Date: ${date} ${time}`, 195, 30, { align: 'right' });
 
-                // Client Info
                 doc.setTextColor(0, 0, 0);
                 doc.setFontSize(12);
                 doc.text(`Client: ${clientName}`, 15, 55);
                 if (clientPhone) doc.text(`Tél: ${clientPhone}`, 15, 62);
 
-                // Table
                 const tableData = cart.map(item => [
                     item.designation,
                     item.qty,
