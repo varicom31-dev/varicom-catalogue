@@ -1,1763 +1,1873 @@
 <!DOCTYPE html>
-<html lang="fr" dir="ltr">
+<html lang="fr" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VARICOM - Administration Pro</title>
+    <title>VARICOM - Catalogue Premium</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
     <style>
-        /* === ألوان متناسقة مع شعار VARICOM (أزرق تدرجي + أحمر/وردي) === */
         :root {
-            --primary-color: #114a9f;       /* أزرق داكن */
-            --primary-color-2: #2b73d6;     /* أزرق فاتح (لتدرج) */
-            --primary-gradient: linear-gradient(90deg, #114a9f 0%, #2b73d6 100%);
-            --secondary-color: #ff2d55;     /* أحمر/وردي شعار */
-            --accent-color: #0ea5a8;        /* لون داعم */
-            --dark-color: #2c3e50;
-            --light-color: #ecf0f1;
+            --primary-color: #1a3a6c;
+            --secondary-color: #e63946;
+            --accent-color: #2a9d8f;
+            --bg-color: #f8f9fa;
+            --text-color: #212529;
             --card-bg: #ffffff;
-            --bg-page: linear-gradient(135deg, rgba(17,74,159,0.12), rgba(43,115,214,0.06));
         }
 
-        /* داكن */
         [data-theme="dark"] {
-            --primary-color: #2b73d6;
-            --primary-color-2: #114a9f;
-            --primary-gradient: linear-gradient(90deg,#2b73d6 0%, #114a9f 100%);
-            --secondary-color: #ff6b85;
-            --accent-color: #34d399;
-            --dark-color: #0b1220;
-            --light-color: #0f1720;
-            --card-bg: #0f1720;
-            --bg-page: linear-gradient(135deg, rgba(43,115,214,0.06), rgba(17,74,159,0.06));
+            --primary-color: #3a6ea5;
+            --bg-color: #121212;
+            --text-color: #f8f9fa;
+            --card-bg: #1e1e1e;
+            --card-border: #2a2a2a;
         }
 
         body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: var(--bg-page);
-            min-height: 100vh;
-            padding: 20px;
-            color: #0b1b2b;
-            transition: background .25s ease, color .25s ease;
+            transition: background-color 0.3s, color 0.3s;
+            padding-top: 70px;
+            margin: 0;
         }
 
-        [data-theme="dark"] body {
-            color: #e6eef8;
+        .navbar {
+            background: rgba(var(--card-bg), 0.95) !important;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+            border-bottom: 1px solid rgba(0,0,0,0.1);
         }
 
-        .admin-container {
-            background: var(--card-bg);
-            border-radius: 15px;
-            box-shadow: 0 15px 35px rgba(16, 40, 80, 0.08);
-            margin: 0 auto;
-            max-width: 1400px;
-            overflow: hidden;
+        [data-theme="dark"] .navbar {
+            background: rgba(30, 30, 30, 0.95) !important;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
         }
 
-        .admin-header {
-            background: var(--primary-gradient);
-            color: white;
-            padding: 25px;
-            position: relative;
-            overflow: hidden;
-            display:flex;
-            flex-direction:column;
-            align-items:center;
-            gap:6px;
-        }
-
-        .admin-header h1 {
-            margin:0;
-            font-weight:700;
-            letter-spacing:0.6px;
-        }
-
-        .admin-header p { margin:0; opacity:0.95; }
-
-        .brand-mark {
-            width:48px;
-            height:48px;
-            border-radius:8px;
-            background: conic-gradient(from 200deg, var(--secondary-color), var(--primary-color), var(--primary-color-2));
-            box-shadow: 0 8px 18px rgba(17,74,159,0.15);
-            display:inline-block;
-            margin-bottom:6px;
-        }
-
-        .upload-section {
-            background: linear-gradient(135deg, rgba(40,167,69,0.08), rgba(16,185,129,0.02));
-            color: #0d1b2a;
-            border-radius: 15px;
-            padding: 25px;
-            margin: 20px;
-            box-shadow: 0 6px 18px rgba(16,40,80,0.04);
-        }
-
-        .upload-area {
-            border: 3px dashed rgba(17, 74, 159, 0.18);
+        .product-card {
+            border: 1px solid rgba(0,0,0,0.1);
             border-radius: 12px;
-            padding: 40px 20px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.28s ease;
-            background: rgba(255,255,255,0.9);
+            overflow: hidden;
+            transition: transform 0.3s, box-shadow 0.3s, border-color 0.3s;
+            background-color: var(--card-bg);
+            height: 100%;
         }
 
-        .upload-area:hover {
-            background: rgba(251,251,251,0.98);
+        [data-theme="dark"] .product-card {
+            border-color: var(--card-border);
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
             border-color: var(--primary-color);
-            transform: translateY(-4px);
         }
 
-        .sync-status {
+        .product-img-container {
+            height: 200px;
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+            cursor: pointer;
+        }
+
+        [data-theme="dark"] .product-img-container {
+            background: linear-gradient(135deg, #2a2a2a 0%, #1e1e1e 100%);
+        }
+
+        .product-img-container img {
+            max-height: 180px;
+            max-width: 90%;
+            object-fit: contain;
+            transition: transform 0.3s;
+        }
+
+        .product-card:hover .product-img-container img {
+            transform: scale(1.05);
+        }
+
+        .badge-new {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: linear-gradient(135deg, var(--secondary-color), #ff6b6b);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            z-index: 10;
+            box-shadow: 0 3px 10px rgba(230, 57, 70, 0.3);
+        }
+
+        .btn-add-cart {
+            background: linear-gradient(135deg, var(--primary-color), #2a4d7a);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            padding: 8px 20px;
+            font-weight: 600;
+            transition: all 0.3s;
+            box-shadow: 0 3px 10px rgba(26, 58, 108, 0.2);
+        }
+
+        .btn-add-cart:hover {
+            background: linear-gradient(135deg, var(--accent-color), #238f7c);
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(42, 157, 143, 0.3);
+        }
+
+        .floating-cart {
             position: fixed;
-            top: 20px;
+            bottom: 30px;
+            right: 30px;
+            background: linear-gradient(135deg, var(--primary-color), #2a4d7a);
+            color: white;
+            width: 65px;
+            height: 65px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.25);
+            cursor: pointer;
+            z-index: 1000;
+            transition: transform 0.3s;
+            border: 3px solid white;
+        }
+
+        [data-theme="dark"] .floating-cart {
+            border-color: #2a2a2a;
+        }
+
+        .floating-cart:hover {
+            transform: scale(1.1) rotate(5deg);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.35);
+        }
+
+        .cart-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: linear-gradient(135deg, var(--secondary-color), #ff6b6b);
+            color: white;
+            border-radius: 50%;
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: bold;
+            border: 2px solid white;
+        }
+
+        [data-theme="dark"] .cart-badge {
+            border-color: #2a2a2a;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-3px); }
+            20%, 40%, 60%, 80% { transform: translateX(3px); }
+        }
+
+        .animate-shake {
+            animation: shake 2s infinite;
+        }
+
+        /* ==================== نظام تكبير الصور المتقدم - الإصلاحات ==================== */
+        .image-zoom-modal {
+            z-index: 1060;
+        }
+
+        .image-zoom-modal .modal-dialog {
+            max-width: 95vw;
+            max-height: 95vh;
+            margin: 10px auto;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .image-zoom-modal .modal-content {
+            background: rgba(0, 0, 0, 0.95);
+            border: none;
+            border-radius: 10px;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .image-zoom-modal .modal-header {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.15);
+            padding: 15px 20px;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1001;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(10px);
+        }
+
+        .image-zoom-modal .modal-body {
+            padding: 60px 20px 20px;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: auto;
+            position: relative;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        #zoomedImage {
+            max-width: 100%;
+            max-height: calc(100vh - 100px);
+            object-fit: contain;
+            transition: transform 0.3s ease;
+            cursor: move;
+            user-select: none;
+            -webkit-user-drag: none;
+            touch-action: none;
+        }
+
+        #zoomedImage.dragging {
+            cursor: grabbing;
+        }
+
+        .zoom-controls {
+            position: absolute;
+            bottom: 30px;
             right: 20px;
             z-index: 1000;
-            padding: 15px 25px;
-            border-radius: 10px;
-            display: none;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.12);
-            animation: slideInRight 0.45s ease;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 15px;
+            border-radius: 25px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .zoom-controls button {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, rgba(26, 58, 108, 0.9), rgba(42, 157, 143, 0.9));
+            border: 2px solid rgba(255, 255, 255, 0.2);
             color: white;
-            font-weight:600;
-        }
-
-        @keyframes slideInRight {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-
-        .sync-success { background: var(--accent-color); border-left: 5px solid #0b845f; }
-        .sync-warning { background: #ffc107; color: #000; border-left: 5px solid #e0a800; }
-        .sync-error { background: var(--secondary-color); border-left: 5px solid #bd2130; }
-
-        .stats-card {
-            background: var(--card-bg);
-            border-radius: 15px;
-            padding: 20px;
-            text-align: center;
-            box-shadow: 0 5px 15px rgba(16, 40, 80, 0.04);
-            transition: transform 0.28s;
-        }
-
-        .stats-card:hover { transform: translateY(-6px); }
-
-        .feature-card {
-            background: var(--card-bg);
-            border-radius: 15px;
-            box-shadow: 0 6px 18px rgba(16, 40, 80, 0.04);
-            margin-bottom: 20px;
-            overflow: hidden;
-        }
-
-        .btn-pulse {
-            animation: pulse 2.2s infinite;
-        }
-
-        @keyframes pulse {
-            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.6); }
-            70% { transform: scale(1.03); box-shadow: 0 0 0 10px rgba(40, 167, 69, 0); }
-            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(40, 167, 69, 0); }
-        }
-
-        .ai-image-result {
-            border: 2px solid #dee2e6;
-            border-radius: 10px;
-            overflow: hidden;
-            transition: all 0.25s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+            font-size: 1.2rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
             cursor: pointer;
-            height: 100%;
-            background: linear-gradient(180deg, rgba(255,255,255,0.6), rgba(255,255,255,0.4));
+            outline: none;
         }
 
-        .ai-image-result:hover {
-            border-color: var(--primary-color);
-            transform: translateY(-6px);
-            box-shadow: 0 8px 22px rgba(16,40,80,0.08);
+        .zoom-controls button:hover {
+            background: linear-gradient(135deg, rgba(42, 157, 143, 0.9), rgba(26, 58, 108, 0.9));
+            transform: scale(1.1);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
         }
 
-        .ai-image-result.selected {
-            border-color: var(--secondary-color);
-            box-shadow: 0 0 0 6px rgba(255,45,85,0.08);
+        .zoom-controls button:active {
+            transform: scale(0.95);
         }
 
-        .search-tags { display:flex; flex-wrap:wrap; gap:6px; margin:10px 0; }
-        .search-tag {
-            background: #eef2f7;
-            padding:6px 10px;
-            border-radius: 999px;
-            font-size:0.85rem;
-            cursor:pointer;
-            transition:all .18s;
+        .image-info-panel {
+            position: absolute;
+            bottom: 30px;
+            left: 20px;
+            z-index: 1000;
+            background: linear-gradient(135deg, rgba(0, 0, 0, 0.85), rgba(26, 58, 108, 0.85));
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            max-width: 400px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
         }
-        .search-tag:hover { background: var(--primary-color); color:white; }
 
-        .loader {
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid var(--primary-color);
+        .image-info-panel h6 {
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: #fff;
+        }
+
+        .image-info-panel .product-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 10px;
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        .image-info-panel .product-details div {
+            padding: 5px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .zoom-indicator {
+            position: absolute;
+            top: 80px;
+            right: 20px;
+            z-index: 1000;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .zoom-indicator i {
+            color: #4CAF50;
+        }
+
+        .btn-close-zoom {
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.3);
             border-radius: 50%;
             width: 40px;
             height: 40px;
-            animation: spin 1s linear infinite;
-            margin: 20px auto;
-        }
-
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-
-        .search-source-badge {
-            position: absolute;
-            bottom: 6px;
-            right: 6px;
-            background: rgba(0,0,0,0.62);
+            display: flex;
+            align-items: center;
+            justify-content: center;
             color: white;
-            padding: 3px 8px;
-            border-radius: 10px;
-            font-size: 0.72rem;
+            font-size: 1.2rem;
+            transition: all 0.3s;
+            cursor: pointer;
+            outline: none;
         }
 
-        .smart-suggestions {
-            background: #f8f9fb;
+        .btn-close-zoom:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: rotate(90deg);
+        }
+
+        .touch-zoom-hint {
+            position: absolute;
+            bottom: 150px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 0.9rem;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            z-index: 1000;
+            animation: pulse-hint 2s infinite;
+            display: none;
+        }
+
+        @keyframes pulse-hint {
+            0%, 100% { opacity: 0.7; }
+            50% { opacity: 1; }
+        }
+
+        .image-loading {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+        }
+
+        [data-theme="dark"] .image-loading {
+            background: linear-gradient(90deg, #2a2a2a 25%, #333 50%, #2a2a2a 75%);
+        }
+
+        @keyframes loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+
+        .high-resolution-mode {
+            image-rendering: -webkit-optimize-contrast;
+            image-rendering: crisp-edges;
+        }
+
+        .modal-open {
+            overflow: hidden;
+        }
+
+        /* تحسينات للموبايل */
+        @media (max-width: 768px) {
+            .image-zoom-modal .modal-dialog {
+                margin: 0;
+                max-width: 100vw;
+                max-height: 100vh;
+                border-radius: 0;
+            }
+            
+            .image-zoom-modal .modal-content {
+                border-radius: 0;
+            }
+            
+            .zoom-controls {
+                bottom: 20px;
+                right: 15px;
+                padding: 12px;
+                gap: 8px;
+            }
+            
+            .zoom-controls button {
+                width: 45px;
+                height: 45px;
+                font-size: 1.1rem;
+            }
+            
+            .image-info-panel {
+                bottom: 20px;
+                left: 15px;
+                right: 15px;
+                padding: 15px;
+                max-width: none;
+            }
+            
+            .image-info-panel h6 {
+                font-size: 1rem;
+            }
+            
+            .image-info-panel .product-details {
+                grid-template-columns: 1fr;
+                font-size: 0.85rem;
+            }
+            
+            .zoom-indicator {
+                top: 70px;
+                right: 15px;
+                padding: 8px 15px;
+                font-size: 0.85rem;
+            }
+            
+            .btn-close-zoom {
+                width: 35px;
+                height: 35px;
+                font-size: 1rem;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .zoom-controls {
+                flex-direction: row;
+                bottom: 15px;
+                right: 50%;
+                transform: translateX(50%);
+                width: auto;
+            }
+            
+            .zoom-controls button {
+                width: 40px;
+                height: 40px;
+                font-size: 1rem;
+            }
+            
+            .image-info-panel {
+                left: 10px;
+                right: 10px;
+                bottom: 80px;
+            }
+            
+            .zoom-indicator {
+                top: 60px;
+                right: 10px;
+                padding: 6px 12px;
+            }
+            
+            .product-img-container {
+                height: 180px;
+            }
+            
+            .product-img-container img {
+                max-height: 160px;
+            }
+        }
+
+        /* تحسينات للأجهزة اللوحية */
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .product-img-container {
+                height: 220px;
+            }
+            
+            .product-img-container img {
+                max-height: 200px;
+            }
+            
+            .zoom-controls {
+                bottom: 25px;
+                right: 25px;
+            }
+            
+            .image-info-panel {
+                max-width: 350px;
+            }
+        }
+
+        /* Toast Notification */
+        .toast-container {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            z-index: 1050;
+        }
+
+        .custom-toast {
+            background: var(--card-bg);
+            border: 1px solid rgba(0,0,0,0.1);
             border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
             padding: 15px;
+            margin-bottom: 10px;
+            animation: slideInLeft 0.3s ease;
+            max-width: 350px;
+        }
+
+        [data-theme="dark"] .custom-toast {
+            border-color: rgba(255,255,255,0.1);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+
+        @keyframes slideInLeft {
+            from { transform: translateX(-100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        /* Loading Skeleton */
+        .skeleton {
+            background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+            border-radius: 8px;
+        }
+
+        [data-theme="dark"] .skeleton {
+            background: linear-gradient(90deg, #2a2a2a 25%, #333 50%, #2a2a2a 75%);
+        }
+
+        /* تحسينات إضافية */
+        .row-cols-2 .product-card {
+            margin-bottom: 15px;
+        }
+
+        .row-cols-md-3 .product-card {
             margin-bottom: 20px;
         }
 
-        .suggestion-tag {
-            display:inline-block;
-            background:#eef2f7;
-            border:1px solid #e2e8f0;
-            border-radius:20px;
-            padding:6px 12px;
-            margin:5px;
-            cursor:pointer;
-            transition:all .18s;
-        }
-        .suggestion-tag:hover { background: var(--primary-color); color:#fff; border-color:var(--primary-color); }
-
-        .image-select-card { transition: all .25s; cursor:pointer; }
-        .image-select-card:hover { transform: translateY(-6px); box-shadow: 0 10px 24px rgba(16,40,80,0.07); }
-
-        .auto-search-progress { height: 5px; background: #e9ecef; border-radius:10px; overflow:hidden; margin-top:10px; }
-        .auto-search-progress-bar { height:100%; background: linear-gradient(90deg,var(--accent-color), #20c997); transition:width .3s; }
-
-        .quality-badge { position:absolute; top:5px; left:5px; background: linear-gradient(135deg,#28a745,#20c997); color:white; padding:3px 8px; border-radius:8px; font-size:.72rem; font-weight:700; }
-        .relevance-badge { position:absolute; top:5px; right:5px; background: linear-gradient(135deg,var(--primary-color),var(--primary-color-2)); color:white; padding:3px 8px; border-radius:8px; font-size:.72rem; font-weight:700; }
-
-        /* Table header sticky */
-        thead.sticky-top { top: 0; z-index: 2; background: linear-gradient(90deg,#ffffff,#f8fbff); }
-        [data-theme="dark"] thead.sticky-top { background: linear-gradient(90deg,#0b1220,#0f1720); color: #e6eef8; }
-
-        /* small responsive tweaks */
-        @media (max-width: 768px) {
-            .admin-header { padding:16px; }
-            .upload-area { padding:28px 14px; }
+        .row-cols-lg-4 .product-card {
+            margin-bottom: 25px;
         }
     </style>
 </head>
+
 <body>
-    <div id="syncStatus" class="sync-status"></div>
-
-    <div class="admin-container">
-        <div class="admin-header text-center">
-            <span class="brand-mark" aria-hidden="true"></span>
-            <h1><i class="fas fa-user-shield me-3"></i>PANEL ADMINISTRATEUR VARICOM</h1>
-            <p class="lead mb-0">Solution Professionnelle - Synchronisation Temps Réel</p>
-        </div>
-
-        <!-- Quick Actions -->
-        <div class="p-4 bg-light border-bottom">
-            <div class="row align-items-center">
-                <div class="col-md-6">
-                    <h4 class="mb-0 text-primary"><i class="fas fa-bolt me-2"></i>Tableau de Bord</h4>
-                </div>
-                <div class="col-md-6 text-end">
-                    <button class="btn btn-warning btn-lg me-2" onclick="autoSearchProductImages()">
-                        <i class="fas fa-robot me-2"></i>بحث تلقائي
-                    </button>
-                    <button class="btn" style="background:linear-gradient(90deg,var(--primary-color),var(--primary-color-2)); color:white;" onclick="uploadToGitHubGist()" id="publishBtn">
-                        <i class="fab fa-github me-2"></i>Publier / Synchroniser
-                    </button>
-                    <button class="btn btn-outline-primary btn-lg" onclick="generateClientLink()">
-                        <i class="fas fa-link me-2"></i>Lien Client
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Stats -->
-        <div class="row m-4">
-            <div class="col-md-3">
-                <div class="stats-card">
-                    <i class="fas fa-box fa-2x text-primary mb-2"></i>
-                    <h3 id="statsProducts">0</h3>
-                    <p class="text-muted mb-0">Produits Totaux</p>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="stats-card">
-                    <i class="fas fa-star fa-2x text-warning mb-2"></i>
-                    <h3 id="statsNewProducts">0</h3>
-                    <p class="text-muted mb-0">Nouveautés</p>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="stats-card">
-                    <i class="fas fa-bell fa-2x text-info mb-2"></i>
-                    <h3 id="statsNotifications">0</h3>
-                    <p class="text-muted mb-0">Notifications</p>
-                </div>
-            </div>
-            <div class="col-md-3">
-                <div class="stats-card">
-                    <i class="fas fa-sync fa-2x text-success mb-2"></i>
-                    <h3 id="statsStatus">Inactif</h3>
-                    <p class="text-muted mb-0">Statut Sync</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Smart Search Section -->
-        <div class="row m-4">
-            <div class="col-12">
-                <div class="feature-card">
-                    <div class="card-header" style="background:linear-gradient(90deg,var(--primary-color),var(--primary-color-2)); color:white;">
-                        <h5 class="mb-0"><i class="fas fa-search-plus me-2"></i>بحث ذكي متقدم بالصور</h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="smart-suggestions">
-                            <h6><i class="fas fa-lightbulb me-2"></i>اقتراحات ذكية:</h6>
-                            <div id="smartSuggestions">
-                                <!-- سيتم ملؤه تلقائياً -->
-                            </div>
-                        </div>
-                        
-                        <div class="row mb-3">
-                            <div class="col-md-8">
-                                <div class="input-group">
-                                    <input type="text" class="form-control" id="smartSearchInput" 
-                                           placeholder="ابحث عن صور للمنتج...">
-                                    <button class="btn btn-primary" onclick="smartImageSearch()">
-                                        <i class="fas fa-search"></i> بحث ذكي
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="col-md-4">
-                                <select class="form-select" id="searchSource">
-                                    <option value="auto">تلقائي (أفضل النتائج)</option>
-                                    <option value="bing">Bing Images</option>
-                                    <option value="unsplash">Unsplash</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div id="autoSearchProgress" class="auto-search-progress" style="display: none;">
-                            <div id="autoSearchProgressBar" class="auto-search-progress-bar" style="width: 0%"></div>
-                        </div>
-                        
-                        <div class="row g-3" id="smartResults"></div>
-                        
-                        <div class="mt-3 text-center" id="applyButtonContainer" style="display: none;">
-                            <button class="btn" style="background:var(--secondary-color); color:white;" onclick="applySelectedImageToCurrentProduct()">
-                                <i class="fas fa-check-circle me-2"></i>تطبيق الصورة المحددة على المنتج
-                            </button>
-                            <p class="text-muted mt-2 small" id="currentProductInfo"></p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Excel Upload -->
-        <div class="upload-section">
-            <h4><i class="fas fa-file-excel me-2"></i>Importation Produits Excel</h4>
-            <div class="upload-area" id="excelUploadArea" onclick="document.getElementById('excelFile').click()">
-                <i class="fas fa-cloud-upload-alt fa-3x mb-3"></i>
-                <h5>Cliquez ou glissez votre fichier Excel ici</h5>
-                <p class="small opacity-75">Supporte .xlsx, .xls, .csv</p>
-                <input type="file" id="excelFile" accept=".xlsx, .xls, .csv" style="display: none;"
-                    onchange="handleExcelUpload(this.files[0])">
-            </div>
-            <div class="mt-3 text-center">
-                <button class="btn btn-outline-secondary btn-sm" onclick="downloadTemplate()">
-                    <i class="fas fa-download me-1"></i>Télécharger Modèle
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg fixed-top">
+        <div class="container">
+            <a class="navbar-brand fw-bold text-primary" href="#">
+                <i class="fas fa-cube me-2"></i>VARICOM
+            </a>
+            <div class="d-flex align-items-center gap-3">
+                <button class="btn btn-outline-secondary btn-sm rounded-circle" onclick="toggleTheme()" id="themeBtn">
+                    <i class="fas fa-moon" id="themeIcon"></i>
                 </button>
-            </div>
-        </div>
-
-        <div class="row m-4">
-            <!-- New Products -->
-            <div class="col-md-6">
-                <div class="feature-card h-100">
-                    <div class="card-header" style="background:linear-gradient(90deg,var(--primary-color),var(--primary-color-2)); color:white;">
-                        <h5 class="mb-0"><i class="fas fa-plus-circle me-2"></i>Ajouter Produit / Nouveauté</h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="mb-3">
-                            <input type="text" class="form-control mb-2" id="newProductName" placeholder="Nom du produit">
-                            <div class="row g-2">
-                                <div class="col-6">
-                                    <input type="number" class="form-control" id="newProductPrice" placeholder="Prix (DA)">
-                                </div>
-                                <div class="col-6">
-                                    <select class="form-select" id="newProductCategory">
-                                        <option value="Général">Catégorie...</option>
-                                        <option value="Ordinateurs">Ordinateurs</option>
-                                        <option value="Téléphones">Téléphones</option>
-                                        <option value="Accessoires">Accessoires</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <input type="text" class="form-control mt-2" id="newProductImage" placeholder="URL de l'image (https://...)">
-                        </div>
-                        <button class="btn" style="background:linear-gradient(90deg,var(--primary-color),var(--primary-color-2)); color:white;" onclick="addNewProduct()">
-                            <i class="fas fa-plus me-2"></i>Ajouter à la liste
-                        </button>
-
-                        <hr>
-                        <h6 class="text-muted">Produits Nouveaux Actifs:</h6>
-                        <ul id="activeNewProducts" class="list-group list-group-flush small" style="max-height: 200px; overflow-y: auto;"></ul>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Notifications -->
-            <div class="col-md-6">
-                <div class="feature-card h-100">
-                    <div class="card-header" style="background: linear-gradient(90deg,#ffc107,#ff8a00); color:#000;">
-                        <h5 class="mb-0"><i class="fas fa-bullhorn me-2"></i>Gérer Notifications</h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="mb-3">
-                            <input type="text" class="form-control mb-2" id="notifTitle" placeholder="Titre (ex: Promo)">
-                            <textarea class="form-control mb-2" id="notifMessage" rows="2" placeholder="Message..."></textarea>
-                            <select class="form-select" id="notifType">
-                                <option value="info">Information ℹ️</option>
-                                <option value="success">Succès ✅</option>
-                                <option value="warning">Attention ⚠️</option>
-                                <option value="error">Urgent ❌</option>
-                            </select>
-                        </div>
-                        <button class="btn btn-warning w-100" onclick="createNotification()">
-                            <i class="fas fa-paper-plane me-2"></i>Publier Notification
-                        </button>
-
-                        <hr>
-                        <h6 class="text-muted">Notifications Actives:</h6>
-                        <ul id="activeNotifications" class="list-group list-group-flush small" style="max-height: 200px; overflow-y: auto;"></ul>
-                    </div>
+                <div class="d-lg-none" onclick="openCart()">
+                    <i class="fas fa-shopping-basket fa-lg text-primary"></i>
                 </div>
             </div>
         </div>
+    </nav>
 
-        <!-- Settings -->
-        <div class="row m-4">
-            <div class="col-12">
-                <div class="feature-card">
-                    <div class="card-header bg-dark text-white">
-                        <h5 class="mb-0"><i class="fas fa-cogs me-2"></i>Configuration</h5>
+    <!-- Hero Section -->
+    <header class="bg-primary text-white pt-5 pb-5">
+        <div class="container py-5">
+            <div class="row align-items-center">
+                <div class="col-lg-6">
+                    <h1 class="display-5 fw-bold animate__animated animate__fadeInLeft">Découvrez Nos Produits</h1>
+                    <p class="lead animate__animated animate__fadeInLeft animate__delay-1s">La qualité professionnelle à portée de main.</p>
+                    <div class="input-group mt-4 shadow-lg animate__animated animate__fadeInUp animate__delay-1s" style="max-width: 500px;">
+                        <span class="input-group-text border-0 bg-white"><i class="fas fa-search text-muted"></i></span>
+                        <input type="text" class="form-control border-0 p-3" id="searchInput"
+                            placeholder="Rechercher un produit..." oninput="filterProducts()">
                     </div>
-                    <div class="card-body">
-                        <div class="row align-items-end">
-                            <div class="col-md-8">
-                                <label class="form-label">Token GitHub (Personnel Access Token)</label>
-                                <div class="input-group">
-                                    <span class="input-group-text"><i class="fab fa-github"></i></span>
-                                    <input type="password" class="form-control" id="githubToken" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx">
-                                    <button class="btn btn-outline-secondary" type="button" onclick="toggleToken()">
-                                        <i class="fas fa-eye"></i>
-                                    </button>
-                                </div>
-                                <small class="text-muted">Nécessaire pour la synchronisation. Stocké localement.</small>
-                            </div>
-                            <div class="col-md-4">
-                                <button class="btn btn-danger w-100" onclick="resetSync()">
-                                    <i class="fas fa-trash-alt me-2"></i>Réinitialiser Sync
-                                </button>
-                            </div>
-                        </div>
-                    </div>
+                </div>
+                <div class="col-lg-6 d-none d-lg-block text-center animate__animated animate__fadeInRight">
+                    <img src="https://cdn-icons-png.flaticon.com/512/3081/3081559.png" alt="Hero" class="img-fluid"
+                        style="max-height: 250px; filter: drop-shadow(0 10px 20px rgba(0,0,0,0.2));">
                 </div>
             </div>
         </div>
+    </header>
 
-        <!-- Catalog Management -->
-        <div class="row m-4">
-            <div class="col-12">
-                <div class="feature-card">
-                    <div class="card-header" style="background:linear-gradient(90deg,var(--primary-color),var(--primary-color-2)); color:white; display:flex; justify-content:space-between; align-items:center;">
-                        <h5 class="mb-0"><i class="fas fa-boxes me-2"></i>Gestion du Catalogue</h5>
-                        <button class="btn btn-light btn-sm text-primary fw-bold" onclick="openBulkImageModal()">
-                            <i class="fas fa-magic me-2"></i>Générateur de Liens Image/Desc
-                        </button>
-                    </div>
-                    <div class="card-body">
-                        <div class="table-responsive" style="max-height: 500px;">
-                            <table class="table table-hover align-middle">
-                                <thead class="table-light sticky-top">
-                                    <tr>
-                                        <th>Ref</th>
-                                        <th>Désignation</th>
-                                        <th>Prix</th>
-                                        <th style="width: 25%;">Image URL</th>
-                                        <th style="width: 20%;">Description URL</th>
-                                        <th>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="catalogTableBody"></tbody>
-                            </table>
-                        </div>
-                        <div class="text-center mt-3">
-                            <small class="text-muted">Affichage limité aux 100 premiers produits pour la performance.</small>
-                        </div>
-                    </div>
-                </div>
-            </div>
+    <!-- Notifications -->
+    <div id="adminNotifications" class="container mt-4"></div>
+
+    <!-- Recommendations -->
+    <section id="recommendationSection" class="container mt-4" style="display: none;">
+        <h4 class="mb-3 text-primary"><i class="fas fa-magic me-2"></i>Recommandé pour vous</h4>
+        <div class="row g-4" id="recGrid"></div>
+        <hr class="my-5">
+    </section>
+
+    <!-- Categories -->
+    <div class="container mt-4 mb-4">
+        <div class="d-flex gap-2 overflow-auto pb-2" id="categoryPills">
+            <button class="btn btn-primary rounded-pill px-4" onclick="filterCategory('all')">Tout</button>
         </div>
     </div>
 
-    <!-- Bulk Image Modal (unchanged structure but colors consistent) -->
-    <div class="modal fade" id="bulkImageModal" tabindex="-1">
-        <div class="modal-dialog modal-xl">
-            <div class="modal-content">
-                <div class="modal-header" style="background:linear-gradient(90deg,var(--primary-color),var(--primary-color-2)); color:white;">
-                    <h5 class="modal-title"><i class="fas fa-magic me-2"></i>Générateur de Liens Image/Desc</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+    <!-- Products Grid -->
+    <div class="container mb-5">
+        <div class="row g-4" id="productGrid">
+            <!-- Products will be loaded here -->
+        </div>
+        
+        <!-- Loading State -->
+        <div id="loadingState" class="text-center py-5">
+            <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
+                <span class="visually-hidden">Chargement...</span>
+            </div>
+            <p class="mt-3 text-muted">Chargement des produits...</p>
+        </div>
+        
+        <!-- Empty State -->
+        <div id="emptyState" class="text-center py-5" style="display: none;">
+            <i class="fas fa-box-open fa-3x text-muted mb-3"></i>
+            <h5 class="text-muted">Aucun produit trouvé</h5>
+            <p class="text-muted">Essayez de modifier vos critères de recherche</p>
+        </div>
+    </div>
+
+    <!-- Floating Cart -->
+    <div class="floating-cart" onclick="openCart()">
+        <i class="fas fa-shopping-cart fa-lg"></i>
+        <span class="cart-badge" id="cartCount">0</span>
+    </div>
+
+    <!-- Cart Modal -->
+    <div class="modal fade" id="cartModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content border-0 shadow-lg">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title"><i class="fas fa-shopping-basket me-2"></i>Votre Panier</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <ul class="nav nav-tabs mb-3" id="bulkTabs" role="tablist">
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link active" id="mode-hosted-tab" data-bs-toggle="tab" data-bs-target="#mode-hosted" type="button" role="tab">📂 Images Hébergées</button>
-                        </li>
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link" id="mode-magic-tab" data-bs-toggle="tab" data-bs-target="#mode-magic" type="button" role="tab">✨ Images Magiques</button>
-                        </li>
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link" id="mode-ai-tab" data-bs-toggle="tab" data-bs-target="#mode-ai" type="button" role="tab">🤖 IA Intelligente</button>
-                        </li>
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link" id="mode-desc-tab" data-bs-toggle="tab" data-bs-target="#mode-desc" type="button" role="tab">📝 Descriptions Auto</button>
-                        </li>
-                    </ul>
-
-                    <div class="tab-content" id="bulkTabsContent">
-                        <!-- Hosted Mode -->
-                        <div class="tab-pane fade show active" id="mode-hosted" role="tabpanel">
-                            <p class="small text-muted">Utilisez ce mode si vous avez vos propres images hébergées (ex: GitHub Pages, Imgur).</p>
-                            <div class="mb-3">
-                                <label class="form-label">Base URL</label>
-                                <input type="text" class="form-control" id="bulkBaseUrl" placeholder="ex: https://monsite.com/images/">
-                            </div>
-                            <div class="row g-2 mb-3">
-                                <div class="col-6">
-                                    <label class="form-label">Champ</label>
-                                    <select class="form-select" id="bulkField">
-                                        <option value="ref">Référence</option>
-                                        <option value="designation">Désignation</option>
-                                    </select>
-                                </div>
-                                <div class="col-6">
-                                    <label class="form-label">Extension</label>
-                                    <select class="form-select" id="bulkExt">
-                                        <option value=".jpg">.jpg</option>
-                                        <option value=".png">.png</option>
-                                        <option value=".webp">.webp</option>
-                                        <option value="">(Aucune)</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Magic Mode -->
-                        <div class="tab-pane fade" id="mode-magic" role="tabpanel">
-                            <div class="alert alert-warning small">
-                                <i class="fas fa-exclamation-triangle me-2"></i><strong>Note:</strong> L'association <em>automatique</em> ne fonctionne qu'avec <strong>Bing</strong> pour des raisons techniques.
-                            </div>
-                            <p class="small text-muted">Recherche automatique d'images sur Bing via la Désignation.</p>
-                        </div>
-
-                        <!-- AI Mode -->
-                        <div class="tab-pane fade" id="mode-ai" role="tabpanel">
-                            <div class="alert alert-info small">
-                                <i class="fas fa-robot me-2"></i><strong>Recherche Intelligente:</strong> Utilise l'IA pour trouver les meilleures images depuis plusieurs sources.
-                            </div>
-                            
-                            <div class="row mb-3">
-                                <div class="col-md-8">
-                                    <label class="form-label">Recherche intelligente</label>
-                                    <input type="text" class="form-control" id="aiSearchQuery" placeholder="Entrez le nom du produit ou laissez vide pour utiliser la désignation">
-                                </div>
-                                <div class="col-md-4">
-                                    <label class="form-label">Sources</label>
-                                    <select class="form-select" id="aiSources">
-                                        <option value="auto" selected>Auto (Bing + Unsplash)</option>
-                                        <option value="bing">Bing uniquement</option>
-                                        <option value="unsplash">Unsplash uniquement</option>
-                                    </select>
-                                </div>
-                            </div>
-                            
-                            <button class="btn btn-primary w-100 mb-3" onclick="searchAIImages()">
-                                <i class="fas fa-search me-2"></i>Rechercher avec IA
-                            </button>
-                            
-                            <div id="aiResults" class="row g-3"></div>
-                            <div id="aiLoader" class="text-center" style="display: none;">
-                                <div class="loader"></div>
-                                <p class="mt-2">Recherche intelligente en cours...</p>
-                            </div>
-                        </div>
-
-                        <!-- Description Mode -->
-                        <div class="tab-pane fade" id="mode-desc" role="tabpanel">
-                            <div class="alert alert-info small">
-                                <i class="fas fa-info-circle me-2"></i><strong>Info:</strong> Génère un lien de recherche.
-                            </div>
-                            <p class="small text-muted">Crée un lien "Fiche Technique" vers Bing pour chaque produit.</p>
+                    <div id="cartItems" class="mb-4"></div>
+                    <div class="card bg-light border-0 p-3 mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="fw-bold">Total Global:</span>
+                            <span class="h4 text-primary mb-0" id="cartTotal">0.00 DA</span>
                         </div>
                     </div>
-
-                    <div class="alert alert-info small mt-3">
-                        <strong>Aperçu:</strong> <span id="bulkPreview" class="text-break">...</span>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label">Nom Complet</label>
+                            <input type="text" class="form-control" id="clientName" placeholder="Votre nom">
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Téléphone</label>
+                            <input type="tel" class="form-control" id="clientPhone" placeholder="05 XX XX XX XX">
+                        </div>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
-                    <button type="button" class="btn btn-primary" onclick="applyBulkActions()">Appliquer à tous</button>
+                <div class="modal-footer justify-content-between">
+                    <button type="button" class="btn btn-outline-danger" onclick="clearCart()">Vider</button>
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-success" onclick="sendWhatsApp()">
+                            <i class="fab fa-whatsapp me-2"></i>Commander
+                        </button>
+                        <button type="button" class="btn btn-dark" onclick="generatePDF()">
+                            <i class="fas fa-file-pdf me-2"></i>PDF
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
+    <!-- Image Zoom Modal - النسخة المصححة -->
+    <div class="modal fade image-zoom-modal" id="imageZoomModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <div class="d-flex justify-content-between align-items-center w-100">
+                        <h6 class="mb-0 text-white">
+                            <i class="fas fa-expand-alt me-2"></i>عرض الصورة
+                        </h6>
+                        <button type="button" class="btn-close-zoom" onclick="closeImageZoom()">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="modal-body">
+                    <img id="zoomedImage" src="" alt="Zoomed Image" class="img-fluid high-resolution-mode">
+                    
+                    <div class="zoom-controls">
+                        <button onclick="zoomImage(1.3)" title="تكبير">
+                            <i class="fas fa-search-plus"></i>
+                        </button>
+                        <button onclick="zoomImage(0.7)" title="تصغير">
+                            <i class="fas fa-search-minus"></i>
+                        </button>
+                        <button onclick="resetZoom()" title="إعادة تعيين">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                        <button onclick="rotateImage(90)" title="تدوير 90°">
+                            <i class="fas fa-redo"></i>
+                        </button>
+                        <button onclick="downloadZoomedImage()" title="تحميل الصورة">
+                            <i class="fas fa-download"></i>
+                        </button>
+                    </div>
+                    
+                    <div class="image-info-panel">
+                        <h6 id="zoomImageTitle"></h6>
+                        <div class="product-details" id="zoomImageInfo"></div>
+                    </div>
+                    
+                    <div class="zoom-indicator">
+                        <i class="fas fa-expand-alt"></i>
+                        <span id="zoomPercentage">100%</span>
+                    </div>
+                    
+                    <div class="touch-zoom-hint" id="touchZoomHint">
+                        <i class="fas fa-hand-pointer me-2"></i>استخدم الإصبعين للتكبير/التصغير
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container"></div>
+
     <script>
-        // ==================== خوارزمية البحث الذكي المتقدمة ====================
-        class IntelligentImageSearch {
-            constructor() {
-                this.sources = {
-                    bing: {
-                        name: "Bing Images",
-                        priority: 1,
-                        baseUrl: "https://www.bing.com/images/search"
-                    },
-                    unsplash: {
-                        name: "Unsplash",
-                        priority: 2,
-                        baseUrl: "https://api.unsplash.com/search/photos"
-                    }
-                };
-
-                this.qualityKeywords = [
-                    "product photography", "white background", "professional", 
-                    "commercial use", "high quality", "isolated", "clean",
-                    "studio shot", "3d render", "realistic"
-                ];
-
-                this.productCategories = {
-                    "ordinateurs": ["computer", "pc", "laptop", "desktop", "workstation"],
-                    "téléphones": ["smartphone", "mobile phone", "cell phone", "iphone", "android"],
-                    "accessoires": ["accessory", "gadget", "tech accessory", "electronic"],
-                    "général": ["product", "item", "merchandise", "goods"]
-                };
-            }
-
-            generateSmartQuery(productName, category = "général") {
-                const baseQuery = productName.toLowerCase();
-                let enhancedQuery = baseQuery;
-                
-                if (category && this.productCategories[category.toLowerCase()]) {
-                    const catKeywords = this.productCategories[category.toLowerCase()];
-                    const randomKeyword = catKeywords[Math.floor(Math.random() * catKeywords.length)];
-                    enhancedQuery += " " + randomKeyword;
-                }
-                
-                const randomQualityKeywords = this.qualityKeywords
-                    .sort(() => 0.5 - Math.random())
-                    .slice(0, 2);
-                
-                enhancedQuery += " " + randomQualityKeywords.join(" ");
-                
-                const words = enhancedQuery.split(" ").filter((word, index, self) => {
-                    return word.length > 2 && self.indexOf(word) === index;
-                });
-                
-                return words.join(" ");
-            }
-
-            calculateImageScore(image, productName) {
-                let score = 50;
-                
-                if (image.source === 'Unsplash') score += 30;
-                if (image.source === 'Bing Images') score += 20;
-                
-                if (image.width >= 800 && image.height >= 600) score += 20;
-                if (image.width >= 1200 && image.height >= 800) score += 30;
-                
-                const imageText = (image.title + " " + (image.description || "")).toLowerCase();
-                const productWords = productName.toLowerCase().split(/[\s\-_]+/).filter(w => w.length > 3);
-                
-                let matches = 0;
-                productWords.forEach(word => {
-                    if (imageText.includes(word)) matches++;
-                });
-                
-                score += (matches / productWords.length) * 30;
-                
-                if (imageText.includes('white background') || imageText.includes('isolated')) score += 15;
-                if (imageText.includes('product') || imageText.includes('professional')) score += 10;
-                
-                return Math.min(100, score);
-            }
-
-            async searchBingEnhanced(query, count = 6) {
-                try {
-                    const encodedQuery = encodeURIComponent(query + " product commercial white background");
-                    const images = [];
-                    
-                    for (let i = 0; i < count; i++) {
-                        images.push({
-                            url: `https://tse2.mm.bing.net/th?q=${encodedQuery}&w=800&h=800&c=7&rs=1&p=0&dpr=2&tid=image&t=${Date.now() + i}`,
-                            thumb: `https://tse2.mm.bing.net/th?q=${encodedQuery}&w=300&h=300&c=7&rs=1&p=0&t=${Date.now() + i}`,
-                            title: query,
-                            description: `Image produit: ${query}`,
-                            source: 'Bing Images',
-                            width: 800,
-                            height: 800,
-                            commercial_use: true,
-                            quality_score: 85
-                        });
-                    }
-                    return images;
-                } catch (error) {
-                    console.error('Bing search error:', error);
-                    return [];
-                }
-            }
-
-            async searchUnsplashEnhanced(query, count = 6) {
-                try {
-                    const encodedQuery = encodeURIComponent(query);
-                    const images = [];
-                    const sizes = ['600x600', '800x800', '1000x1000'];
-                    
-                    for (let i = 0; i < count; i++) {
-                        const size = sizes[i % sizes.length];
-                        images.push({
-                            url: `https://source.unsplash.com/featured/${size}/?${encodedQuery},product,white-background&sig=${Date.now() + i}`,
-                            thumb: `https://source.unsplash.com/featured/300x300/?${encodedQuery},product&sig=${Date.now() + i}`,
-                            title: query,
-                            description: `Professional product photography of ${query}`,
-                            source: 'Unsplash',
-                            width: parseInt(size.split('x')[0]),
-                            height: parseInt(size.split('x')[1]),
-                            commercial_use: true,
-                            quality_score: 90
-                        });
-                    }
-                    return images;
-                } catch (error) {
-                    console.error('Unsplash search error:', error);
-                    return [];
-                }
-            }
-
-            async searchAllSources(query, category, maxResults = 12) {
-                const results = [];
-                
-                try {
-                    const bingResults = await this.searchBingEnhanced(query, 4);
-                    results.push(...bingResults);
-                } catch (e) {
-                    console.warn('Bing search failed:', e);
-                }
-                
-                try {
-                    const unsplashResults = await this.searchUnsplashEnhanced(query, 4);
-                    results.push(...unsplashResults);
-                } catch (e) {
-                    console.warn('Unsplash search failed:', e);
-                }
-                
-                return results
-                    .map(img => ({
-                        ...img,
-                        relevance_score: this.calculateImageScore(img, query),
-                        final_score: (img.quality_score * 0.6) + (this.calculateImageScore(img, query) * 0.4)
-                    }))
-                    .sort((a, b) => b.final_score - a.final_score)
-                    .slice(0, maxResults);
-            }
+        // ==================== التكوين والحالة ====================
+        const urlParams = new URLSearchParams(window.location.search);
+        let gistId = urlParams.get('gist') || localStorage.getItem('varicom_gist_id');
+        
+        if (gistId === 'null' || gistId === 'undefined' || gistId === '') {
+            gistId = null;
+            localStorage.removeItem('varicom_gist_id');
         }
 
-        // ==================== الحالة والتخزين ====================
-        let state = {
-            products: [],
-            newProducts: [],
-            notifications: [],
-            gistId: localStorage.getItem('varicom_gist_id') || null,
-            lastSync: localStorage.getItem('varicom_last_sync') || null,
-            smartSearch: {
-                currentProduct: null,
-                selectedImage: null,
-                searchResults: [],
-                currentSearchQuery: ''
-            },
-            autoSearch: {
-                active: false,
-                currentIndex: 0,
-                totalProducts: 0
-            }
-        };
+        const adminPhone = "213541527561";
 
-        const intelligentSearch = new IntelligentImageSearch();
+        let allProducts = [];
+        let newProducts = [];
+        let notifications = [];
+        let cart = JSON.parse(localStorage.getItem('varicom_cart')) || [];
+        let wishlist = JSON.parse(localStorage.getItem('varicom_wishlist')) || [];
+        let categoryAffinity = JSON.parse(localStorage.getItem('varicom_affinity')) || {};
+        let currentCategory = 'all';
+
+        // ==================== متغيرات نظام تكبير الصور ====================
+        let currentZoom = 1;
+        let currentRotation = 0;
+        let currentProductInfo = null;
+        let isDragging = false;
+        let startX, startY;
+        let zoomedImage = null;
+        let zoomModal = null;
 
         // ==================== التهيئة ====================
         document.addEventListener('DOMContentLoaded', () => {
-            loadLocalData();
-            updateUI();
-            generateSmartSuggestions();
+            const savedTheme = localStorage.getItem('varicom_theme') || 'light';
+            applyTheme(savedTheme);
+            updateCartUI();
 
-            const tokenInput = document.getElementById('githubToken');
-            tokenInput.value = localStorage.getItem('varicom_github_token') || '';
-            tokenInput.addEventListener('input', (e) => {
-                localStorage.setItem('varicom_github_token', e.target.value);
-            });
+            if (gistId) {
+                loadData();
+            } else {
+                showNoCatalogMessage();
+            }
 
-            ['bulkBaseUrl', 'bulkField', 'bulkExt'].forEach(id => {
-                const el = document.getElementById(id);
-                if (el) el.addEventListener('input', updateBulkPreview);
-            });
-
-            const tabEls = document.querySelectorAll('button[data-bs-toggle="tab"]');
-            tabEls.forEach(tab => {
-                tab.addEventListener('shown.bs.tab', updateBulkPreview);
-            });
-
-            document.getElementById('smartSearchInput').addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') {
-                    smartImageSearch();
-                }
-            });
+            initBackButtonLogic();
+            initImageZoomSystem();
+            setupResponsiveDesign();
         });
 
-        function loadLocalData() {
-            try {
-                const saved = localStorage.getItem('varicom_data');
-                if (saved) {
-                    const data = JSON.parse(saved);
-                    state.products = data.products || [];
-                    state.newProducts = data.newProducts || [];
-                    state.notifications = data.notifications || [];
-                }
-            } catch (e) { 
-                console.error('Error loading local data', e);
-                state.products = [];
-                state.newProducts = [];
-                state.notifications = [];
-            }
-        }
-
-        function saveData() {
-            const data = {
-                products: state.products,
-                newProducts: state.newProducts,
-                notifications: state.notifications
-            };
-            localStorage.setItem('varicom_data', JSON.stringify(data));
-            updateUI();
-        }
-
-        // ==================== إقتراحات ذكية ====================
-        function generateSmartSuggestions() {
-            const suggestions = [
-                'صور منتجات احترافية',
-                'خلفية بيضاء',
-                'صور عالية الجودة',
-                'صور للمكاتب',
-                'أجهزة كمبيوتر',
-                'هواتف ذكية',
-                'إكسسوارات تقنية',
-                'صور تجارية',
-                'عروض ترويجية',
-                'صور واقعية',
-                'إلكترونيات',
-                'أجهزة مكتبية',
-                'طابعات',
-                'شاشات',
-                'لوحات المفاتيح'
-            ];
+        // ==================== نظام تكبير الصور المصحح ====================
+        function initImageZoomSystem() {
+            // الحصول على عناصر DOM
+            zoomModal = new bootstrap.Modal(document.getElementById('imageZoomModal'));
+            zoomedImage = document.getElementById('zoomedImage');
             
-            const container = document.getElementById('smartSuggestions');
-            if (container) {
-                container.innerHTML = suggestions.map(tag => 
-                    `<span class="suggestion-tag" onclick="addSuggestion('${tag}')">${tag}</span>`
-                ).join('');
-            }
-        }
-
-        function addSuggestion(tag) {
-            const input = document.getElementById('smartSearchInput');
-            if (input) {
-                input.value = tag;
-                smartImageSearch();
-            }
-        }
-
-        // ==================== البحث الذكي الرئيسي ====================
-        async function smartImageSearch() {
-            const query = document.getElementById('smartSearchInput')?.value;
-            const source = document.getElementById('searchSource')?.value || 'auto';
+            if (!zoomedImage) return;
             
-            if (!query) {
-                showStatus('أدخل كلمة للبحث', 'warning');
+            // إضافة أحداث الفأرة
+            zoomedImage.addEventListener('mousedown', startDrag);
+            zoomedImage.addEventListener('wheel', handleZoomWheel);
+            
+            // إضافة أحداث اللمس
+            zoomedImage.addEventListener('touchstart', handleTouchStart);
+            zoomedImage.addEventListener('touchmove', handleTouchMove);
+            zoomedImage.addEventListener('touchend', handleTouchEnd);
+            
+            // إضافة أحداث الحركة على مستوى المستند
+            document.addEventListener('mousemove', dragImage);
+            document.addEventListener('mouseup', stopDrag);
+            
+            // منع السلوك الافتراضي عند فتح المودال
+            const modalElement = document.getElementById('imageZoomModal');
+            modalElement.addEventListener('show.bs.modal', function() {
+                document.body.classList.add('modal-open');
+                showTouchHint();
+            });
+            
+            modalElement.addEventListener('hidden.bs.modal', function() {
+                document.body.classList.remove('modal-open');
+                resetZoom();
+                hideTouchHint();
+            });
+            
+            // إعادة تعيين عند إغلاق المودال
+            modalElement.addEventListener('hidden.bs.modal', function() {
+                resetZoom();
+                hideTouchHint();
+            });
+        }
+
+        // إظهار تلميح اللمس
+        function showTouchHint() {
+            const hint = document.getElementById('touchZoomHint');
+            if (!hint) return;
+            
+            // إظهار التلميح فقط على الأجهزة المحمولة
+            if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
+                hint.style.display = 'block';
+                setTimeout(() => {
+                    hint.style.display = 'none';
+                }, 3000);
+            }
+        }
+
+        function hideTouchHint() {
+            const hint = document.getElementById('touchZoomHint');
+            if (hint) hint.style.display = 'none';
+        }
+
+        // فتح تكبير الصورة
+        function openImageZoom(imageUrl, productInfo) {
+            const zoomImageTitle = document.getElementById('zoomImageTitle');
+            const zoomImageInfo = document.getElementById('zoomImageInfo');
+            
+            if (!zoomedImage || !zoomImageTitle || !zoomImageInfo) {
+                console.error('عناصر تكبير الصور غير موجودة');
                 return;
             }
             
-            state.smartSearch.currentSearchQuery = query;
-            state.smartSearch.selectedImage = null;
-            
-            const resultsDiv = document.getElementById('smartResults');
-            if (!resultsDiv) return;
-            
-            resultsDiv.innerHTML = `
-                <div class="col-12 text-center py-5">
-                    <div class="spinner-border text-primary" style="width: 3rem; height: 3rem;" role="status">
-                        <span class="visually-hidden">جار البحث...</span>
-                    </div>
-                    <div class="mt-4">
-                        <h5>جاري البحث الذكي...</h5>
-                        <p class="text-muted">نستخدم الذكاء الاصطناعي لإيجاد أفضل الصور لـ "${query}"</p>
-                        <div class="progress" style="height: 8px; width: 200px; margin: 0 auto;">
-                            <div class="progress-bar progress-bar-striped progress-bar-animated" style="width: 100%"></div>
-                        </div>
-                    </div>
-                </div>
-            `;
-            
-            const applyBtnContainer = document.getElementById('applyButtonContainer');
-            if (applyBtnContainer) {
-                applyBtnContainer.style.display = 'none';
+            try {
+                // تحليل معلومات المنتج إذا كانت نصاً
+                if (typeof productInfo === 'string') {
+                    productInfo = JSON.parse(productInfo);
+                }
+            } catch (e) {
+                console.error('خطأ في تحليل معلومات المنتج:', e);
+                productInfo = null;
             }
             
-            try {
-                let images = [];
-                const category = state.smartSearch.currentProduct ? 
-                    state.products.find(p => p.id === state.smartSearch.currentProduct)?.famille : '';
+            // إظهار مؤشر التحميل
+            zoomedImage.classList.add('image-loading');
+            zoomedImage.src = '';
+            
+            // تحميل الصورة
+            const tempImg = new Image();
+            tempImg.onload = function() {
+                zoomedImage.src = imageUrl;
+                zoomedImage.classList.remove('image-loading');
+                applyZoom();
                 
-                const smartQuery = intelligentSearch.generateSmartQuery(query, category);
-                
-                if (source === 'auto') {
-                    images = await intelligentSearch.searchAllSources(smartQuery, category, 12);
-                } else if (source === 'bing') {
-                    images = await intelligentSearch.searchBingEnhanced(smartQuery, 12);
-                } else if (source === 'unsplash') {
-                    images = await intelligentSearch.searchUnsplashEnhanced(smartQuery, 12);
-                }
-                
-                if (images.length === 0) {
-                    const broaderQuery = query.split(' ')[0];
-                    images = await intelligentSearch.searchAllSources(broaderQuery, category, 12);
-                }
-                
-                state.smartSearch.searchResults = images;
-                
-                displaySmartResults(images);
-                
-                if (state.smartSearch.currentProduct) {
-                    const product = state.products.find(p => p.id === state.smartSearch.currentProduct);
-                    if (product && applyBtnContainer) {
-                        document.getElementById('currentProductInfo').innerHTML = `
-                            <strong>المنتج الحالي:</strong> ${product.designation}<br>
-                            <small class="text-muted">${product.ref} | ${product.famille} | ${product.prix} DA</small>
-                        `;
-                        applyBtnContainer.style.display = 'block';
+                // تحديث معلومات المنتج
+                if (productInfo) {
+                    currentProductInfo = productInfo;
+                    zoomImageTitle.textContent = productInfo.designation || 'صورة المنتج';
+                    
+                    let infoHTML = '';
+                    if (productInfo.ref) {
+                        infoHTML += `<div><strong>المرجع:</strong> ${productInfo.ref}</div>`;
                     }
+                    if (productInfo.prix) {
+                        infoHTML += `<div><strong>السعر:</strong> ${formatPrice(productInfo.prix)}</div>`;
+                    }
+                    if (productInfo.famille) {
+                        infoHTML += `<div><strong>الفئة:</strong> ${productInfo.famille}</div>`;
+                    }
+                    if (tempImg.width && tempImg.height) {
+                        infoHTML += `<div><strong>الأبعاد:</strong> ${tempImg.width} × ${tempImg.height} بكسل</div>`;
+                    }
+                    
+                    zoomImageInfo.innerHTML = infoHTML;
                 }
                 
-                showStatus(`تم العثور على ${images.length} صورة بجودة عالية`, 'success');
+                updateZoomIndicator();
+            };
+            
+            tempImg.onerror = function() {
+                zoomedImage.src = 'https://via.placeholder.com/800x600/1a3a6c/ffffff?text=صورة+غير+متوفرة';
+                zoomedImage.classList.remove('image-loading');
+                zoomImageTitle.textContent = 'صورة غير متوفرة';
+                zoomImageInfo.innerHTML = '<div>تعذر تحميل الصورة</div>';
+            };
+            
+            tempImg.src = imageUrl;
+            
+            // فتح المودال
+            if (zoomModal) {
+                zoomModal.show();
+            }
+        }
+
+        // إغلاق تكبير الصورة
+        function closeImageZoom() {
+            if (zoomModal) {
+                zoomModal.hide();
+            }
+        }
+
+        // تطبيق التكبير والتدوير
+        function applyZoom() {
+            if (!zoomedImage) return;
+            
+            zoomedImage.style.transform = `
+                scale(${currentZoom}) 
+                rotate(${currentRotation}deg)
+            `;
+            updateZoomIndicator();
+        }
+
+        // التكبير
+        function zoomImage(factor) {
+            currentZoom *= factor;
+            
+            // تحديد الحدود الدنيا والقصوى
+            if (currentZoom < 0.1) currentZoom = 0.1;
+            if (currentZoom > 10) currentZoom = 10;
+            
+            applyZoom();
+        }
+
+        // إعادة تعيين التكبير
+        function resetZoom() {
+            currentZoom = 1;
+            currentRotation = 0;
+            applyZoom();
+        }
+
+        // تدوير الصورة
+        function rotateImage(degrees) {
+            currentRotation += degrees;
+            applyZoom();
+        }
+
+        // تحديث مؤشر التكبير
+        function updateZoomIndicator() {
+            const indicator = document.getElementById('zoomPercentage');
+            if (indicator) {
+                indicator.textContent = `${Math.round(currentZoom * 100)}%`;
+            }
+        }
+
+        // تحميل الصورة المكبرة
+        function downloadZoomedImage() {
+            if (!zoomedImage || !currentProductInfo) {
+                showToast('لا توجد صورة للتحميل', 'error');
+                return;
+            }
+
+            try {
+                const link = document.createElement('a');
+                link.href = zoomedImage.src;
                 
+                // إنشاء اسم ملف آمن
+                let fileName = 'image';
+                if (currentProductInfo.ref) {
+                    fileName = currentProductInfo.ref;
+                }
+                if (currentProductInfo.designation) {
+                    fileName += '_' + currentProductInfo.designation;
+                }
+                fileName = fileName.replace(/[^a-z0-9]/gi, '_') + '.jpg';
+                
+                link.download = fileName;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                showToast('تم تحميل الصورة', 'success');
             } catch (error) {
-                console.error('Search error:', error);
-                if (resultsDiv) {
-                    resultsDiv.innerHTML = `
-                        <div class="col-12">
-                            <div class="alert alert-danger">
-                                <i class="fas fa-exclamation-triangle me-2"></i>
-                                <strong>خطأ في البحث الذكي:</strong> ${error.message || 'حدث خطأ غير متوقع'}
-                                <br>
-                                <button class="btn btn-sm btn-outline-primary mt-2" onclick="smartImageSearch()">
-                                    <i class="fas fa-redo me-1"></i>إعادة المحاولة
+                console.error('خطأ في تحميل الصورة:', error);
+                showToast('خطأ في تحميل الصورة', 'error');
+            }
+        }
+
+        // ==================== التحكم بالسحب ====================
+        function startDrag(e) {
+            if (currentZoom <= 1) return;
+            
+            isDragging = true;
+            if (e.type === 'mousedown') {
+                startX = e.clientX;
+                startY = e.clientY;
+            } else if (e.type === 'touchstart' && e.touches.length === 1) {
+                startX = e.touches[0].clientX;
+                startY = e.touches[0].clientY;
+                e.preventDefault(); // منع التمرير في الهواتف
+            }
+            
+            zoomedImage.classList.add('dragging');
+        }
+
+        function dragImage(e) {
+            if (!isDragging || !zoomedImage) return;
+            
+            e.preventDefault();
+            
+            let clientX, clientY;
+            if (e.type === 'mousemove') {
+                clientX = e.clientX;
+                clientY = e.clientY;
+            } else if (e.type === 'touchmove' && e.touches.length === 1) {
+                clientX = e.touches[0].clientX;
+                clientY = e.touches[0].clientY;
+                e.preventDefault();
+            } else {
+                return;
+            }
+            
+            // حساب الحركة
+            const deltaX = clientX - startX;
+            const deltaY = clientY - startY;
+            
+            // تطبيق الحركة على الصورة
+            const currentTransform = zoomedImage.style.transform || '';
+            const translateMatch = currentTransform.match(/translate\(([^)]+)\)/);
+            
+            let translateX = 0, translateY = 0;
+            if (translateMatch) {
+                const translateParts = translateMatch[1].split(',');
+                translateX = parseFloat(translateParts[0]) || 0;
+                translateY = parseFloat(translateParts[1]) || 0;
+            }
+            
+            translateX += deltaX;
+            translateY += deltaY;
+            
+            zoomedImage.style.transform = `
+                scale(${currentZoom}) 
+                rotate(${currentRotation}deg)
+                translate(${translateX}px, ${translateY}px)
+            `;
+            
+            // تحديث نقطة البداية
+            startX = clientX;
+            startY = clientY;
+        }
+
+        function stopDrag() {
+            isDragging = false;
+            if (zoomedImage) {
+                zoomedImage.classList.remove('dragging');
+            }
+        }
+
+        // ==================== التحكم باللمس (التكبير بإصبعين) ====================
+        let initialDistance = null;
+
+        function handleTouchStart(e) {
+            if (e.touches.length === 2) {
+                initialDistance = getTouchDistance(e.touches);
+                e.preventDefault();
+            } else if (e.touches.length === 1) {
+                startDrag(e);
+            }
+        }
+
+        function handleTouchMove(e) {
+            if (e.touches.length === 2 && initialDistance !== null) {
+                const currentDistance = getTouchDistance(e.touches);
+                const scaleFactor = currentDistance / initialDistance;
+                
+                // تطبيق التكبير التدريجي
+                const newZoom = currentZoom * scaleFactor;
+                if (newZoom >= 0.1 && newZoom <= 10) {
+                    currentZoom = newZoom;
+                    applyZoom();
+                }
+                
+                initialDistance = currentDistance;
+                e.preventDefault();
+            } else if (e.touches.length === 1) {
+                dragImage(e);
+            }
+        }
+
+        function handleTouchEnd(e) {
+            if (e.touches.length < 2) {
+                initialDistance = null;
+            }
+            if (e.touches.length === 0) {
+                stopDrag();
+            }
+        }
+
+        function getTouchDistance(touches) {
+            const dx = touches[0].clientX - touches[1].clientX;
+            const dy = touches[0].clientY - touches[1].clientY;
+            return Math.sqrt(dx * dx + dy * dy);
+        }
+
+        // ==================== التحكم بالعجلة ====================
+        function handleZoomWheel(e) {
+            e.preventDefault();
+            const delta = e.deltaY > 0 ? 0.9 : 1.1;
+            zoomImage(delta);
+        }
+
+        // ==================== تحسينات إضافية للعرض ====================
+        function setupResponsiveDesign() {
+            function adjustGridColumns() {
+                const screenWidth = window.innerWidth;
+                const productGrid = document.getElementById('productGrid');
+                
+                if (!productGrid) return;
+                
+                productGrid.className = 'row g-4';
+                
+                if (screenWidth < 576) {
+                    productGrid.classList.add('row-cols-2');
+                } else if (screenWidth < 768) {
+                    productGrid.classList.add('row-cols-2');
+                } else if (screenWidth < 992) {
+                    productGrid.classList.add('row-cols-md-3');
+                } else {
+                    productGrid.classList.add('row-cols-lg-4');
+                }
+            }
+            
+            function adjustFontSizes() {
+                const screenWidth = window.innerWidth;
+                
+                if (screenWidth < 576) {
+                    document.documentElement.style.fontSize = '14px';
+                } else if (screenWidth < 768) {
+                    document.documentElement.style.fontSize = '15px';
+                } else {
+                    document.documentElement.style.fontSize = '16px';
+                }
+            }
+            
+            window.addEventListener('load', () => {
+                adjustGridColumns();
+                adjustFontSizes();
+            });
+            
+            window.addEventListener('resize', () => {
+                adjustGridColumns();
+                adjustFontSizes();
+            });
+        }
+
+        // ==================== تحميل البيانات ====================
+        async function loadData() {
+            showLoadingState();
+            
+            try {
+                const response = await fetch(`https://api.github.com/gists/${gistId}`);
+                if (!response.ok) {
+                    if (response.status === 404) {
+                        throw new Error('Catalogue introuvable (ID invalide ou supprimé).');
+                    }
+                    throw new Error(`Erreur réseau: ${response.status}`);
+                }
+
+                const data = await response.json();
+                const fileKey = 'varicom_data.json';
+
+                if (!data.files || !data.files[fileKey]) {
+                    throw new Error('Fichier de données manquant dans le Gist.');
+                }
+
+                let fileContent = data.files[fileKey].content;
+
+                if (data.files[fileKey].truncated) {
+                    const rawResponse = await fetch(data.files[fileKey].raw_url);
+                    if (!rawResponse.ok) {
+                        throw new Error('Erreur lors du téléchargement du contenu brut.');
+                    }
+                    fileContent = await rawResponse.text();
+                }
+
+                if (!fileContent) {
+                    throw new Error('Le contenu du fichier est vide.');
+                }
+
+                let parsedData;
+                try {
+                    parsedData = JSON.parse(fileContent);
+                } catch (e) {
+                    throw new Error('Erreur de format JSON: ' + e.message);
+                }
+
+                allProducts = parsedData.products || [];
+                newProducts = parsedData.newProducts || [];
+                notifications = parsedData.notifications || [];
+
+                const existingIds = new Set(allProducts.map(p => p.id));
+                newProducts.forEach(p => {
+                    if (!existingIds.has(p.id)) {
+                        allProducts.unshift(p);
+                    }
+                });
+
+                displayNotifications(notifications);
+                updateCategories();
+                filterProducts();
+                
+                hideLoadingState();
+                showToast('Catalogue chargé avec succès', 'success');
+
+            } catch (error) {
+                console.error('Erreur chargement données:', error);
+                showErrorState(error.message);
+            }
+        }
+
+        function showLoadingState() {
+            const loading = document.getElementById('loadingState');
+            const empty = document.getElementById('emptyState');
+            const grid = document.getElementById('productGrid');
+            
+            if (loading) loading.style.display = 'block';
+            if (empty) empty.style.display = 'none';
+            if (grid) grid.innerHTML = '';
+        }
+
+        function hideLoadingState() {
+            const loading = document.getElementById('loadingState');
+            if (loading) loading.style.display = 'none';
+        }
+
+        function showErrorState(message) {
+            const grid = document.getElementById('productGrid');
+            if (grid) {
+                grid.innerHTML = `
+                    <div class="col-12 text-center py-5">
+                        <div class="alert alert-danger d-inline-block">
+                            <i class="fas fa-exclamation-triangle fa-2x mb-3"></i><br>
+                            <strong>Erreur de chargement du catalogue</strong><br>
+                            <small>${escapeHtml(message)}</small><br>
+                            <button class="btn btn-outline-danger btn-sm mt-3" onclick="location.reload()">
+                                <i class="fas fa-redo me-1"></i>Réessayer
+                            </button>
+                        </div>
+                    </div>`;
+            }
+            hideLoadingState();
+        }
+
+        function showNoCatalogMessage() {
+            const grid = document.getElementById('productGrid');
+            if (grid) {
+                grid.innerHTML = `
+                    <div class="col-12 text-center py-5">
+                        <div class="alert alert-info d-inline-block">
+                            <i class="fas fa-info-circle fa-2x mb-3"></i><br>
+                            <strong>Catalogue non chargé</strong><br>
+                            <small>Veuillez scanner le code QR ou utiliser le lien fourni par l'administrateur</small><br>
+                            <div class="mt-3">
+                                <input type="text" class="form-control mb-2" id="manualGistId" placeholder="ID du catalogue">
+                                <button class="btn btn-primary btn-sm" onclick="loadManualCatalog()">
+                                    <i class="fas fa-download me-1"></i>Charger
                                 </button>
                             </div>
                         </div>
-                    `;
-                }
+                    </div>`;
+            }
+            hideLoadingState();
+        }
+
+        function loadManualCatalog() {
+            const manualGistId = document.getElementById('manualGistId')?.value;
+            if (manualGistId && manualGistId.trim() !== '') {
+                gistId = manualGistId.trim();
+                localStorage.setItem('varicom_gist_id', gistId);
+                loadData();
             }
         }
 
-        function displaySmartResults(images) {
-            const resultsDiv = document.getElementById('smartResults');
-            if (!resultsDiv) return;
-            
-            if (!images || images.length === 0) {
-                resultsDiv.innerHTML = `
-                    <div class="col-12 text-center py-5">
-                        <i class="fas fa-search fa-3x text-muted mb-3"></i>
-                        <h5 class="text-muted">لم يتم العثور على صور</h5>
-                        <p class="text-muted mb-4">جرب استخدام كلمات بحث مختلفة أو استعلام أوسع</p>
-                    </div>
-                `;
-                return;
-            }
-            
-            resultsDiv.innerHTML = images.map((img, index) => `
-                <div class="col-md-3 col-sm-4 col-6 mb-4">
-                    <div class="card h-100 image-select-card" onclick="selectSmartImage(${index})" 
-                         data-index="${index}">
-                        <div class="position-relative" style="height: 180px; overflow: hidden;">
-                            <img src="${img.thumb || img.url}" 
-                                 class="card-img-top h-100 w-100" 
-                                 alt="${img.title}"
-                                 style="object-fit: cover;"
-                                 onerror="this.src='https://via.placeholder.com/300x200/4A90E2/FFFFFF?text=VARICOM'"
-                                 loading="lazy">
-                            <span class="search-source-badge">${img.source}</span>
-                            
-                            <span class="quality-badge" title="درجة الجودة">
-                                <i class="fas fa-star me-1"></i>${Math.round(img.quality_score || 75)}
-                            </span>
-                            
-                            <span class="relevance-badge" title="درجة الصلة">
-                                <i class="fas fa-bullseye me-1"></i>${Math.round(img.relevance_score || 70)}
-                            </span>
-                        </div>
-                        <div class="card-body p-2">
-                            <div class="d-flex justify-content-between align-items-start mb-1">
-                                <small class="text-muted d-block text-truncate" style="max-width: 70%;" 
-                                       title="${img.title}">
-                                    ${img.title.substring(0, 20)}${img.title.length > 20 ? '...' : ''}
-                                </small>
-                                <small class="text-success fw-bold">
-                                    ${img.width || 800}×${img.height || 800}
-                                </small>
-                            </div>
-                            
-                            <div class="progress mb-2" style="height: 4px;" title="درجة الجودة الإجمالية">
-                                <div class="progress-bar ${img.final_score > 80 ? 'bg-success' : img.final_score > 60 ? 'bg-primary' : 'bg-warning'}" 
-                                     style="width: ${img.final_score || 70}%"></div>
-                            </div>
-                            
-                            <div class="d-flex justify-content-between">
-                                <small class="text-muted">
-                                    <i class="fas fa-expand-alt me-1"></i>${img.width || 800}×${img.height || 800}
-                                </small>
-                                <small class="text-muted">
-                                    <i class="fas fa-percentage me-1"></i>${Math.round(img.final_score || 70)}%
-                                </small>
-                            </div>
-                        </div>
-                    </div>
+        // ==================== الإشعارات ====================
+        function displayNotifications(notifs) {
+            const container = document.getElementById('adminNotifications');
+            if (!container || !notifs || !Array.isArray(notifs) || notifs.length === 0) return;
+
+            container.innerHTML = notifs.map(notif => `
+                <div class="alert alert-${getBootstrapType(notif.type)} alert-dismissible fade show shadow-sm" role="alert">
+                    <i class="fas fa-${getNotificationIcon(notif.type)} me-2"></i>
+                    <strong>${escapeHtml(notif.title)}:</strong> ${escapeHtml(notif.message)}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
             `).join('');
         }
 
-        function selectSmartImage(index) {
-            document.querySelectorAll('.image-select-card').forEach(card => {
-                card.classList.remove('border-primary', 'border-3');
-                card.classList.add('border-light');
-            });
-            
-            const selectedCard = document.querySelector(`.image-select-card[data-index="${index}"]`);
-            if (selectedCard) {
-                selectedCard.classList.remove('border-light');
-                selectedCard.classList.add('border-primary', 'border-3');
-                
-                state.smartSearch.selectedImage = state.smartSearch.searchResults[index];
-                
-                const applyBtnContainer = document.getElementById('applyButtonContainer');
-                if (state.smartSearch.currentProduct && applyBtnContainer) {
-                    applyBtnContainer.style.display = 'block';
-                }
-                
-                showStatus(`تم تحديد صورة من ${state.smartSearch.searchResults[index].source}`, 'info');
-            }
-        }
-
-        function applySelectedImageToCurrentProduct() {
-            if (!state.smartSearch.currentProduct) {
-                showStatus('لم يتم تحديد منتج. اختر منتجاً من الجدول أولاً.', 'warning');
-                return;
-            }
-            
-            if (!state.smartSearch.selectedImage) {
-                showStatus('لم يتم تحديد صورة. اختر صورة أولاً.', 'warning');
-                return;
-            }
-            
-            updateProductImage(state.smartSearch.currentProduct, state.smartSearch.selectedImage.url);
-            showStatus('✓ تم تطبيق الصورة بنجاح!', 'success');
-            
-            setTimeout(() => {
-                const applyBtnContainer = document.getElementById('applyButtonContainer');
-                if (applyBtnContainer) {
-                    applyBtnContainer.style.display = 'none';
-                }
-            }, 2000);
-        }
-
-        // ==================== البحث التلقائي ====================
-        async function autoSearchProductImages() {
-            if (!state.products || state.products.length === 0) {
-                showStatus('لا توجد منتجات للبحث', 'warning');
-                return;
-            }
-            
-            const productsNeedingImages = state.products.filter(p => {
-                const hasImage = p.image && p.image.trim() !== '';
-                const isHighQuality = hasImage && (
-                    (p.image.includes('bing.net') && p.image.includes('w=800')) || 
-                    (p.image.includes('unsplash') && p.image.includes('featured'))
-                );
-                return !hasImage || !isHighQuality;
-            }).slice(0, 20);
-            
-            if (productsNeedingImages.length === 0) {
-                showStatus('جميع المنتجات تحتوي على صور عالية الجودة', 'info');
-                return;
-            }
-            
-            state.autoSearch = {
-                active: true,
-                currentIndex: 0,
-                totalProducts: productsNeedingImages.length,
-                products: productsNeedingImages
-            };
-            
-            const progressBar = document.getElementById('autoSearchProgress');
-            const progressBarInner = document.getElementById('autoSearchProgressBar');
-            if (progressBar) progressBar.style.display = 'block';
-            if (progressBarInner) progressBarInner.style.width = '0%';
-            
-            showStatus(`بدأ البحث الذكي لـ ${productsNeedingImages.length} منتج...`, 'info');
-            
-            for (let i = 0; i < productsNeedingImages.length; i++) {
-                if (!state.autoSearch.active) break;
-                
-                const product = productsNeedingImages[i];
-                state.autoSearch.currentIndex = i + 1;
-                
-                try {
-                    const smartQuery = intelligentSearch.generateSmartQuery(
-                        product.designation, 
-                        product.famille
-                    );
-                    
-                    const images = await intelligentSearch.searchAllSources(smartQuery, product.famille, 1);
-                    
-                    if (images.length > 0) {
-                        const bestImage = images[0];
-                        updateProductImage(product.id, bestImage.url);
-                        
-                        if (progressBarInner) {
-                            const progress = ((i + 1) / productsNeedingImages.length) * 100;
-                            progressBarInner.style.width = `${progress}%`;
-                        }
-                        
-                        showStatus(`✅ تم إضافة صورة لـ ${product.designation} (${i+1}/${productsNeedingImages.length})`, 'success');
-                    }
-                } catch (e) {
-                    console.error(`Failed to search for: ${product.designation}`, e);
-                    showStatus(`❌ خطأ في البحث عن ${product.designation}`, 'error');
-                }
-                
-                await new Promise(resolve => setTimeout(resolve, 1200));
-            }
-            
-            state.autoSearch.active = false;
-            if (progressBar) progressBar.style.display = 'none';
-            showStatus('🎉 اكتمل البحث الذكي بنجاح!', 'success');
-        }
-
-        // ==================== معالجة Excel ====================
-        function handleExcelUpload(file) {
-            if (!file) return;
-
-            showStatus('Lecture du fichier...', 'info');
-            const reader = new FileReader();
-
-            reader.onload = (e) => {
-                try {
-                    const data = new Uint8Array(e.target.result);
-                    const workbook = XLSX.read(data, { type: 'array' });
-                    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
-                    const jsonData = XLSX.utils.sheet_to_json(firstSheet);
-
-                    processExcelData(jsonData);
-                } catch (err) {
-                    showStatus('Erreur lecture Excel: ' + err.message, 'error');
-                }
-            };
-            reader.onerror = () => {
-                showStatus('Erreur de lecture du fichier', 'error');
-            };
-            reader.readAsArrayBuffer(file);
-        }
-
-        function processExcelData(data) {
-            if (!Array.isArray(data)) {
-                showStatus('Format de fichier invalide', 'error');
-                return;
-            }
-
-            const processed = data.map((row, idx) => ({
-                id: `prod_${Date.now()}_${idx}`,
-                ref: row['Ref'] || row['Référence'] || row['Code'] || `REF${idx + 1}`,
-                designation: row['Designation'] || row['Désignation'] || row['Nom'] || 'Produit sans nom',
-                famille: row['Famille'] || row['Categorie'] || 'Général',
-                prix: parseFloat(row['Prix'] || row['Price'] || 0) || 0,
-                image: row['Image'] || row['Photo'] || '',
-                description: row['Description'] || row['Desc'] || ''
-            })).filter(p => p.designation && p.designation !== 'Produit sans nom');
-
-            state.products = processed;
-            saveData();
-            showStatus(`${processed.length} produits importés avec succès!`, 'success');
-        }
-
-        // ==================== إدارة المنتجات والإشعارات ====================
-        function addNewProduct() {
-            const name = document.getElementById('newProductName')?.value;
-            const price = document.getElementById('newProductPrice')?.value;
-            const cat = document.getElementById('newProductCategory')?.value;
-            const img = document.getElementById('newProductImage')?.value;
-
-            if (!name || !price) {
-                showStatus('Nom et Prix requis', 'warning');
-                return;
-            }
-
-            state.newProducts.unshift({
-                id: `new_${Date.now()}`,
-                name: name.trim(),
-                price: parseFloat(price) || 0,
-                category: cat || 'Général',
-                image: img || '',
-                timestamp: new Date().toISOString()
-            });
-
-            if (document.getElementById('newProductName')) {
-                document.getElementById('newProductName').value = '';
-                document.getElementById('newProductPrice').value = '';
-                document.getElementById('newProductImage').value = '';
-            }
-
-            saveData();
-            showStatus('Nouveau produit ajouté', 'success');
-        }
-
-        function createNotification() {
-            const title = document.getElementById('notifTitle')?.value;
-            const msg = document.getElementById('notifMessage')?.value;
-            const type = document.getElementById('notifType')?.value;
-
-            if (!title || !msg) {
-                showStatus('Titre et Message requis', 'warning');
-                return;
-            }
-
-            state.notifications.unshift({
-                id: `notif_${Date.now()}`,
-                title: title.trim(),
-                message: msg.trim(),
-                type: type || 'info',
-                timestamp: new Date().toISOString()
-            });
-
-            if (document.getElementById('notifTitle')) {
-                document.getElementById('notifTitle').value = '';
-                document.getElementById('notifMessage').value = '';
-            }
-
-            saveData();
-            showStatus('Notification créée', 'success');
-        }
-
-        function removeNewProduct(id) {
-            state.newProducts = state.newProducts.filter(p => p.id !== id);
-            saveData();
-        }
-
-        function removeNotification(id) {
-            state.notifications = state.notifications.filter(n => n.id !== id);
-            saveData();
-        }
-
-        // ==================== الدوال الجماعية ====================
-        function openBulkImageModal() {
-            const modalElement = document.getElementById('bulkImageModal');
-            if (modalElement) {
-                const modal = new bootstrap.Modal(modalElement);
-                modal.show();
-                updateBulkPreview();
-            }
-        }
-
-        function updateBulkPreview() {
-            const activeTab = document.querySelector('.nav-link.active');
-            const preview = document.getElementById('bulkPreview');
-            
-            if (!activeTab || !preview) return;
-
-            if (activeTab.id === 'mode-magic-tab') {
-                preview.textContent = `https://tse2.mm.bing.net/th?q=ExempleProduit&w=800&h=800`;
-            } else if (activeTab.id === 'mode-desc-tab') {
-                preview.textContent = `https://www.bing.com/search?q=fiche+technique+ExempleProduit`;
-            } else if (activeTab.id === 'mode-ai-tab') {
-                preview.textContent = `Recherche IA avec sources multiples`;
-            } else {
-                const baseUrl = document.getElementById('bulkBaseUrl')?.value || 'https://site.com/img/';
-                const field = document.getElementById('bulkField')?.value || 'ref';
-                const ext = document.getElementById('bulkExt')?.value || '.jpg';
-                const example = field === 'ref' ? 'REF123' : 'Produit_Exemple';
-                preview.textContent = `${baseUrl}${example}${ext}`;
-            }
-        }
-
-        async function searchAIImages() {
-            const query = document.getElementById('aiSearchQuery')?.value;
-            const source = document.getElementById('aiSources')?.value || 'auto';
-            
-            if (!query) {
-                showStatus('أدخل كلمة للبحث', 'warning');
-                return;
-            }
-
-            const loader = document.getElementById('aiLoader');
-            const resultsDiv = document.getElementById('aiResults');
-            
-            if (loader) loader.style.display = 'block';
-            if (resultsDiv) resultsDiv.innerHTML = '';
-
-            try {
-                let images = [];
-                const smartQuery = intelligentSearch.generateSmartQuery(query);
-                
-                if (source === 'auto') {
-                    images = await intelligentSearch.searchAllSources(smartQuery, '', 9);
-                } else if (source === 'bing') {
-                    images = await intelligentSearch.searchBingEnhanced(smartQuery, 9);
-                } else if (source === 'unsplash') {
-                    images = await intelligentSearch.searchUnsplashEnhanced(smartQuery, 9);
-                }
-
-                displayAIResults(images);
-                
-            } catch (error) {
-                console.error('AI Search error:', error);
-                if (resultsDiv) {
-                    resultsDiv.innerHTML = `
-                        <div class="col-12">
-                            <div class="alert alert-danger">
-                                Erreur de recherche: ${error.message || 'Erreur inconnue'}
-                            </div>
-                        </div>
-                    `;
-                }
-            } finally {
-                if (loader) loader.style.display = 'none';
-            }
-        }
-
-        function displayAIResults(results) {
-            const container = document.getElementById('aiResults');
-            if (!container) return;
-            
-            if (!results || results.length === 0) {
-                container.innerHTML = `
-                    <div class="col-12">
-                        <div class="alert alert-warning">
-                            Aucune image trouvée. Essayez avec d'autres termes.
-                        </div>
-                    </div>
-                `;
-                return;
-            }
-
-            container.innerHTML = results.map((img, index) => `
-                <div class="col-md-4 col-sm-6">
-                    <div class="ai-image-result" onclick="selectAIImage(${index})">
-                        <div class="position-relative" style="height: 150px; overflow: hidden;">
-                            <img src="${img.thumb || img.url}" class="w-100 h-100" style="object-fit: cover;" alt="${img.title}">
-                            <span class="search-source-badge">${img.source}</span>
-                        </div>
-                        <div class="p-2">
-                            <small class="d-block text-truncate">${img.title}</small>
-                            <small class="text-muted">
-                                <i class="fas fa-${img.source === 'Unsplash' ? 'camera' : 'search'} me-1"></i>
-                                ${img.source} - ${img.width || 800}×${img.height || 800}
-                            </small>
-                        </div>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        function selectAIImage(index) {
-            document.querySelectorAll('.ai-image-result').forEach(el => {
-                el.classList.remove('selected');
-            });
-            
-            const selected = document.querySelectorAll('.ai-image-result')[index];
-            if (selected) {
-                selected.classList.add('selected');
-                state.smartSearch.selectedImage = state.smartSearch.searchResults[index];
-            }
-        }
-
-        function applyBulkActions() {
-            const activeTab = document.querySelector('.nav-link.active');
-            if (!activeTab || !state.products || state.products.length === 0) {
-                showStatus('Aucun produit à modifier', 'warning');
-                return;
-            }
-
-            if (!confirm(`Cela va modifier ${state.products.length} produits. Continuer?`)) {
-                return;
-            }
-
-            if (activeTab.id === 'mode-magic-tab') {
-                state.products = state.products.map(p => ({
-                    ...p,
-                    image: `https://tse2.mm.bing.net/th?q=${encodeURIComponent(p.designation)}&w=800&h=800&c=7&rs=1&p=0`
-                }));
-            } else if (activeTab.id === 'mode-desc-tab') {
-                state.products = state.products.map(p => ({
-                    ...p,
-                    description: `https://www.bing.com/search?q=fiche+technique+${encodeURIComponent(p.designation)}`
-                }));
-            } else if (activeTab.id === 'mode-ai-tab') {
-                if (state.smartSearch.selectedImage) {
-                    const selectedUrl = state.smartSearch.selectedImage.url;
-                    state.products = state.products.map(p => ({
-                        ...p,
-                        image: selectedUrl
-                    }));
-                    showStatus('Image IA appliquée à tous les produits', 'success');
-                } else {
-                    showStatus('Veuillez d\'abord sélectionner une image', 'warning');
-                    return;
-                }
-            } else {
-                const baseUrl = document.getElementById('bulkBaseUrl')?.value;
-                const field = document.getElementById('bulkField')?.value || 'ref';
-                const ext = document.getElementById('bulkExt')?.value || '';
-
-                if (!baseUrl) {
-                    showStatus('Veuillez entrer une URL de base', 'warning');
-                    return;
-                }
-
-                state.products = state.products.map(p => {
-                    const val = p[field] ? p[field].toString().trim() : '';
-                    const safeVal = field === 'designation' ? 
-                        val.replace(/[^a-zA-Z0-9-_]/g, '_') : 
-                        val;
-                    return {
-                        ...p,
-                        image: `${baseUrl}${safeVal}${ext}`
-                    };
-                });
-            }
-
-            saveData();
-            const modal = bootstrap.Modal.getInstance(document.getElementById('bulkImageModal'));
-            if (modal) modal.hide();
-            showStatus('Mise à jour effectuée avec succès!', 'success');
-        }
-
-        // ==================== البحث للجدول ====================
-        function openSmartSearchForProduct(productId, designation) {
-            state.smartSearch.currentProduct = productId;
-            const searchInput = document.getElementById('smartSearchInput');
-            if (searchInput) searchInput.value = designation;
-            
-            const searchSource = document.getElementById('searchSource');
-            if (searchSource) searchSource.value = 'auto';
-            
-            const suggestions = document.querySelector('.smart-suggestions');
-            if (suggestions) {
-                suggestions.scrollIntoView({ 
-                    behavior: 'smooth',
-                    block: 'start'
-                });
-            }
-            
-            setTimeout(() => {
-                smartImageSearch();
-                showStatus(`ابحث عن صور لـ ${designation}، ثم انقر على الصورة ثم على "تطبيق"`, 'info');
-            }, 800);
-        }
-
-        async function quickImageSearch(productId, designation) {
-            showStatus(`جاري البحث عن ${designation}...`, 'info');
-            
-            try {
-                const smartQuery = intelligentSearch.generateSmartQuery(designation);
-                const images = await intelligentSearch.searchBingEnhanced(smartQuery, 1);
-                if (images.length > 0) {
-                    updateProductImage(productId, images[0].url);
-                    showStatus(`✓ تم إضافة صورة لـ ${designation}`, 'success');
-                } else {
-                    showStatus('لم أجد صوراً مناسبة', 'warning');
-                }
-            } catch (error) {
-                console.error('Quick search error:', error);
-                showStatus('خطأ في البحث', 'error');
-            }
-        }
-
-        // ==================== تحديث المنتج ====================
-        function updateProductImage(id, newUrl) {
-            const product = state.products.find(p => p.id === id);
-            if (product) {
-                product.image = newUrl;
-                saveData();
-                updateUI();
-            }
-        }
-
-        function updateProductDesc(id, newUrl) {
-            const product = state.products.find(p => p.id === id);
-            if (product) {
-                product.description = newUrl;
-                saveData();
-                updateUI();
-            }
-        }
-
-        // ==================== GitHub Sync ====================
-        async function uploadToGitHubGist() {
-            const token = document.getElementById('githubToken')?.value;
-            if (!token || token.trim() === '') {
-                showStatus('Token GitHub manquant!', 'error');
-                return;
-            }
-
-            if (state.products.length === 0 && state.newProducts.length === 0) {
-                showStatus('Aucun produit à publier! Veuillez importer des données.', 'warning');
-                return;
-            }
-
-            const btn = document.getElementById('publishBtn');
-            if (!btn) return;
-
-            const originalText = btn.innerHTML;
-            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Synchronisation...';
-            btn.disabled = true;
-
-            const payload = {
-                description: "VARICOM Catalog Data",
-                public: true,
-                files: {
-                    "varicom_data.json": {
-                        content: JSON.stringify({
-                            products: state.products,
-                            newProducts: state.newProducts,
-                            notifications: state.notifications,
-                            lastUpdate: new Date().toISOString(),
-                            meta: { version: "2.0", source: "VaricomAdmin" }
-                        })
-                    }
-                }
-            };
-
-            try {
-                let url = 'https://api.github.com/gists';
-                let method = 'POST';
-
-                if (state.gistId) {
-                    url += `/${state.gistId}`;
-                    method = 'PATCH';
-                }
-
-                const response = await fetch(url, {
-                    method: method,
-                    headers: {
-                        'Authorization': `token ${token}`,
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/vnd.github.v3+json'
-                    },
-                    body: JSON.stringify(payload)
-                });
-
-                if (!response.ok) {
-                    if (response.status === 404 && state.gistId) {
-                        state.gistId = null;
-                        localStorage.removeItem('varicom_gist_id');
-                        return uploadToGitHubGist();
-                    }
-                    throw new Error(`Erreur GitHub: ${response.status} ${response.statusText}`);
-                }
-
-                const result = await response.json();
-                state.gistId = result.id;
-                state.lastSync = new Date().toISOString();
-
-                localStorage.setItem('varicom_gist_id', state.gistId);
-                localStorage.setItem('varicom_last_sync', state.lastSync);
-
-                showStatus('✅ Synchronisation réussie! Données publiées.', 'success');
-                updateUI();
-
-            } catch (err) {
-                console.error('Sync error:', err);
-                showStatus('Erreur Sync: ' + err.message, 'error');
-            } finally {
-                btn.innerHTML = originalText;
-                btn.disabled = false;
-            }
-        }
-
-        // ==================== تحديث الواجهة ====================
-        function updateUI() {
-            // Stats
-            updateElement('statsProducts', state.products.length);
-            updateElement('statsNewProducts', state.newProducts.length);
-            updateElement('statsNotifications', state.notifications.length);
-            
-            const statsStatus = document.getElementById('statsStatus');
-            if (statsStatus) {
-                statsStatus.textContent = state.gistId ? 'Actif' : 'Inactif';
-                statsStatus.className = state.gistId ? 'text-success' : 'text-danger';
-            }
-
-            // Lists
-            updateNewProductsList();
-            updateNotificationsList();
-
-            // Catalog Table
-            updateCatalogTable();
-        }
-
-        function updateElement(id, value) {
-            const element = document.getElementById(id);
-            if (element) {
-                element.textContent = value;
-            }
-        }
-
-        function updateNewProductsList() {
-            const list = document.getElementById('activeNewProducts');
-            if (!list) return;
-
-            list.innerHTML = state.newProducts.map(p => `
-                <li class="list-group-item d-flex justify-content-between align-items-center">
-                    <div>
-                        <strong>${escapeHtml(p.name)}</strong> - ${p.price} DA
-                        <br><small class="text-muted">${p.category}</small>
-                    </div>
-                    <button class="btn btn-sm btn-outline-danger" onclick="removeNewProduct('${escapeJs(p.id)}')">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </li>
-            `).join('');
-        }
-
-        function updateNotificationsList() {
-            const list = document.getElementById('activeNotifications');
-            if (!list) return;
-
-            list.innerHTML = state.notifications.map(n => `
-                <li class="list-group-item d-flex justify-content-between align-items-center">
-                    <div>
-                        <span class="badge bg-${getBadgeClass(n.type)} me-2">${getBadgeIcon(n.type)}</span>
-                        <strong>${escapeHtml(n.title)}</strong>
-                        <br><small class="text-muted">${escapeHtml(n.message.substring(0, 50))}${n.message.length > 50 ? '...' : ''}</small>
-                    </div>
-                    <button class="btn btn-sm btn-outline-danger" onclick="removeNotification('${escapeJs(n.id)}')">
-                        <i class="fas fa-times"></i>
-                    </button>
-                </li>
-            `).join('');
-        }
-
-        function updateCatalogTable() {
-            const tableBody = document.getElementById('catalogTableBody');
-            if (!tableBody) return;
-
-            const productsToShow = state.products.slice(0, 100);
-            
-            tableBody.innerHTML = productsToShow.map(p => `
-                <tr data-product-id="${p.id}">
-                    <td><small>${escapeHtml(p.ref)}</small></td>
-                    <td class="text-truncate" style="max-width: 150px;" title="${escapeHtml(p.designation)}">
-                        ${escapeHtml(p.designation)}
-                    </td>
-                    <td>${p.prix} DA</td>
-                    <td>
-                        <div class="input-group input-group-sm">
-                            <input type="text" class="form-control" 
-                                   value="${escapeHtml(p.image || '')}" 
-                                   onchange="updateProductImage('${escapeJs(p.id)}', this.value)"
-                                   placeholder="URL Image...">
-                            <button class="btn btn-outline-primary" 
-                                    onclick="quickImageSearch('${escapeJs(p.id)}', '${escapeJs(p.designation)}')"
-                                    title="بحث سريع">
-                                <i class="fas fa-bolt"></i>
-                            </button>
-                        </div>
-                        ${p.image ? 
-                            `<small class="text-success"><i class="fas fa-check-circle"></i> موجودة</small>` : 
-                            `<small class="text-danger"><i class="fas fa-times-circle"></i> مفقودة</small>`}
-                    </td>
-                    <td>
-                        <input type="text" class="form-control form-control-sm" 
-                               value="${escapeHtml(p.description || '')}" 
-                               onchange="updateProductDesc('${escapeJs(p.id)}', this.value)"
-                               placeholder="URL Desc...">
-                    </td>
-                    <td>
-                        <div class="btn-group btn-group-sm">
-                            <button class="btn btn-outline-success" 
-                                    onclick="openSmartSearchForProduct('${escapeJs(p.id)}', '${escapeJs(p.designation)}')"
-                                    title="بحث ذكي">
-                                <i class="fas fa-robot"></i>
-                            </button>
-                            <button class="btn btn-outline-primary" 
-                                    onclick="window.open('https://www.bing.com/images/search?q=${encodeURIComponent(p.designation + ' product white background')}', '_blank')"
-                                    title="Bing">
-                                <i class="fas fa-search"></i>
-                            </button>
-                            <button class="btn btn-outline-info" 
-                                    onclick="window.open('https://unsplash.com/s/photos/${encodeURIComponent(p.designation)}', '_blank')"
-                                    title="Unsplash">
-                                <i class="fas fa-camera"></i>
-                            </button>
-                        </div>
-                    </td>
-                </tr>
-            `).join('');
-        }
-
-        function getBadgeClass(type) {
+        function getBootstrapType(type) {
             switch (type) {
                 case 'info': return 'info';
                 case 'success': return 'success';
                 case 'warning': return 'warning';
                 case 'error': return 'danger';
-                default: return 'secondary';
+                default: return 'primary';
             }
         }
 
-        function getBadgeIcon(type) {
+        function getNotificationIcon(type) {
             switch (type) {
-                case 'info': return 'ℹ️';
-                case 'success': return '✅';
-                case 'warning': return '⚠️';
-                case 'error': return '❌';
-                default: return '🔔';
+                case 'info': return 'info-circle';
+                case 'success': return 'check-circle';
+                case 'warning': return 'exclamation-triangle';
+                case 'error': return 'exclamation-circle';
+                default: return 'bell';
             }
+        }
+
+        // ==================== الفئات ====================
+        function updateCategories() {
+            const categories = ['all'];
+            allProducts.forEach(p => {
+                if (p.famille && !categories.includes(p.famille)) {
+                    categories.push(p.famille);
+                }
+            });
+            
+            const container = document.getElementById('categoryPills');
+            if (!container) return;
+
+            container.innerHTML = categories.map(cat => `
+                <button class="btn ${currentCategory === cat ? 'btn-primary' : 'btn-outline-primary'} rounded-pill px-4 text-capitalize" 
+                        onclick="filterCategory('${escapeJs(cat)}')">
+                    ${cat === 'all' ? 'Tout' : escapeHtml(cat)}
+                </button>
+            `).join('');
+        }
+
+        function filterCategory(cat) {
+            currentCategory = cat;
+            updateCategories();
+            filterProducts();
+        }
+
+        // ==================== البحث والتصفية ====================
+        function filterProducts() {
+            const term = document.getElementById('searchInput')?.value.toLowerCase().trim() || '';
+            const terms = term.split(/\s+/).filter(t => t.length > 0);
+
+            let filtered = allProducts;
+            
+            if (currentCategory !== 'all') {
+                filtered = filtered.filter(p => p.famille === currentCategory);
+            }
+
+            if (terms.length > 0) {
+                filtered = filtered.filter(p => {
+                    const searchableText = `${p.designation || ''} ${p.ref || ''} ${p.famille || ''} ${p.description || ''}`.toLowerCase();
+                    return terms.every(t => searchableText.includes(t));
+                });
+            }
+
+            renderProducts(filtered);
+        }
+
+        // ==================== عرض المنتجات ====================
+        function renderProducts(products) {
+            const grid = document.getElementById('productGrid');
+            const emptyState = document.getElementById('emptyState');
+            
+            if (!grid) return;
+
+            if (!products || products.length === 0) {
+                grid.innerHTML = '';
+                if (emptyState) emptyState.style.display = 'block';
+                return;
+            }
+
+            if (emptyState) emptyState.style.display = 'none';
+
+            grid.innerHTML = products.map(p => createProductCard(p)).join('');
+            lazyLoadImages();
+        }
+
+        function createProductCard(p) {
+            const isNew = p.id && p.id.startsWith('new_');
+            const badge = isNew ? '<span class="badge-new animate-shake">NOUVEAU</span>' : '';
+            
+            const image = p.image || 'https://via.placeholder.com/300x200/1a3a6c/ffffff?text=VARICOM';
+            const hasImage = image && !image.includes('placeholder');
+            
+            // استخدم productId بدلاً من JSON.stringify
+            const productId = p.id;
+            
+            return `
+                <div class="col-6 col-md-4 col-lg-3">
+                    <div class="product-card h-100">
+                        <div class="product-img-container" 
+                             onclick="openProductImageZoom('${escapeJs(image)}', '${escapeJs(productId)}')"
+                             style="cursor: pointer;">
+                            ${badge}
+                            <img src="${hasImage ? 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 200"%3E%3C/svg%3E' : image}" 
+                                 data-src="${hasImage ? image : ''}"
+                                 alt="${escapeHtml(p.designation)}" 
+                                 loading="lazy"
+                                 class="${hasImage ? 'lazy-image' : ''}"
+                                 style="width: 100%; height: 100%; object-fit: contain;">
+                            <button class="btn btn-light btn-sm position-absolute bottom-0 start-0 m-2 rounded-circle shadow-lg" 
+                                    onclick="openProductImageZoom('${escapeJs(image)}', '${escapeJs(productId)}')"
+                                    title="تكبير الصورة"
+                                    style="width: 40px; height: 40px; backdrop-filter: blur(10px);">
+                                <i class="fas fa-expand-alt"></i>
+                            </button>
+                            <button class="btn btn-light btn-sm position-absolute top-0 end-0 m-2 rounded-circle shadow-lg" 
+                                    onclick="toggleWishlist('${escapeJs(p.id)}')"
+                                    title="${wishlist.includes(p.id) ? 'Retirer des favoris' : 'Ajouter aux favoris'}"
+                                    style="width: 40px; height: 40px; backdrop-filter: blur(10px);">
+                                <i class="${wishlist.includes(p.id) ? 'fas text-danger' : 'far'} fa-heart"></i>
+                            </button>
+                        </div>
+                        <div class="card-body d-flex flex-column p-3">
+                            <small class="text-muted mb-1">${escapeHtml(p.ref)}</small>
+                            <h6 class="card-title text-truncate mb-2" title="${escapeHtml(p.designation)}">
+                                ${escapeHtml(p.designation)}
+                            </h6>
+                            <div class="mt-auto d-flex justify-content-between align-items-center">
+                                <span class="fw-bold text-primary">
+                                    ${formatPrice(p.prix)}
+                                    ${p.description ? `<a href="${escapeHtml(p.description)}" target="_blank" class="text-info ms-2" title="Fiche Technique"><i class="fas fa-info-circle"></i></a>` : ''}
+                                </span>
+                                <button class="btn-add-cart" onclick="addToCart('${escapeJs(p.id)}')">
+                                    <i class="fas fa-plus me-1"></i>Ajouter
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // دالة مساعدة لفتح تكبير الصورة باستخدام productId
+        function openProductImageZoom(imageUrl, productId) {
+            event.stopPropagation(); // منع حدث الحاوية الأم
+            
+            const product = allProducts.find(p => p.id === productId);
+            if (product) {
+                openImageZoom(imageUrl, product);
+            } else {
+                openImageZoom(imageUrl, null);
+            }
+        }
+
+        // ==================== تحميل الصور الكسول ====================
+        function lazyLoadImages() {
+            const images = document.querySelectorAll('.lazy-image');
+            
+            const imageObserver = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        const img = entry.target;
+                        const src = img.getAttribute('data-src');
+                        if (src) {
+                            img.src = src;
+                            img.classList.remove('lazy-image');
+                            observer.unobserve(img);
+                        }
+                    }
+                });
+            }, {
+                rootMargin: '50px 0px',
+                threshold: 0.1
+            });
+            
+            images.forEach(img => imageObserver.observe(img));
+        }
+
+        // ==================== السلة والمفضلة ====================
+        function addToCart(id) {
+            const product = allProducts.find(p => p.id === id);
+            if (!product) {
+                showToast('Produit non trouvé', 'error');
+                return;
+            }
+
+            const existing = cart.find(item => item.id === id);
+            if (existing) {
+                existing.qty++;
+            } else {
+                cart.push({ 
+                    ...product, 
+                    qty: 1 
+                });
+            }
+
+            trackAffinity(product.famille, 5);
+            saveCart();
+            showToast(`Ajouté: ${product.designation}`, 'success');
+        }
+
+        function removeFromCart(id) {
+            cart = cart.filter(item => item.id !== id);
+            saveCart();
+            renderCartItems();
+        }
+
+        function updateQty(id, change) {
+            const item = cart.find(i => i.id === id);
+            if (item) {
+                item.qty += change;
+                if (item.qty <= 0) {
+                    removeFromCart(id);
+                } else {
+                    saveCart();
+                }
+            }
+            renderCartItems();
+        }
+
+        function clearCart() {
+            if (cart.length === 0) {
+                showToast('Le panier est déjà vide', 'info');
+                return;
+            }
+            
+            if (confirm('Vider le panier?')) {
+                cart = [];
+                saveCart();
+                renderCartItems();
+                showToast('Panier vidé', 'success');
+            }
+        }
+
+        function saveCart() {
+            localStorage.setItem('varicom_cart', JSON.stringify(cart));
+            updateCartUI();
+        }
+
+        function updateCartUI() {
+            const count = cart.reduce((sum, item) => sum + item.qty, 0);
+            const badge = document.getElementById('cartCount');
+            if (badge) {
+                badge.textContent = count;
+                badge.classList.remove('animate__bounceIn');
+                void badge.offsetWidth;
+                badge.classList.add('animate__animated', 'animate__bounceIn');
+            }
+        }
+
+        function openCart() {
+            renderCartItems();
+            const modal = new bootstrap.Modal(document.getElementById('cartModal'));
+            modal.show();
+        }
+
+        function renderCartItems() {
+            const container = document.getElementById('cartItems');
+            const totalEl = document.getElementById('cartTotal');
+
+            if (!container || !totalEl) return;
+
+            if (cart.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-5 text-muted">
+                        <i class="fas fa-shopping-basket fa-3x mb-3"></i><br>
+                        Votre panier est vide
+                    </div>`;
+                totalEl.textContent = '0.00 DA';
+                return;
+            }
+
+            let html = '<ul class="list-group list-group-flush">';
+            let total = 0;
+
+            cart.forEach(item => {
+                const itemTotal = (item.prix || 0) * item.qty;
+                total += itemTotal;
+                html += `
+                    <li class="list-group-item d-flex justify-content-between align-items-center bg-transparent">
+                        <div class="flex-grow-1">
+                            <h6 class="mb-1 text-truncate" style="max-width: 200px;">${escapeHtml(item.designation)}</h6>
+                            <small class="text-muted">${formatPrice(item.prix)} x ${item.qty}</small>
+                        </div>
+                        <div class="d-flex align-items-center gap-2">
+                            <button class="btn btn-sm btn-outline-secondary rounded-circle" 
+                                    onclick="updateQty('${escapeJs(item.id)}', -1)"
+                                    style="width: 30px; height: 30px;">
+                                -
+                            </button>
+                            <span class="fw-bold" style="min-width: 30px; text-align: center;">${item.qty}</span>
+                            <button class="btn btn-sm btn-outline-secondary rounded-circle" 
+                                    onclick="updateQty('${escapeJs(item.id)}', 1)"
+                                    style="width: 30px; height: 30px;">
+                                +
+                            </button>
+                            <button class="btn btn-sm btn-outline-danger ms-2" 
+                                    onclick="removeFromCart('${escapeJs(item.id)}')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </li>
+                `;
+            });
+            html += '</ul>';
+
+            container.innerHTML = html;
+            totalEl.textContent = formatPrice(total);
+        }
+
+        function toggleWishlist(id) {
+            event.stopPropagation(); // منع حدث الحاوية الأم
+            
+            const index = wishlist.indexOf(id);
+            const product = allProducts.find(p => p.id === id);
+
+            if (index === -1) {
+                wishlist.push(id);
+                showToast('Ajouté aux favoris ❤️', 'success');
+                if (product) trackAffinity(product.famille, 3);
+            } else {
+                wishlist.splice(index, 1);
+                showToast('Retiré des favoris', 'info');
+            }
+
+            localStorage.setItem('varicom_wishlist', JSON.stringify(wishlist));
+            filterProducts();
+        }
+
+        // ==================== التتبع والتوصيات ====================
+        function trackAffinity(category, score) {
+            if (!category) return;
+            categoryAffinity[category] = (categoryAffinity[category] || 0) + score;
+            localStorage.setItem('varicom_affinity', JSON.stringify(categoryAffinity));
+        }
+
+        // ==================== التصدير والطلب ====================
+        function generatePDF() {
+            if (cart.length === 0) {
+                showToast('Le panier est vide!', 'warning');
+                return;
+            }
+
+            try {
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+
+                const clientName = document.getElementById('clientName')?.value || 'Client';
+                const clientPhone = document.getElementById('clientPhone')?.value || '';
+                const date = new Date().toLocaleDateString('fr-FR');
+                const time = new Date().toLocaleTimeString('fr-FR');
+
+                doc.setFillColor(26, 58, 108);
+                doc.rect(0, 0, 210, 40, 'F');
+                doc.setTextColor(255, 255, 255);
+                doc.setFontSize(22);
+                doc.setFont('helvetica', 'bold');
+                doc.text('VARICOM', 15, 15);
+                doc.setFontSize(10);
+                doc.setFont('helvetica', 'normal');
+                doc.text('07 Boulevard MIRA Abderahmen Loc N°2, Oran', 15, 25);
+                doc.text('Tél: 05 41 52 75 61', 15, 32);
+
+                doc.setFontSize(16);
+                doc.setFont('helvetica', 'bold');
+                doc.text('BON DE COMMANDE', 195, 20, { align: 'right' });
+                doc.setFontSize(10);
+                doc.setFont('helvetica', 'normal');
+                doc.text(`Date: ${date} ${time}`, 195, 30, { align: 'right' });
+
+                doc.setTextColor(0, 0, 0);
+                doc.setFontSize(12);
+                doc.text(`Client: ${clientName}`, 15, 55);
+                if (clientPhone) doc.text(`Tél: ${clientPhone}`, 15, 62);
+
+                const tableData = cart.map(item => [
+                    item.designation,
+                    item.qty,
+                    formatPrice(item.prix),
+                    formatPrice(item.prix * item.qty)
+                ]);
+
+                const total = cart.reduce((sum, item) => sum + (item.prix * item.qty), 0);
+
+                doc.autoTable({
+                    startY: 75,
+                    head: [['Désignation', 'Qté', 'P.U', 'Total']],
+                    body: tableData,
+                    theme: 'striped',
+                    headStyles: { 
+                        fillColor: [26, 58, 108],
+                        textColor: [255, 255, 255],
+                        fontStyle: 'bold'
+                    },
+                    foot: [['', '', 'Total Global:', formatPrice(total)]],
+                    footStyles: { 
+                        fillColor: [240, 240, 240], 
+                        textColor: [0, 0, 0], 
+                        fontStyle: 'bold' 
+                    }
+                });
+
+                doc.save(`Commande_VARICOM_${date.replace(/\//g, '-')}_${Date.now()}.pdf`);
+                showToast('PDF généré avec succès', 'success');
+                
+            } catch (error) {
+                console.error('PDF generation error:', error);
+                showToast('Erreur lors de la génération du PDF', 'error');
+            }
+        }
+
+        function sendWhatsApp() {
+            if (cart.length === 0) {
+                showToast('Le panier est vide!', 'warning');
+                return;
+            }
+
+            const clientName = document.getElementById('clientName')?.value || 'Client';
+            const clientPhone = document.getElementById('clientPhone')?.value || '';
+
+            let msg = `*Nouvelle Commande - VARICOM*\n`;
+            msg += `Date: ${new Date().toLocaleDateString('fr-FR')}\n`;
+            msg += `Client: ${clientName}\n`;
+            msg += `Tél: ${clientPhone}\n\n`;
+            msg += `*Détails de la commande:*\n`;
+
+            let total = 0;
+            cart.forEach((item, index) => {
+                const itemTotal = item.prix * item.qty;
+                total += itemTotal;
+                msg += `${index + 1}. ${item.designation}\n`;
+                msg += `   Quantité: ${item.qty}\n`;
+                msg += `   Prix unitaire: ${formatPrice(item.prix)}\n`;
+                msg += `   Total: ${formatPrice(itemTotal)}\n\n`;
+            });
+
+            msg += `*TOTAL GLOBAL: ${formatPrice(total)}*\n\n`;
+            msg += `_Commande générée via l'application VARICOM_`;
+
+            const encodedMsg = encodeURIComponent(msg);
+            const url = `https://wa.me/${adminPhone}?text=${encodedMsg}`;
+            window.open(url, '_blank');
+            showToast('Ouverture de WhatsApp...', 'info');
+        }
+
+        // ==================== دوال المساعدة ====================
+        function formatPrice(price) {
+            if (isNaN(price) || price === null || price === undefined) {
+                return '0.00 DA';
+            }
+            return new Intl.NumberFormat('fr-DZ', { 
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2 
+            }).format(price) + ' DA';
+        }
+
+        function showToast(message, type = 'success') {
+            const container = document.querySelector('.toast-container');
+            if (!container) return;
+
+            const toast = document.createElement('div');
+            toast.className = `custom-toast alert-${type}`;
+            toast.innerHTML = `
+                <div class="d-flex align-items-center">
+                    <i class="fas fa-${getToastIcon(type)} me-2 text-${type}"></i>
+                    <div class="flex-grow-1">${escapeHtml(message)}</div>
+                    <button type="button" class="btn-close btn-close-sm" onclick="this.parentElement.parentElement.remove()"></button>
+                </div>
+            `;
+
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                if (toast.parentNode) {
+                    toast.style.opacity = '0';
+                    toast.style.transition = 'opacity 0.3s';
+                    setTimeout(() => {
+                        if (toast.parentNode) {
+                            toast.remove();
+                        }
+                    }, 300);
+                }
+            }, 3000);
+        }
+
+        function getToastIcon(type) {
+            switch (type) {
+                case 'success': return 'check-circle';
+                case 'error': return 'exclamation-circle';
+                case 'warning': return 'exclamation-triangle';
+                case 'info': return 'info-circle';
+                default: return 'bell';
+            }
+        }
+
+        function applyTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+            localStorage.setItem('varicom_theme', theme);
+            const icon = document.getElementById('themeIcon');
+            if (icon) {
+                icon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
+            }
+        }
+
+        function toggleTheme() {
+            const current = localStorage.getItem('varicom_theme') || 'light';
+            const next = current === 'light' ? 'dark' : 'light';
+            applyTheme(next);
+            showToast(`Thème ${next === 'dark' ? 'sombre' : 'clair'} activé`, 'info');
+        }
+
+        function initBackButtonLogic() {
+            history.pushState({ page: 1 }, "title", "");
+
+            let lastBackPressTime = 0;
+
+            window.onpopstate = function (event) {
+                const now = Date.now();
+                const timeDiff = now - lastBackPressTime;
+
+                if (window.scrollY > 0) {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                    history.pushState({ page: 1 }, "title", "");
+                    showToast('Appuyez encore pour quitter', 'info');
+                } else {
+                    if (timeDiff < 2000) {
+                        history.back();
+                    } else {
+                        showToast('Appuyez encore pour quitter', 'info');
+                        lastBackPressTime = now;
+                        history.pushState({ page: 1 }, "title", "");
+                    }
+                }
+            };
         }
 
         function escapeHtml(text) {
@@ -1776,98 +1886,6 @@
                 .replace(/\n/g, '\\n')
                 .replace(/\r/g, '\\r')
                 .replace(/\t/g, '\\t');
-        }
-
-        // ==================== دوال المساعدة ====================
-        function showStatus(msg, type) {
-            const el = document.getElementById('syncStatus');
-            if (!el) return;
-
-            el.textContent = msg;
-            el.className = 'sync-status';
-            
-            switch(type) {
-                case 'success':
-                    el.classList.add('sync-success');
-                    break;
-                case 'warning':
-                    el.classList.add('sync-warning');
-                    break;
-                case 'error':
-                    el.classList.add('sync-error');
-                    break;
-                default:
-                    el.classList.add('sync-success');
-            }
-            
-            el.style.display = 'block';
-            setTimeout(() => {
-                el.style.display = 'none';
-            }, 3000);
-        }
-
-        function generateClientLink() {
-            if (!state.gistId) {
-                showStatus('Veuillez d\'abord publier le catalogue', 'warning');
-                return;
-            }
-
-            const currentUrl = window.location.href;
-            const baseUrl = currentUrl.substring(0, currentUrl.lastIndexOf('/') + 1);
-            const clientUrl = `${baseUrl}index.html?gist=${state.gistId}`;
-
-            if (navigator.clipboard && navigator.clipboard.writeText) {
-                navigator.clipboard.writeText(clientUrl).then(() => {
-                    showStatus('✅ Lien client copié!', 'success');
-                }).catch(() => {
-                    prompt('Copiez ce lien manuellement:', clientUrl);
-                    showStatus('Lien prêt à être copié', 'info');
-                });
-            } else {
-                prompt('Copiez ce lien manuellement:', clientUrl);
-                showStatus('Lien prêt à être copié', 'info');
-            }
-        }
-
-        function toggleToken() {
-            const input = document.getElementById('githubToken');
-            const icon = input?.parentNode?.querySelector('i');
-            if (input && icon) {
-                if (input.type === 'password') {
-                    input.type = 'text';
-                    icon.classList.replace('fa-eye', 'fa-eye-slash');
-                } else {
-                    input.type = 'password';
-                    icon.classList.replace('fa-eye-slash', 'fa-eye');
-                }
-            }
-        }
-
-        function resetSync() {
-            if (confirm('Voulez-vous vraiment réinitialiser la synchronisation? Cela déconnectera le catalogue actuel.')) {
-                localStorage.removeItem('varicom_gist_id');
-                localStorage.removeItem('varicom_last_sync');
-                state.gistId = null;
-                state.lastSync = null;
-                updateUI();
-                showStatus('Synchronisation réinitialisée', 'info');
-            }
-        }
-
-        function downloadTemplate() {
-            const wb = XLSX.utils.book_new();
-            const ws = XLSX.utils.json_to_sheet([
-                { 
-                    Ref: 'REF001', 
-                    Designation: 'Exemple Produit', 
-                    Famille: 'Informatique', 
-                    Prix: 1000, 
-                    Image: 'https://example.com/image.jpg', 
-                    Description: 'https://example.com/description' 
-                }
-            ]);
-            XLSX.utils.book_append_sheet(wb, ws, "Modele");
-            XLSX.writeFile(wb, "modele_import_varicom.xlsx");
         }
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
