@@ -33,6 +33,7 @@
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             transition: background-color 0.3s, color 0.3s;
             padding-top: 70px;
+            margin: 0;
         }
 
         .navbar {
@@ -182,7 +183,11 @@
             animation: shake 2s infinite;
         }
 
-        /* ==================== نظام تكبير الصور المتقدم ==================== */
+        /* ==================== نظام تكبير الصور المتقدم - الإصلاحات ==================== */
+        .image-zoom-modal {
+            z-index: 1060;
+        }
+
         .image-zoom-modal .modal-dialog {
             max-width: 95vw;
             max-height: 95vh;
@@ -197,10 +202,11 @@
         .image-zoom-modal .modal-content {
             background: rgba(0, 0, 0, 0.95);
             border: none;
-            border-radius: 0;
+            border-radius: 10px;
             width: 100%;
             height: 100%;
             overflow: hidden;
+            position: relative;
         }
 
         .image-zoom-modal .modal-header {
@@ -216,44 +222,34 @@
         }
 
         .image-zoom-modal .modal-body {
-            padding: 0;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-            position: relative;
-        }
-
-        .zoom-image-container {
+            padding: 60px 20px 20px;
             width: 100%;
             height: 100%;
             display: flex;
             align-items: center;
             justify-content: center;
             overflow: auto;
-            padding: 60px 20px 20px;
+            position: relative;
             -webkit-overflow-scrolling: touch;
         }
 
-        .zoom-image-container img {
+        #zoomedImage {
             max-width: 100%;
-            max-height: 100%;
+            max-height: calc(100vh - 100px);
             object-fit: contain;
             transition: transform 0.3s ease;
-            cursor: grab;
+            cursor: move;
             user-select: none;
             -webkit-user-drag: none;
-            touch-action: manipulation;
+            touch-action: none;
         }
 
-        .zoom-image-container img:active {
+        #zoomedImage.dragging {
             cursor: grabbing;
         }
 
         .zoom-controls {
-            position: fixed;
+            position: absolute;
             bottom: 30px;
             right: 20px;
             z-index: 1000;
@@ -280,6 +276,8 @@
             transition: all 0.3s;
             font-size: 1.2rem;
             box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            cursor: pointer;
+            outline: none;
         }
 
         .zoom-controls button:hover {
@@ -293,10 +291,9 @@
         }
 
         .image-info-panel {
-            position: fixed;
+            position: absolute;
             bottom: 30px;
             left: 20px;
-            right: 100px;
             z-index: 1000;
             background: linear-gradient(135deg, rgba(0, 0, 0, 0.85), rgba(26, 58, 108, 0.85));
             color: white;
@@ -329,7 +326,7 @@
         }
 
         .zoom-indicator {
-            position: fixed;
+            position: absolute;
             top: 80px;
             right: 20px;
             z-index: 1000;
@@ -362,6 +359,8 @@
             color: white;
             font-size: 1.2rem;
             transition: all 0.3s;
+            cursor: pointer;
+            outline: none;
         }
 
         .btn-close-zoom:hover {
@@ -370,7 +369,7 @@
         }
 
         .touch-zoom-hint {
-            position: fixed;
+            position: absolute;
             bottom: 150px;
             left: 50%;
             transform: translateX(-50%);
@@ -411,11 +410,8 @@
             image-rendering: crisp-edges;
         }
 
-        .disable-scroll {
+        .modal-open {
             overflow: hidden;
-            position: fixed;
-            width: 100%;
-            height: 100%;
         }
 
         /* تحسينات للموبايل */
@@ -447,9 +443,9 @@
             .image-info-panel {
                 bottom: 20px;
                 left: 15px;
-                right: 90px;
+                right: 15px;
                 padding: 15px;
-                max-width: calc(100vw - 120px);
+                max-width: none;
             }
             
             .image-info-panel h6 {
@@ -494,7 +490,6 @@
                 left: 10px;
                 right: 10px;
                 bottom: 80px;
-                max-width: 100%;
             }
             
             .zoom-indicator {
@@ -714,7 +709,7 @@
         </div>
     </div>
 
-    <!-- Image Zoom Modal - النسخة المحسنة -->
+    <!-- Image Zoom Modal - النسخة المصححة -->
     <div class="modal fade image-zoom-modal" id="imageZoomModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -723,15 +718,13 @@
                         <h6 class="mb-0 text-white">
                             <i class="fas fa-expand-alt me-2"></i>عرض الصورة
                         </h6>
-                        <button type="button" class="btn-close-zoom" data-bs-dismiss="modal">
+                        <button type="button" class="btn-close-zoom" onclick="closeImageZoom()">
                             <i class="fas fa-times"></i>
                         </button>
                     </div>
                 </div>
                 <div class="modal-body">
-                    <div class="zoom-image-container">
-                        <img id="zoomedImage" src="" alt="Zoomed Image" class="img-fluid high-resolution-mode">
-                    </div>
+                    <img id="zoomedImage" src="" alt="Zoomed Image" class="img-fluid high-resolution-mode">
                     
                     <div class="zoom-controls">
                         <button onclick="zoomImage(1.3)" title="تكبير">
@@ -762,7 +755,7 @@
                     </div>
                     
                     <div class="touch-zoom-hint" id="touchZoomHint">
-                        <i class="fas fa-hand-pointer me-2"></i>اسحب بإصبعين للتكبير/التصغير
+                        <i class="fas fa-hand-pointer me-2"></i>استخدم الإصبعين للتكبير/التصغير
                     </div>
                 </div>
             </div>
@@ -792,14 +785,14 @@
         let categoryAffinity = JSON.parse(localStorage.getItem('varicom_affinity')) || {};
         let currentCategory = 'all';
 
-        // متغيرات تكبير الصورة
+        // ==================== متغيرات نظام تكبير الصور ====================
         let currentZoom = 1;
         let currentRotation = 0;
         let currentProductInfo = null;
         let isDragging = false;
-        let startX, startY, scrollLeft, scrollTop;
-        let lastTouchDistance = null;
-        let isPinching = false;
+        let startX, startY;
+        let zoomedImage = null;
+        let zoomModal = null;
 
         // ==================== التهيئة ====================
         document.addEventListener('DOMContentLoaded', () => {
@@ -818,46 +811,44 @@
             setupResponsiveDesign();
         });
 
-        // ==================== نظام تكبير الصور المتقدم ====================
+        // ==================== نظام تكبير الصور المصحح ====================
         function initImageZoomSystem() {
-            const modal = document.getElementById('imageZoomModal');
-            if (!modal) return;
+            // الحصول على عناصر DOM
+            zoomModal = new bootstrap.Modal(document.getElementById('imageZoomModal'));
+            zoomedImage = document.getElementById('zoomedImage');
             
-            // منع التمرير عند فتح المودال
-            modal.addEventListener('show.bs.modal', function() {
-                document.body.classList.add('disable-scroll');
+            if (!zoomedImage) return;
+            
+            // إضافة أحداث الفأرة
+            zoomedImage.addEventListener('mousedown', startDrag);
+            zoomedImage.addEventListener('wheel', handleZoomWheel);
+            
+            // إضافة أحداث اللمس
+            zoomedImage.addEventListener('touchstart', handleTouchStart);
+            zoomedImage.addEventListener('touchmove', handleTouchMove);
+            zoomedImage.addEventListener('touchend', handleTouchEnd);
+            
+            // إضافة أحداث الحركة على مستوى المستند
+            document.addEventListener('mousemove', dragImage);
+            document.addEventListener('mouseup', stopDrag);
+            
+            // منع السلوك الافتراضي عند فتح المودال
+            const modalElement = document.getElementById('imageZoomModal');
+            modalElement.addEventListener('show.bs.modal', function() {
+                document.body.classList.add('modal-open');
                 showTouchHint();
             });
             
-            modal.addEventListener('hidden.bs.modal', function() {
-                document.body.classList.remove('disable-scroll');
+            modalElement.addEventListener('hidden.bs.modal', function() {
+                document.body.classList.remove('modal-open');
                 resetZoom();
                 hideTouchHint();
             });
             
-            // تهيئة الأحداث عند عرض المودال
-            modal.addEventListener('shown.bs.modal', function() {
-                const img = document.getElementById('zoomedImage');
-                if (!img) return;
-                
-                // إضافة أحداث الفأرة
-                img.addEventListener('mousedown', startDrag);
-                img.addEventListener('wheel', handleZoomWheel);
-                
-                // إضافة أحداث اللمس
-                img.addEventListener('touchstart', handleTouchStart);
-                img.addEventListener('touchmove', handleTouchMove);
-                img.addEventListener('touchend', handleTouchEnd);
-                
-                // إضافة أحداث الحركة
-                document.addEventListener('mousemove', dragImage);
-                document.addEventListener('mouseup', stopDrag);
-                
-                // تحسين جودة الصورة
-                img.classList.add('high-resolution-mode');
-                
-                // تطبيق التكبير الحالي
-                applyZoom();
+            // إعادة تعيين عند إغلاق المودال
+            modalElement.addEventListener('hidden.bs.modal', function() {
+                resetZoom();
+                hideTouchHint();
             });
         }
 
@@ -867,10 +858,10 @@
             if (!hint) return;
             
             // إظهار التلميح فقط على الأجهزة المحمولة
-            if ('ontouchstart' in window || navigator.maxTouchPoints) {
+            if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
                 hint.style.display = 'block';
                 setTimeout(() => {
-                    if (hint) hint.style.display = 'none';
+                    hint.style.display = 'none';
                 }, 3000);
             }
         }
@@ -882,31 +873,36 @@
 
         // فتح تكبير الصورة
         function openImageZoom(imageUrl, productInfo) {
-            const zoomedImage = document.getElementById('zoomedImage');
             const zoomImageTitle = document.getElementById('zoomImageTitle');
             const zoomImageInfo = document.getElementById('zoomImageInfo');
             
-            if (!zoomedImage || !zoomImageTitle || !zoomImageInfo) return;
+            if (!zoomedImage || !zoomImageTitle || !zoomImageInfo) {
+                console.error('عناصر تكبير الصور غير موجودة');
+                return;
+            }
             
             try {
+                // تحليل معلومات المنتج إذا كانت نصاً
                 if (typeof productInfo === 'string') {
                     productInfo = JSON.parse(productInfo);
                 }
             } catch (e) {
-                console.error('Error parsing product info:', e);
+                console.error('خطأ في تحليل معلومات المنتج:', e);
                 productInfo = null;
             }
             
             // إظهار مؤشر التحميل
             zoomedImage.classList.add('image-loading');
+            zoomedImage.src = '';
             
-            // تحميل الصورة أولاً للحصول على أبعادها
+            // تحميل الصورة
             const tempImg = new Image();
             tempImg.onload = function() {
                 zoomedImage.src = imageUrl;
                 zoomedImage.classList.remove('image-loading');
                 applyZoom();
                 
+                // تحديث معلومات المنتج
                 if (productInfo) {
                     currentProductInfo = productInfo;
                     zoomImageTitle.textContent = productInfo.designation || 'صورة المنتج';
@@ -941,19 +937,25 @@
             tempImg.src = imageUrl;
             
             // فتح المودال
-            const modal = new bootstrap.Modal(document.getElementById('imageZoomModal'));
-            modal.show();
+            if (zoomModal) {
+                zoomModal.show();
+            }
+        }
+
+        // إغلاق تكبير الصورة
+        function closeImageZoom() {
+            if (zoomModal) {
+                zoomModal.hide();
+            }
         }
 
         // تطبيق التكبير والتدوير
         function applyZoom() {
-            const zoomedImage = document.getElementById('zoomedImage');
             if (!zoomedImage) return;
             
             zoomedImage.style.transform = `
                 scale(${currentZoom}) 
                 rotate(${currentRotation}deg)
-                translate(${0}px, ${0}px)
             `;
             updateZoomIndicator();
         }
@@ -962,6 +964,7 @@
         function zoomImage(factor) {
             currentZoom *= factor;
             
+            // تحديد الحدود الدنيا والقصوى
             if (currentZoom < 0.1) currentZoom = 0.1;
             if (currentZoom > 10) currentZoom = 10;
             
@@ -991,11 +994,16 @@
 
         // تحميل الصورة المكبرة
         function downloadZoomedImage() {
-            const zoomedImage = document.getElementById('zoomedImage');
-            if (zoomedImage && currentProductInfo) {
+            if (!zoomedImage || !currentProductInfo) {
+                showToast('لا توجد صورة للتحميل', 'error');
+                return;
+            }
+
+            try {
                 const link = document.createElement('a');
                 link.href = zoomedImage.src;
                 
+                // إنشاء اسم ملف آمن
                 let fileName = 'image';
                 if (currentProductInfo.ref) {
                     fileName = currentProductInfo.ref;
@@ -1011,66 +1019,88 @@
                 document.body.removeChild(link);
                 
                 showToast('تم تحميل الصورة', 'success');
+            } catch (error) {
+                console.error('خطأ في تحميل الصورة:', error);
+                showToast('خطأ في تحميل الصورة', 'error');
             }
         }
 
-        // التحكم بالسحب
+        // ==================== التحكم بالسحب ====================
         function startDrag(e) {
             if (currentZoom <= 1) return;
             
             isDragging = true;
             if (e.type === 'mousedown') {
-                startX = e.pageX;
-                startY = e.pageY;
+                startX = e.clientX;
+                startY = e.clientY;
             } else if (e.type === 'touchstart' && e.touches.length === 1) {
-                startX = e.touches[0].pageX;
-                startY = e.touches[0].pageY;
+                startX = e.touches[0].clientX;
+                startY = e.touches[0].clientY;
+                e.preventDefault(); // منع التمرير في الهواتف
             }
             
-            const container = document.querySelector('.zoom-image-container');
-            if (container) {
-                scrollLeft = container.scrollLeft;
-                scrollTop = container.scrollTop;
-            }
-            
-            e.preventDefault();
+            zoomedImage.classList.add('dragging');
         }
 
         function dragImage(e) {
-            if (!isDragging || currentZoom <= 1) return;
+            if (!isDragging || !zoomedImage) return;
             
             e.preventDefault();
             
-            let x, y;
+            let clientX, clientY;
             if (e.type === 'mousemove') {
-                x = e.pageX;
-                y = e.pageY;
+                clientX = e.clientX;
+                clientY = e.clientY;
             } else if (e.type === 'touchmove' && e.touches.length === 1) {
-                x = e.touches[0].pageX;
-                y = e.touches[0].pageY;
+                clientX = e.touches[0].clientX;
+                clientY = e.touches[0].clientY;
+                e.preventDefault();
             } else {
                 return;
             }
             
-            const walkX = (x - startX) * 2;
-            const walkY = (y - startY) * 2;
-            const container = document.querySelector('.zoom-image-container');
+            // حساب الحركة
+            const deltaX = clientX - startX;
+            const deltaY = clientY - startY;
             
-            if (container) {
-                container.scrollLeft = scrollLeft - walkX;
-                container.scrollTop = scrollTop - walkY;
+            // تطبيق الحركة على الصورة
+            const currentTransform = zoomedImage.style.transform || '';
+            const translateMatch = currentTransform.match(/translate\(([^)]+)\)/);
+            
+            let translateX = 0, translateY = 0;
+            if (translateMatch) {
+                const translateParts = translateMatch[1].split(',');
+                translateX = parseFloat(translateParts[0]) || 0;
+                translateY = parseFloat(translateParts[1]) || 0;
             }
+            
+            translateX += deltaX;
+            translateY += deltaY;
+            
+            zoomedImage.style.transform = `
+                scale(${currentZoom}) 
+                rotate(${currentRotation}deg)
+                translate(${translateX}px, ${translateY}px)
+            `;
+            
+            // تحديث نقطة البداية
+            startX = clientX;
+            startY = clientY;
         }
 
         function stopDrag() {
             isDragging = false;
+            if (zoomedImage) {
+                zoomedImage.classList.remove('dragging');
+            }
         }
 
-        // التحكم باللمس (التكبير بإصبعين)
+        // ==================== التحكم باللمس (التكبير بإصبعين) ====================
+        let initialDistance = null;
+
         function handleTouchStart(e) {
             if (e.touches.length === 2) {
-                isPinching = true;
-                lastTouchDistance = getTouchDistance(e.touches);
+                initialDistance = getTouchDistance(e.touches);
                 e.preventDefault();
             } else if (e.touches.length === 1) {
                 startDrag(e);
@@ -1078,13 +1108,18 @@
         }
 
         function handleTouchMove(e) {
-            if (isPinching && e.touches.length === 2) {
+            if (e.touches.length === 2 && initialDistance !== null) {
                 const currentDistance = getTouchDistance(e.touches);
-                if (lastTouchDistance !== null) {
-                    const scaleFactor = currentDistance / lastTouchDistance;
-                    zoomImage(scaleFactor);
+                const scaleFactor = currentDistance / initialDistance;
+                
+                // تطبيق التكبير التدريجي
+                const newZoom = currentZoom * scaleFactor;
+                if (newZoom >= 0.1 && newZoom <= 10) {
+                    currentZoom = newZoom;
+                    applyZoom();
                 }
-                lastTouchDistance = currentDistance;
+                
+                initialDistance = currentDistance;
                 e.preventDefault();
             } else if (e.touches.length === 1) {
                 dragImage(e);
@@ -1093,8 +1128,7 @@
 
         function handleTouchEnd(e) {
             if (e.touches.length < 2) {
-                isPinching = false;
-                lastTouchDistance = null;
+                initialDistance = null;
             }
             if (e.touches.length === 0) {
                 stopDrag();
@@ -1102,12 +1136,12 @@
         }
 
         function getTouchDistance(touches) {
-            const dx = touches[0].pageX - touches[1].pageX;
-            const dy = touches[0].pageY - touches[1].pageY;
+            const dx = touches[0].clientX - touches[1].clientX;
+            const dy = touches[0].clientY - touches[1].clientY;
             return Math.sqrt(dx * dx + dy * dy);
         }
 
-        // التحكم بالعجلة
+        // ==================== التحكم بالعجلة ====================
         function handleZoomWheel(e) {
             e.preventDefault();
             const delta = e.deltaY > 0 ? 0.9 : 1.1;
@@ -1393,32 +1427,14 @@
             const image = p.image || 'https://via.placeholder.com/300x200/1a3a6c/ffffff?text=VARICOM';
             const hasImage = image && !image.includes('placeholder');
             
-            const zoomButton = hasImage ? 
-                `<button class="btn btn-light btn-sm position-absolute bottom-0 start-0 m-2 rounded-circle shadow-lg" 
-                        onclick="openImageZoom('${escapeJs(image)}', ${escapeJs(JSON.stringify(p))})"
-                        title="تكبير الصورة"
-                        style="width: 40px; height: 40px; backdrop-filter: blur(10px);">
-                    <i class="fas fa-expand-alt"></i>
-                </button>` : '';
+            // استخدم productId بدلاً من JSON.stringify
+            const productId = p.id;
             
-            const wishlistButton = `
-                <button class="btn btn-light btn-sm position-absolute top-0 end-0 m-2 rounded-circle shadow-lg" 
-                        onclick="toggleWishlist('${escapeJs(p.id)}')"
-                        title="${wishlist.includes(p.id) ? 'Retirer des favoris' : 'Ajouter aux favoris'}"
-                        style="width: 40px; height: 40px; backdrop-filter: blur(10px);">
-                    <i class="${wishlist.includes(p.id) ? 'fas text-danger' : 'far'} fa-heart"></i>
-                </button>`;
-            
-            const descIcon = p.description ?
-                `<a href="${escapeHtml(p.description)}" target="_blank" class="text-info ms-2" title="Fiche Technique">
-                    <i class="fas fa-info-circle"></i>
-                </a>` : '';
-
             return `
                 <div class="col-6 col-md-4 col-lg-3">
                     <div class="product-card h-100">
                         <div class="product-img-container" 
-                             onclick="openImageZoom('${escapeJs(image)}', ${escapeJs(JSON.stringify(p))})"
+                             onclick="openProductImageZoom('${escapeJs(image)}', '${escapeJs(productId)}')"
                              style="cursor: pointer;">
                             ${badge}
                             <img src="${hasImage ? 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 200"%3E%3C/svg%3E' : image}" 
@@ -1427,8 +1443,18 @@
                                  loading="lazy"
                                  class="${hasImage ? 'lazy-image' : ''}"
                                  style="width: 100%; height: 100%; object-fit: contain;">
-                            ${zoomButton}
-                            ${wishlistButton}
+                            <button class="btn btn-light btn-sm position-absolute bottom-0 start-0 m-2 rounded-circle shadow-lg" 
+                                    onclick="openProductImageZoom('${escapeJs(image)}', '${escapeJs(productId)}')"
+                                    title="تكبير الصورة"
+                                    style="width: 40px; height: 40px; backdrop-filter: blur(10px);">
+                                <i class="fas fa-expand-alt"></i>
+                            </button>
+                            <button class="btn btn-light btn-sm position-absolute top-0 end-0 m-2 rounded-circle shadow-lg" 
+                                    onclick="toggleWishlist('${escapeJs(p.id)}')"
+                                    title="${wishlist.includes(p.id) ? 'Retirer des favoris' : 'Ajouter aux favoris'}"
+                                    style="width: 40px; height: 40px; backdrop-filter: blur(10px);">
+                                <i class="${wishlist.includes(p.id) ? 'fas text-danger' : 'far'} fa-heart"></i>
+                            </button>
                         </div>
                         <div class="card-body d-flex flex-column p-3">
                             <small class="text-muted mb-1">${escapeHtml(p.ref)}</small>
@@ -1437,7 +1463,8 @@
                             </h6>
                             <div class="mt-auto d-flex justify-content-between align-items-center">
                                 <span class="fw-bold text-primary">
-                                    ${formatPrice(p.prix)}${descIcon}
+                                    ${formatPrice(p.prix)}
+                                    ${p.description ? `<a href="${escapeHtml(p.description)}" target="_blank" class="text-info ms-2" title="Fiche Technique"><i class="fas fa-info-circle"></i></a>` : ''}
                                 </span>
                                 <button class="btn-add-cart" onclick="addToCart('${escapeJs(p.id)}')">
                                     <i class="fas fa-plus me-1"></i>Ajouter
@@ -1447,6 +1474,18 @@
                     </div>
                 </div>
             `;
+        }
+
+        // دالة مساعدة لفتح تكبير الصورة باستخدام productId
+        function openProductImageZoom(imageUrl, productId) {
+            event.stopPropagation(); // منع حدث الحاوية الأم
+            
+            const product = allProducts.find(p => p.id === productId);
+            if (product) {
+                openImageZoom(imageUrl, product);
+            } else {
+                openImageZoom(imageUrl, null);
+            }
         }
 
         // ==================== تحميل الصور الكسول ====================
@@ -1606,6 +1645,8 @@
         }
 
         function toggleWishlist(id) {
+            event.stopPropagation(); // منع حدث الحاوية الأم
+            
             const index = wishlist.indexOf(id);
             const product = allProducts.find(p => p.id === id);
 
