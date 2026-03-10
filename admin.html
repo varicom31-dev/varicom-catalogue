@@ -7,6 +7,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <style>
         :root {
             --primary-color: #1a3a6c;
@@ -406,6 +407,46 @@
                 <button class="btn btn-outline-light btn-sm" onclick="downloadTemplate()">
                     <i class="fas fa-download me-1"></i>Télécharger Modèle
                 </button>
+            </div>
+        </div>
+
+        <!-- Image Recognition Upload (Google Drive / ZIP) -->
+        <div class="row m-4">
+            <div class="col-12">
+                <div class="feature-card">
+                    <div class="card-header bg-purple text-white" style="background: linear-gradient(135deg, #6f42c1, #6610f2);">
+                        <h5 class="mb-0"><i class="fas fa-brain me-2"></i>ذكاء اصطناعي للتعرف على المنتجات من الصور</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>ميزة متطورة:</strong> قم بتحميل ملف ZIP يحتوي على صور المنتجات (من Google Drive أو غيره). سيقوم النظام بمطابقة أسماء الملفات مع أرقام <code>Ref</code> الخاصة بالمنتجات وتحديث الصور تلقائياً.
+                        </div>
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="input-group">
+                                    <input type="file" id="zipFile" accept=".zip" class="form-control" onchange="handleZipUpload(this.files[0])">
+                                    <button class="btn btn-primary" onclick="document.getElementById('zipFile').click()">
+                                        <i class="fas fa-cloud-upload-alt me-2"></i>اختيار ملف ZIP
+                                    </button>
+                                </div>
+                                <small class="text-muted">يجب أن تكون أسماء الصور مطابقة لـ Ref (مثل: REF001.jpg, REF002.png)</small>
+                            </div>
+                            <div class="col-md-4">
+                                <button class="btn btn-outline-info w-100" onclick="showMatchedImagesPreview()">
+                                    <i class="fas fa-eye me-2"></i>معاينة التطابقات
+                                </button>
+                            </div>
+                        </div>
+                        <div id="zipProgress" class="mt-3" style="display: none;">
+                            <div class="progress">
+                                <div id="zipProgressBar" class="progress-bar progress-bar-striped progress-bar-animated" style="width: 0%"></div>
+                            </div>
+                            <p id="zipStatus" class="mt-2 small"></p>
+                        </div>
+                        <div id="matchedImagesPreview" class="row mt-3 g-2"></div>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -2741,13 +2782,13 @@
                     const option1Name = 'Title';
                     const option1Value = 'Default Title';
                     const sku = escapeCSV(p.ref || '');
-                    const grams = '0'; // يمكن تعديله حسب الحاجة
+                    const grams = '0';
                     const invTracker = 'shopify';
                     const invQty = '1';
                     const invPolicy = 'deny';
                     const fulfillmentService = 'manual';
                     const price = p.prix || 0;
-                    const comparePrice = p.prix_comparaison || ''; // سعر المقارنة (فارغ إذا لم يكن موجوداً)
+                    const comparePrice = p.prix_comparaison || '';
                     const requiresShipping = 'TRUE';
                     const taxable = 'TRUE';
                     const imageSrc = p.image ? escapeCSV(p.image) : '';
@@ -2756,7 +2797,7 @@
                     return [
                         handle,
                         title,
-                        '', // Body HTML فارغ
+                        '',
                         vendor,
                         type,
                         tags,
@@ -2780,7 +2821,6 @@
 
                 const csvContent = headers + '\n' + rows;
                 
-                // إنشاء رابط تحميل الملف
                 const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
                 const link = document.createElement('a');
                 const url = URL.createObjectURL(blob);
@@ -2798,7 +2838,6 @@
             }
         }
 
-        // دالة مساعدة للهروب من الفواصل والاقتباسات في CSV
         function escapeCSV(str) {
             if (!str) return '';
             const stringified = String(str);
@@ -2806,6 +2845,138 @@
                 return '"' + stringified.replace(/"/g, '""') + '"';
             }
             return stringified;
+        }
+
+        // ==================== معالجة ملف ZIP (صور من Google Drive) ====================
+        async function handleZipUpload(file) {
+            if (!file) return;
+
+            if (!state.products || state.products.length === 0) {
+                showStatus('لا توجد منتجات في الكتالوج. قم باستيراد Excel أولاً.', 'warning');
+                return;
+            }
+
+            const zipProgress = document.getElementById('zipProgress');
+            const zipProgressBar = document.getElementById('zipProgressBar');
+            const zipStatus = document.getElementById('zipStatus');
+            const matchedPreview = document.getElementById('matchedImagesPreview');
+
+            zipProgress.style.display = 'block';
+            zipProgressBar.style.width = '0%';
+            zipStatus.innerHTML = 'جاري فتح الملف المضغوط...';
+            matchedPreview.innerHTML = '';
+
+            try {
+                const zip = new JSZip();
+                const contents = await zip.loadAsync(file);
+                
+                const imageFiles = [];
+                zip.forEach((relativePath, zipEntry) => {
+                    if (!zipEntry.dir) {
+                        const ext = relativePath.split('.').pop().toLowerCase();
+                        if (['jpg', 'jpeg', 'png', 'gif', 'webp'].includes(ext)) {
+                            imageFiles.push({ path: relativePath, entry: zipEntry });
+                        }
+                    }
+                });
+
+                if (imageFiles.length === 0) {
+                    showStatus('لم يتم العثور على صور في الملف المضغوط', 'warning');
+                    zipProgress.style.display = 'none';
+                    return;
+                }
+
+                zipStatus.innerHTML = `تم العثور على ${imageFiles} صورة. جاري المطابقة مع المنتجات...`;
+                zipProgressBar.style.width = '30%';
+
+                // إنشاء قاموس للمنتجات حسب الـ ref
+                const productMap = new Map();
+                state.products.forEach(p => {
+                    if (p.ref) {
+                        productMap.set(p.ref.toString().trim().toLowerCase(), p);
+                    }
+                });
+
+                const matches = [];
+                let processed = 0;
+
+                for (const img of imageFiles) {
+                    const fileName = img.path.split('/').pop().split('\\').pop(); // اسم الملف مع الامتداد
+                    const nameWithoutExt = fileName.substring(0, fileName.lastIndexOf('.')) || fileName;
+                    const refKey = nameWithoutExt.trim().toLowerCase();
+
+                    if (productMap.has(refKey)) {
+                        // تحويل الصورة إلى Base64 Data URL
+                        const blob = await img.entry.async('blob');
+                        const dataUrl = await new Promise((resolve) => {
+                            const reader = new FileReader();
+                            reader.onload = (e) => resolve(e.target.result);
+                            reader.readAsDataURL(blob);
+                        });
+
+                        matches.push({
+                            ref: nameWithoutExt,
+                            product: productMap.get(refKey),
+                            dataUrl: dataUrl,
+                            fileName: fileName
+                        });
+
+                        processed++;
+                        zipProgressBar.style.width = 30 + (processed / imageFiles.length * 70);
+                        zipStatus.innerHTML = `تمت مطابقة ${matches.length} صورة...`;
+                    }
+                }
+
+                if (matches.length === 0) {
+                    showStatus('لم يتم العثور على تطابقات. تأكد من أن أسماء الملفات تطابق أرقام Ref.', 'warning');
+                    zipProgress.style.display = 'none';
+                    return;
+                }
+
+                // عرض المعاينة
+                matchedPreview.innerHTML = matches.map(m => `
+                    <div class="col-md-3 col-sm-4 col-6">
+                        <div class="card">
+                            <img src="${m.dataUrl}" class="card-img-top" style="height: 120px; object-fit: cover;" alt="${m.ref}">
+                            <div class="card-body p-2">
+                                <small class="d-block text-truncate"><strong>${m.product.designation}</strong></small>
+                                <small class="text-muted">${m.ref}</small>
+                                <button class="btn btn-sm btn-success w-100 mt-1" onclick="applyMatchedImage('${m.product.id}', '${m.dataUrl}')">تطبيق</button>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+
+                zipStatus.innerHTML = `✅ تمت المطابقة بنجاح: ${matches.length} صورة من أصل ${imageFiles.length}`;
+                zipProgressBar.style.width = '100%';
+
+                showStatus(`تم التعرف على ${matches.length} منتج من الصور!`, 'success');
+
+            } catch (error) {
+                console.error('Zip processing error:', error);
+                showStatus('خطأ في معالجة الملف المضغوط: ' + error.message, 'error');
+                zipProgress.style.display = 'none';
+            }
+        }
+
+        function applyMatchedImage(productId, dataUrl) {
+            const product = state.products.find(p => p.id === productId);
+            if (product) {
+                if (!product.originalImage) {
+                    product.originalImage = product.image;
+                }
+                product.image = dataUrl;  // تخزين الصورة كـ Data URL
+                saveData();
+                updateUI();
+                showStatus(`تم تطبيق الصورة على المنتج ${product.designation}`, 'success');
+            }
+        }
+
+        function showMatchedImagesPreview() {
+            const matchedPreview = document.getElementById('matchedImagesPreview');
+            if (matchedPreview.children.length === 0) {
+                showStatus('لا توجد صور مطابقة بعد. قم برفع ملف ZIP أولاً.', 'info');
+            }
         }
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
