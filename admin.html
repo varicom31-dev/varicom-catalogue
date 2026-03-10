@@ -254,7 +254,6 @@
             font-weight: bold;
         }
 
-        /* أنماط إضافية للبحث المتقدم */
         .source-group-card {
             border-left: 4px solid var(--primary-color);
         }
@@ -422,8 +421,13 @@
                             <input type="text" class="form-control mb-2" id="newProductName" placeholder="Nom du produit">
                             <div class="row g-2">
                                 <div class="col-6">
-                                    <input type="number" class="form-control" id="newProductPrice" placeholder="Prix (DA)">
+                                    <input type="number" class="form-control" id="newProductPrice" placeholder="Prix détail (DA)">
                                 </div>
+                                <div class="col-6">
+                                    <input type="number" class="form-control" id="newProductComparePrice" placeholder="Prix comparaison (gros) (DA)">
+                                </div>
+                            </div>
+                            <div class="row g-2 mt-2">
                                 <div class="col-6">
                                     <select class="form-select" id="newProductCategory">
                                         <option value="Général">Catégorie...</option>
@@ -432,8 +436,10 @@
                                         <option value="Accessoires">Accessoires</option>
                                     </select>
                                 </div>
+                                <div class="col-6">
+                                    <input type="text" class="form-control" id="newProductImage" placeholder="URL de l'image">
+                                </div>
                             </div>
-                            <input type="text" class="form-control mt-2" id="newProductImage" placeholder="URL de l'image (https://...)">
                         </div>
                         <button class="btn btn-primary w-100" onclick="addNewProduct()">
                             <i class="fas fa-plus me-2"></i>Ajouter à la liste
@@ -523,7 +529,8 @@
                                     <tr>
                                         <th>Ref</th>
                                         <th>Désignation</th>
-                                        <th>Prix</th>
+                                        <th>Prix Détail</th>
+                                        <th>Prix Comparaison</th>
                                         <th style="width: 25%;">Image URL</th>
                                         <th style="width: 20%;">Description URL</th>
                                         <th>Actions</th>
@@ -1203,7 +1210,6 @@
                 }
             });
 
-            // تحميل نتائج البحث الدفعي السابقة
             try {
                 const savedBatchResults = localStorage.getItem('varicom_batch_results');
                 if (savedBatchResults) {
@@ -1345,7 +1351,7 @@
                     if (product && applyBtnContainer) {
                         document.getElementById('currentProductInfo').innerHTML = `
                             <strong>المنتج الحالي:</strong> ${product.designation}<br>
-                            <small class="text-muted">${product.ref} | ${product.famille} | ${product.prix} DA</small>
+                            <small class="text-muted">${product.ref} | ${product.famille} | ${product.prix} DA | Comparaison: ${product.prix_comparaison || '-'} DA</small>
                         `;
                         applyBtnContainer.style.display = 'block';
                     }
@@ -1674,6 +1680,7 @@
                 designation: row['Designation'] || row['Désignation'] || row['Nom'] || 'Produit sans nom',
                 famille: row['Famille'] || row['Categorie'] || 'Général',
                 prix: parseFloat(row['Prix'] || row['Price'] || 0) || 0,
+                prix_comparaison: parseFloat(row['Prix de comparaison'] || row['Compare Price'] || row['Prix Gros'] || 0) || 0,
                 image: row['Image'] || row['Photo'] || '',
                 description: row['Description'] || row['Desc'] || ''
             })).filter(p => p.designation && p.designation !== 'Produit sans nom');
@@ -1687,6 +1694,7 @@
         function addNewProduct() {
             const name = document.getElementById('newProductName')?.value;
             const price = document.getElementById('newProductPrice')?.value;
+            const comparePrice = document.getElementById('newProductComparePrice')?.value;
             const cat = document.getElementById('newProductCategory')?.value;
             const img = document.getElementById('newProductImage')?.value;
 
@@ -1699,6 +1707,7 @@
                 id: `new_${Date.now()}`,
                 name: name.trim(),
                 price: parseFloat(price) || 0,
+                comparePrice: parseFloat(comparePrice) || 0,
                 category: cat || 'Général',
                 image: img || '',
                 timestamp: new Date().toISOString()
@@ -1707,6 +1716,7 @@
             if (document.getElementById('newProductName')) {
                 document.getElementById('newProductName').value = '';
                 document.getElementById('newProductPrice').value = '';
+                document.getElementById('newProductComparePrice').value = '';
                 document.getElementById('newProductImage').value = '';
             }
 
@@ -2141,7 +2151,7 @@
             list.innerHTML = state.newProducts.map(p => `
                 <li class="list-group-item d-flex justify-content-between align-items-center">
                     <div>
-                        <strong>${escapeHtml(p.name)}</strong> - ${p.price} DA
+                        <strong>${escapeHtml(p.name)}</strong> - ${p.price} DA (détail) / ${p.comparePrice || 0} DA (gros)
                         <br><small class="text-muted">${p.category}</small>
                     </div>
                     <button class="btn btn-sm btn-outline-danger" onclick="removeNewProduct('${escapeJs(p.id)}')">
@@ -2182,6 +2192,7 @@
                         ${escapeHtml(p.designation)}
                     </td>
                     <td>${p.prix} DA</td>
+                    <td>${p.prix_comparaison || 0} DA</td>
                     <td>
                         <div class="input-group input-group-sm">
                             <input type="text" class="form-control" 
@@ -2359,6 +2370,7 @@
                     Designation: 'Exemple Produit', 
                     Famille: 'Informatique', 
                     Prix: 1000, 
+                    'Prix de comparaison': 900,
                     Image: 'https://example.com/image.jpg', 
                     Description: 'https://example.com/description' 
                 }
@@ -2680,7 +2692,7 @@
             showStatus(`تم تطبيق ${appliedCount} صورة على المنتجات`, 'success');
         }
 
-        // ==================== دالة تصدير CSV لـ Shopify ====================
+        // ==================== دالة تصدير CSV لـ Shopify (مع سعرين) ====================
         function exportShopifyCSV() {
             if (!state.products || state.products.length === 0) {
                 showStatus('لا توجد منتجات لتصديرها', 'warning');
@@ -2735,7 +2747,7 @@
                     const invPolicy = 'deny';
                     const fulfillmentService = 'manual';
                     const price = p.prix || 0;
-                    const comparePrice = ''; // سعر المقارنة (فارغ)
+                    const comparePrice = p.prix_comparaison || ''; // سعر المقارنة (فارغ إذا لم يكن موجوداً)
                     const requiresShipping = 'TRUE';
                     const taxable = 'TRUE';
                     const imageSrc = p.image ? escapeCSV(p.image) : '';
