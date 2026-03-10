@@ -292,6 +292,9 @@
                     <button class="btn btn-success btn-lg me-2" onclick="uploadToGitHubGist()" id="publishBtn">
                         <i class="fab fa-github me-2"></i>Publier / Synchroniser
                     </button>
+                    <button class="btn btn-info btn-lg me-2" onclick="exportShopifyCSV()">
+                        <i class="fas fa-file-csv me-2"></i>📥 Exporter CSV Shopify
+                    </button>
                     <button class="btn btn-primary btn-lg" onclick="generateClientLink()">
                         <i class="fas fa-link me-2"></i>Lien Client
                     </button>
@@ -2675,85 +2678,122 @@
             modal.hide();
             
             showStatus(`تم تطبيق ${appliedCount} صورة على المنتجات`, 'success');
-                    // ==================== التصدير إلى حساب Shopify ====================
-        function exportToShopifyCSV() {
+        }
+
+        // ==================== دالة تصدير CSV لـ Shopify ====================
+        function exportShopifyCSV() {
             if (!state.products || state.products.length === 0) {
-                showStatus('لا توجد منتجات للتصدير', 'warning');
+                showStatus('لا توجد منتجات لتصديرها', 'warning');
                 return;
             }
 
-            // الأعمدة الأساسية المطلوبة والمقبولة في Shopify
-            const headers = [
-                "Handle", "Title", "Body (HTML)", "Vendor", "Type", "Tags", "Published", 
-                "Option1 Name", "Option1 Value", "Variant SKU", "Variant Inventory Tracker", 
-                "Variant Inventory Qty", "Variant Inventory Policy", "Variant Fulfillment Service", 
-                "Variant Price", "Variant Requires Shipping", "Variant Taxable", "Image Src", "Image Position", 
-                "Status"
-            ];
+            try {
+                // إنشاء رؤوس الأعمدة المطلوبة من قبل Shopify
+                const headers = [
+                    'Handle',
+                    'Title',
+                    'Body (HTML)',
+                    'Vendor',
+                    'Type',
+                    'Tags',
+                    'Published',
+                    'Option1 Name',
+                    'Option1 Value',
+                    'Variant SKU',
+                    'Variant Grams',
+                    'Variant Inventory Tracker',
+                    'Variant Inventory Qty',
+                    'Variant Inventory Policy',
+                    'Variant Fulfillment Service',
+                    'Variant Price',
+                    'Variant Compare At Price',
+                    'Variant Requires Shipping',
+                    'Variant Taxable',
+                    'Image Src',
+                    'Image Alt Text'
+                ].join(',');
 
-            let csvContent = headers.join(",") + "\n";
+                // تحويل المنتجات إلى صفوف CSV
+                const rows = state.products.map(p => {
+                    const handle = p.designation
+                        .toLowerCase()
+                        .replace(/[^a-z0-9]+/g, '-')
+                        .replace(/^-|-$/g, '') || 'produit';
+                    
+                    // التعامل مع الفواصل والاقتباسات داخل النصوص
+                    const title = escapeCSV(p.designation);
+                    const vendor = 'VARICOM';
+                    const type = escapeCSV(p.famille || 'Général');
+                    const tags = escapeCSV(p.famille || '');
+                    const published = 'TRUE';
+                    const option1Name = 'Title';
+                    const option1Value = 'Default Title';
+                    const sku = escapeCSV(p.ref || '');
+                    const grams = '0'; // يمكن تعديله حسب الحاجة
+                    const invTracker = 'shopify';
+                    const invQty = '1';
+                    const invPolicy = 'deny';
+                    const fulfillmentService = 'manual';
+                    const price = p.prix || 0;
+                    const comparePrice = ''; // سعر المقارنة (فارغ)
+                    const requiresShipping = 'TRUE';
+                    const taxable = 'TRUE';
+                    const imageSrc = p.image ? escapeCSV(p.image) : '';
+                    const imageAlt = escapeCSV(p.designation);
 
-            // أداة لضمان أن النصوص التي تحتوي فواصل لا تخرب ملف الـ CSV
-            function escapeCSV(str) {
-                if (str === null || str === undefined) return '""';
-                const strValue = String(str);
-                if (strValue.includes('"') || strValue.includes(',') || strValue.includes('\n')) {
-                    return '"' + strValue.replace(/"/g, '""') + '"';
-                }
-                return strValue;
+                    return [
+                        handle,
+                        title,
+                        '', // Body HTML فارغ
+                        vendor,
+                        type,
+                        tags,
+                        published,
+                        option1Name,
+                        option1Value,
+                        sku,
+                        grams,
+                        invTracker,
+                        invQty,
+                        invPolicy,
+                        fulfillmentService,
+                        price,
+                        comparePrice,
+                        requiresShipping,
+                        taxable,
+                        imageSrc,
+                        imageAlt
+                    ].join(',');
+                }).join('\n');
+
+                const csvContent = headers + '\n' + rows;
+                
+                // إنشاء رابط تحميل الملف
+                const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement('a');
+                const url = URL.createObjectURL(blob);
+                link.href = url;
+                link.setAttribute('download', 'shopify_products.csv');
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+                
+                showStatus(`تم تصدير ${state.products.length} منتج بنجاح!`, 'success');
+            } catch (error) {
+                console.error('Export error:', error);
+                showStatus('حدث خطأ أثناء تصدير CSV: ' + error.message, 'error');
             }
-
-            // تحويل منتجاتك إلى سطور متوافقة مع شوبيفاي
-            state.products.forEach(p => {
-                // إنشاء رابط URL مميز للمنتج في شوبيفاي (Handle)
-                const handle = p.designation ? p.designation.toLowerCase()
-                                .replace(/[^a-z0-9\u0600-\u06FF]+/g, '-') // دعم العربية والانجليزية
-                                .replace(/(^-|-$)/g, '') : ('product-' + p.id);
-                
-                const row = [
-                    handle,                           // Handle
-                    p.designation || 'Produit',       // Title
-                    p.description || '',              // Body (HTML)
-                    'VARICOM',                        // Vendor
-                    p.famille || 'Général',           // Type (تصنيف)
-                    p.famille || '',                  // Tags (استخدمنا التصنيف ككلمة مفتاحية)
-                    'TRUE',                           // Published
-                    'Title',                          // Option1 Name
-                    'Default Title',                  // Option1 Value
-                    p.ref || '',                      // Variant SKU (كود الدخول أو الريفيرانس)
-                    'shopify',                        // Variant Inventory Tracker
-                    '100',                            // Variant Inventory Qty (الكمية الافتراضية)
-                    'deny',                           // Variant Inventory Policy
-                    'manual',                         // Variant Fulfillment Service
-                    p.prix || 0,                      // Variant Price (السعر)
-                    'TRUE',                           // Variant Requires Shipping
-                    'TRUE',                           // Variant Taxable
-                    p.image || '',                    // Image Src (رابط الصورة التي تم اختيارها)
-                    '1',                              // Image Position
-                    'active'                          // Status (مفعل في المتجر)
-                ].map(escapeCSV);
-                
-                csvContent += row.join(",") + "\n";
-            });
-
-            // إنشاء وبدء تحميل الملف
-            // علامة \uFEFF هي BOM لتأكيد قراءة اللغة العربية/الفرنسية بشكل صحيح في Excel وغيرها
-            const blob = new Blob(["\uFEFF" + csvContent], { type: 'text/csv;charset=utf-8;' });
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement("a");
-            link.setAttribute("href", url);
-            
-            // تسمية الملف بالتاريخ
-            const dateStr = new Date().toISOString().split('T')[0];
-            link.setAttribute("download", `shopify_products_${dateStr}.csv`);
-            
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-
-            showStatus('تم تصدير ملف Shopify بنجاح! ✔️', 'success');
         }
 
+        // دالة مساعدة للهروب من الفواصل والاقتباسات في CSV
+        function escapeCSV(str) {
+            if (!str) return '';
+            const stringified = String(str);
+            if (stringified.includes(',') || stringified.includes('"') || stringified.includes('\n')) {
+                return '"' + stringified.replace(/"/g, '""') + '"';
+            }
+            return stringified;
         }
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
