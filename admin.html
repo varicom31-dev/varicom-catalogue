@@ -9,34 +9,270 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <style>
-        :root { --primary-color: #1a3a6c; --secondary-color: #e63946; --accent-color: #2a9d8f; --dark-color: #2c3e50; --light-color: #ecf0f1; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; }
-        .admin-container { background: white; border-radius: 15px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); margin: 0 auto; max-width: 1400px; overflow: hidden; }
-        .admin-header { background: linear-gradient(135deg, var(--primary-color), #2a4d7a); color: white; padding: 25px; position: relative; overflow: hidden; }
-        .upload-section { background: linear-gradient(135deg, #28a745, #20c997); color: white; border-radius: 15px; padding: 25px; margin: 20px; box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
-        .upload-area { border: 3px dashed rgba(255,255,255,0.5); border-radius: 12px; padding: 40px 20px; text-align: center; cursor: pointer; transition: all 0.3s ease; background: rgba(255,255,255,0.1); }
-        .upload-area:hover { background: rgba(255,255,255,0.2); border-color: white; }
-        .sync-status { position: fixed; top: 20px; right: 20px; z-index: 1000; padding: 15px 25px; border-radius: 10px; display: none; box-shadow: 0 5px 20px rgba(0,0,0,0.15); animation: slideInRight 0.5s ease; color: white; }
+        :root {
+            --primary-color: #1a3a6c;
+            --secondary-color: #e63946;
+            --accent-color: #2a9d8f;
+            --dark-color: #2c3e50;
+            --light-color: #ecf0f1;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .admin-container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            margin: 0 auto;
+            max-width: 1400px;
+            overflow: hidden;
+        }
+
+        .admin-header {
+            background: linear-gradient(135deg, var(--primary-color), #2a4d7a);
+            color: white;
+            padding: 25px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .upload-section {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .upload-area {
+            border: 3px dashed rgba(255, 255, 255, 0.5);
+            border-radius: 12px;
+            padding: 40px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .upload-area:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: white;
+        }
+
+        .sync-status {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+            padding: 15px 25px;
+            border-radius: 10px;
+            display: none;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+            animation: slideInRight 0.5s ease;
+            color: white;
+        }
+
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
         .sync-success { background: #28a745; border-left: 5px solid #1e7e34; }
         .sync-warning { background: #ffc107; color: #000; border-left: 5px solid #e0a800; }
         .sync-error { background: #dc3545; border-left: 5px solid #bd2130; }
-        .stats-card { background: white; border-radius: 15px; padding: 20px; text-align: center; box-shadow: 0 5px 15px rgba(0,0,0,0.05); transition: transform 0.3s; }
+
+        .stats-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s;
+        }
+
         .stats-card:hover { transform: translateY(-5px); }
-        .feature-card { background: white; border-radius: 15px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); margin-bottom: 20px; overflow: hidden; }
-        .smart-suggestions { background: #f8f9fa; border-radius: 10px; padding: 15px; margin-bottom: 20px; }
-        .suggestion-tag { display: inline-block; background: #e9ecef; border: 1px solid #dee2e6; border-radius: 20px; padding: 5px 15px; margin: 5px; cursor: pointer; transition: all 0.2s; }
-        .suggestion-tag:hover { background: #007bff; color: white; border-color: #007bff; }
-        .image-select-card { transition: all 0.3s; cursor: pointer; }
-        .image-select-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0,0,0,0.1); }
-        .auto-search-progress { height: 5px; background: #e9ecef; border-radius: 10px; overflow: hidden; margin-top: 10px; }
-        .auto-search-progress-bar { height: 100%; background: linear-gradient(90deg, #28a745, #20c997); transition: width 0.3s; }
-        .source-group-card { border-left: 4px solid var(--primary-color); }
-        .batch-results-table { max-height: 400px; overflow-y: auto; }
-        .image-preview-modal img { max-height: 70vh; object-fit: contain; }
+
+        .feature-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .btn-pulse {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.7); }
+            70% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(40, 167, 69, 0); }
+            100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(40, 167, 69, 0); }
+        }
+
+        .ai-image-result {
+            border: 2px solid #dee2e6;
+            border-radius: 10px;
+            overflow: hidden;
+            transition: all 0.3s;
+            cursor: pointer;
+            height: 100%;
+        }
+
+        .ai-image-result:hover {
+            border-color: var(--primary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .ai-image-result.selected {
+            border-color: #28a745;
+            box-shadow: 0 0 0 3px rgba(40, 167, 69, 0.3);
+        }
+
+        .search-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin: 10px 0;
+        }
+
+        .search-tag {
+            background: #e9ecef;
+            padding: 3px 8px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .search-tag:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .loader {
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid var(--primary-color);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .search-source-badge {
+            position: absolute;
+            bottom: 5px;
+            right: 5px;
+            background: rgba(0,0,0,0.7);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.7rem;
+        }
+
+        .smart-suggestions {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .suggestion-tag {
+            display: inline-block;
+            background: #e9ecef;
+            border: 1px solid #dee2e6;
+            border-radius: 20px;
+            padding: 5px 15px;
+            margin: 5px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .suggestion-tag:hover {
+            background: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
+
+        .image-select-card {
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .image-select-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+
+        .auto-search-progress {
+            height: 5px;
+            background: #e9ecef;
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 10px;
+        }
+
+        .auto-search-progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #28a745, #20c997);
+            transition: width 0.3s;
+        }
+
+        .quality-badge {
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.7rem;
+            font-weight: bold;
+        }
+
+        .relevance-badge {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: linear-gradient(135deg, #007bff, #6610f2);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 0.7rem;
+            font-weight: bold;
+        }
+
+        .source-group-card {
+            border-left: 4px solid var(--primary-color);
+        }
+        
+        .batch-results-table {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .image-preview-modal img {
+            max-height: 70vh;
+            object-fit: contain;
+        }
     </style>
 </head>
 <body>
     <div id="syncStatus" class="sync-status"></div>
+
     <div class="admin-container">
         <div class="admin-header text-center">
             <h1><i class="fas fa-user-shield me-3"></i>PANEL ADMINISTRATEUR VARICOM</h1>
@@ -46,38 +282,110 @@
         <!-- Quick Actions -->
         <div class="p-4 bg-light border-bottom">
             <div class="row align-items-center">
-                <div class="col-md-6"><h4 class="mb-0 text-primary"><i class="fas fa-bolt me-2"></i>Tableau de Bord</h4></div>
+                <div class="col-md-6">
+                    <h4 class="mb-0 text-primary"><i class="fas fa-bolt me-2"></i>Tableau de Bord</h4>
+                </div>
                 <div class="col-md-6 text-end">
-                    <button class="btn btn-warning btn-lg me-2" onclick="autoSearchProductImages()"><i class="fas fa-robot me-2"></i>بحث تلقائي</button>
-                    <button class="btn btn-success btn-lg me-2" onclick="uploadToGitHubGist()" id="publishBtn"><i class="fab fa-github me-2"></i>Publier / Synchroniser</button>
-                    <button class="btn btn-info btn-lg me-2" onclick="exportShopifyCSV()"><i class="fas fa-file-csv me-2"></i>📥 Exporter CSV Shopify (Valide)</button>
-                    <button class="btn btn-primary btn-lg" onclick="generateClientLink()"><i class="fas fa-link me-2"></i>Lien Client</button>
+                    <button class="btn btn-warning btn-lg me-2" onclick="autoSearchProductImages()">
+                        <i class="fas fa-robot me-2"></i>بحث تلقائي
+                    </button>
+                    <button class="btn btn-success btn-lg me-2" onclick="uploadToGitHubGist()" id="publishBtn">
+                        <i class="fab fa-github me-2"></i>Publier / Synchroniser
+                    </button>
+                    <button class="btn btn-info btn-lg me-2" onclick="exportShopifyCSV()">
+                        <i class="fas fa-file-csv me-2"></i>📥 Exporter CSV Shopify (Valide)
+                    </button>
+                    <button class="btn btn-primary btn-lg" onclick="generateClientLink()">
+                        <i class="fas fa-link me-2"></i>Lien Client
+                    </button>
                 </div>
             </div>
         </div>
 
         <!-- Stats -->
         <div class="row m-4">
-            <div class="col-md-3"><div class="stats-card"><i class="fas fa-box fa-2x text-primary mb-2"></i><h3 id="statsProducts">0</h3><p class="text-muted mb-0">Produits Totaux</p></div></div>
-            <div class="col-md-3"><div class="stats-card"><i class="fas fa-star fa-2x text-warning mb-2"></i><h3 id="statsNewProducts">0</h3><p class="text-muted mb-0">Nouveautés</p></div></div>
-            <div class="col-md-3"><div class="stats-card"><i class="fas fa-bell fa-2x text-info mb-2"></i><h3 id="statsNotifications">0</h3><p class="text-muted mb-0">Notifications</p></div></div>
-            <div class="col-md-3"><div class="stats-card"><i class="fas fa-sync fa-2x text-success mb-2"></i><h3 id="statsStatus">Inactif</h3><p class="text-muted mb-0">Statut Sync</p></div></div>
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <i class="fas fa-box fa-2x text-primary mb-2"></i>
+                    <h3 id="statsProducts">0</h3>
+                    <p class="text-muted mb-0">Produits Totaux</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <i class="fas fa-star fa-2x text-warning mb-2"></i>
+                    <h3 id="statsNewProducts">0</h3>
+                    <p class="text-muted mb-0">Nouveautés</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <i class="fas fa-bell fa-2x text-info mb-2"></i>
+                    <h3 id="statsNotifications">0</h3>
+                    <p class="text-muted mb-0">Notifications</p>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="stats-card">
+                    <i class="fas fa-sync fa-2x text-success mb-2"></i>
+                    <h3 id="statsStatus">Inactif</h3>
+                    <p class="text-muted mb-0">Statut Sync</p>
+                </div>
+            </div>
         </div>
 
         <!-- Smart Search Section -->
         <div class="row m-4">
             <div class="col-12">
                 <div class="feature-card">
-                    <div class="card-header bg-success text-white"><h5 class="mb-0"><i class="fas fa-search-plus me-2"></i>بحث ذكي متقدم بالصور</h5><button class="btn btn-warning btn-sm ms-2" onclick="openBatchSearchModal()"><i class="fas fa-bolt me-1"></i> بحث دفعي متقدم</button></div>
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0"><i class="fas fa-search-plus me-2"></i>بحث ذكي متقدم بالصور</h5>
+                        <button class="btn btn-warning btn-sm ms-2" onclick="openBatchSearchModal()">
+                            <i class="fas fa-bolt me-1"></i> بحث دفعي متقدم
+                        </button>
+                    </div>
                     <div class="card-body">
-                        <div class="smart-suggestions"><h6><i class="fas fa-lightbulb me-2"></i>اقتراحات ذكية:</h6><div id="smartSuggestions"></div></div>
-                        <div class="row mb-3">
-                            <div class="col-md-8"><div class="input-group"><input type="text" class="form-control" id="smartSearchInput" placeholder="ابحث عن صور للمنتج..."><button class="btn btn-primary" onclick="smartImageSearch()"><i class="fas fa-search"></i> بحث ذكي</button></div></div>
-                            <div class="col-md-4"><select class="form-select" id="searchSource"><option value="auto">تلقائي (أفضل النتائج من جميع المصادر)</option><option value="all">جميع المصادر (24 صورة)</option><option value="bing">Bing Images</option><option value="unsplash">Unsplash</option><option value="pexels">Pexels</option><option value="pixabay">Pixabay</option><option value="google">Google Images</option><option value="flickr">Flickr</option></select></div>
+                        <div class="smart-suggestions">
+                            <h6><i class="fas fa-lightbulb me-2"></i>اقتراحات ذكية:</h6>
+                            <div id="smartSuggestions"></div>
                         </div>
-                        <div id="autoSearchProgress" class="auto-search-progress" style="display: none;"><div id="autoSearchProgressBar" class="auto-search-progress-bar" style="width: 0%"></div></div>
+                        
+                        <div class="row mb-3">
+                            <div class="col-md-8">
+                                <div class="input-group">
+                                    <input type="text" class="form-control" id="smartSearchInput" 
+                                           placeholder="ابحث عن صور للمنتج...">
+                                    <button class="btn btn-primary" onclick="smartImageSearch()">
+                                        <i class="fas fa-search"></i> بحث ذكي
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <select class="form-select" id="searchSource">
+                                    <option value="auto">تلقائي (أفضل النتائج من جميع المصادر)</option>
+                                    <option value="all">جميع المصادر (24 صورة)</option>
+                                    <option value="bing">Bing Images</option>
+                                    <option value="unsplash">Unsplash</option>
+                                    <option value="pexels">Pexels</option>
+                                    <option value="pixabay">Pixabay</option>
+                                    <option value="google">Google Images</option>
+                                    <option value="flickr">Flickr</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div id="autoSearchProgress" class="auto-search-progress" style="display: none;">
+                            <div id="autoSearchProgressBar" class="auto-search-progress-bar" style="width: 0%"></div>
+                        </div>
+                        
                         <div class="row g-3" id="smartResults"></div>
-                        <div class="mt-3 text-center" id="applyButtonContainer" style="display: none;"><button class="btn btn-success btn-lg" onclick="applySelectedImageToCurrentProduct()"><i class="fas fa-check-circle me-2"></i>تطبيق الصورة المحددة على المنتج</button><p class="text-muted mt-2 small" id="currentProductInfo"></p></div>
+                        
+                        <div class="mt-3 text-center" id="applyButtonContainer" style="display: none;">
+                            <button class="btn btn-success btn-lg" onclick="applySelectedImageToCurrentProduct()">
+                                <i class="fas fa-check-circle me-2"></i>تطبيق الصورة المحددة على المنتج
+                            </button>
+                            <p class="text-muted mt-2 small" id="currentProductInfo"></p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -86,22 +394,54 @@
         <!-- Excel Upload -->
         <div class="upload-section">
             <h4><i class="fas fa-file-excel me-2"></i>Importation Produits Excel</h4>
-            <div class="upload-area" id="excelUploadArea" onclick="document.getElementById('excelFile').click()"><i class="fas fa-cloud-upload-alt fa-3x mb-3"></i><h5>Cliquez ou glissez votre fichier Excel ici</h5><p class="small opacity-75">Supporte .xlsx, .xls, .csv</p><input type="file" id="excelFile" accept=".xlsx, .xls, .csv" style="display: none;" onchange="handleExcelUpload(this.files[0])"></div>
-            <div class="mt-3 text-center"><button class="btn btn-outline-light btn-sm" onclick="downloadTemplate()"><i class="fas fa-download me-1"></i>Télécharger Modèle</button></div>
+            <div class="upload-area" id="excelUploadArea" onclick="document.getElementById('excelFile').click()">
+                <i class="fas fa-cloud-upload-alt fa-3x mb-3"></i>
+                <h5>Cliquez ou glissez votre fichier Excel ici</h5>
+                <p class="small opacity-75">Supporte .xlsx, .xls, .csv</p>
+                <input type="file" id="excelFile" accept=".xlsx, .xls, .csv" style="display: none;"
+                    onchange="handleExcelUpload(this.files[0])">
+            </div>
+            <div class="mt-3 text-center">
+                <button class="btn btn-outline-light btn-sm" onclick="downloadTemplate()">
+                    <i class="fas fa-download me-1"></i>Télécharger Modèle
+                </button>
+            </div>
         </div>
 
-        <!-- Image Recognition Upload (ZIP) with Cloudinary -->
+        <!-- Image Recognition Upload (Google Drive / ZIP) -->
         <div class="row m-4">
             <div class="col-12">
                 <div class="feature-card">
-                    <div class="card-header bg-purple text-white" style="background: linear-gradient(135deg, #6f42c1, #6610f2);"><h5 class="mb-0"><i class="fas fa-brain me-2"></i>ذكاء اصطناعي للتعرف على المنتجات من الصور</h5></div>
+                    <div class="card-header bg-purple text-white" style="background: linear-gradient(135deg, #6f42c1, #6610f2);">
+                        <h5 class="mb-0"><i class="fas fa-brain me-2"></i>ذكاء اصطناعي للتعرف على المنتجات من الصور</h5>
+                    </div>
                     <div class="card-body">
-                        <div class="alert alert-info"><i class="fas fa-info-circle me-2"></i><strong>ميزة متطورة:</strong> قم بتحميل ملف ZIP يحتوي على صور المنتجات. سيقوم النظام بمطابقة أسماء الملفات مع أرقام <code>Ref</code> ورفع الصور إلى Cloudinary لتحويلها إلى روابط صالحة لـ Shopify.</div>
-                        <div class="row">
-                            <div class="col-md-8"><div class="input-group"><input type="file" id="zipFile" accept=".zip" class="form-control" onchange="handleZipUpload(this.files[0])"><button class="btn btn-primary" onclick="document.getElementById('zipFile').click()"><i class="fas fa-cloud-upload-alt me-2"></i>اختيار ملف ZIP</button></div><small class="text-muted">يجب أن تكون أسماء الصور مطابقة لـ Ref (مثل: REF001.jpg, REF002.png)</small></div>
-                            <div class="col-md-4"><button class="btn btn-outline-info w-100" onclick="showMatchedImagesPreview()"><i class="fas fa-eye me-2"></i>معاينة التطابقات</button></div>
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            <strong>ميزة متطورة:</strong> قم بتحميل ملف ZIP يحتوي على صور المنتجات (من Google Drive أو غيره). سيقوم النظام بمطابقة أسماء الملفات مع أرقام <code>Ref</code> الخاصة بالمنتجات وتحديث الصور تلقائياً.
                         </div>
-                        <div id="zipProgress" class="mt-3" style="display: none;"><div class="progress"><div id="zipProgressBar" class="progress-bar progress-bar-striped progress-bar-animated" style="width: 0%"></div></div><p id="zipStatus" class="mt-2 small"></p></div>
+                        <div class="row">
+                            <div class="col-md-8">
+                                <div class="input-group">
+                                    <input type="file" id="zipFile" accept=".zip" class="form-control" onchange="handleZipUpload(this.files[0])">
+                                    <button class="btn btn-primary" onclick="document.getElementById('zipFile').click()">
+                                        <i class="fas fa-cloud-upload-alt me-2"></i>اختيار ملف ZIP
+                                    </button>
+                                </div>
+                                <small class="text-muted">يجب أن تكون أسماء الصور مطابقة لـ Ref (مثل: REF001.jpg, REF002.png)</small>
+                            </div>
+                            <div class="col-md-4">
+                                <button class="btn btn-outline-info w-100" onclick="showMatchedImagesPreview()">
+                                    <i class="fas fa-eye me-2"></i>معاينة التطابقات
+                                </button>
+                            </div>
+                        </div>
+                        <div id="zipProgress" class="mt-3" style="display: none;">
+                            <div class="progress">
+                                <div id="zipProgressBar" class="progress-bar progress-bar-striped progress-bar-animated" style="width: 0%"></div>
+                            </div>
+                            <p id="zipStatus" class="mt-2 small"></p>
+                        </div>
                         <div id="matchedImagesPreview" class="row mt-3 g-2"></div>
                     </div>
                 </div>
@@ -110,25 +450,101 @@
 
         <div class="row m-4">
             <!-- New Products -->
-            <div class="col-md-6"><div class="feature-card h-100"><div class="card-header bg-primary text-white"><h5 class="mb-0"><i class="fas fa-plus-circle me-2"></i>Ajouter Produit / Nouveauté</h5></div><div class="card-body"><div class="mb-3"><input type="text" class="form-control mb-2" id="newProductName" placeholder="Nom du produit"><div class="row g-2"><div class="col-6"><input type="number" class="form-control" id="newProductPrice" placeholder="Prix détail (DA)"></div><div class="col-6"><input type="number" class="form-control" id="newProductComparePrice" placeholder="Prix comparaison (gros) (DA)"></div></div><div class="row g-2 mt-2"><div class="col-6"><select class="form-select" id="newProductCategory"><option value="Général">Catégorie...</option><option value="Ordinateurs">Ordinateurs</option><option value="Téléphones">Téléphones</option><option value="Accessoires">Accessoires</option></select></div><div class="col-6"><input type="text" class="form-control" id="newProductImage" placeholder="URL de l'image"></div></div></div><button class="btn btn-primary w-100" onclick="addNewProduct()"><i class="fas fa-plus me-2"></i>Ajouter à la liste</button><hr><h6 class="text-muted">Produits Nouveaux Actifs:</h6><ul id="activeNewProducts" class="list-group list-group-flush small" style="max-height: 200px; overflow-y: auto;"></ul></div></div></div>
+            <div class="col-md-6">
+                <div class="feature-card h-100">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0"><i class="fas fa-plus-circle me-2"></i>Ajouter Produit / Nouveauté</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <input type="text" class="form-control mb-2" id="newProductName" placeholder="Nom du produit">
+                            <div class="row g-2">
+                                <div class="col-6">
+                                    <input type="number" class="form-control" id="newProductPrice" placeholder="Prix détail (DA)">
+                                </div>
+                                <div class="col-6">
+                                    <input type="number" class="form-control" id="newProductComparePrice" placeholder="Prix comparaison (gros) (DA)">
+                                </div>
+                            </div>
+                            <div class="row g-2 mt-2">
+                                <div class="col-6">
+                                    <select class="form-select" id="newProductCategory">
+                                        <option value="Général">Catégorie...</option>
+                                        <option value="Ordinateurs">Ordinateurs</option>
+                                        <option value="Téléphones">Téléphones</option>
+                                        <option value="Accessoires">Accessoires</option>
+                                    </select>
+                                </div>
+                                <div class="col-6">
+                                    <input type="text" class="form-control" id="newProductImage" placeholder="URL de l'image">
+                                </div>
+                            </div>
+                        </div>
+                        <button class="btn btn-primary w-100" onclick="addNewProduct()">
+                            <i class="fas fa-plus me-2"></i>Ajouter à la liste
+                        </button>
+
+                        <hr>
+                        <h6 class="text-muted">Produits Nouveaux Actifs:</h6>
+                        <ul id="activeNewProducts" class="list-group list-group-flush small" style="max-height: 200px; overflow-y: auto;"></ul>
+                    </div>
+                </div>
+            </div>
+
             <!-- Notifications -->
-            <div class="col-md-6"><div class="feature-card h-100"><div class="card-header bg-warning text-dark"><h5 class="mb-0"><i class="fas fa-bullhorn me-2"></i>Gérer Notifications</h5></div><div class="card-body"><div class="mb-3"><input type="text" class="form-control mb-2" id="notifTitle" placeholder="Titre (ex: Promo)"><textarea class="form-control mb-2" id="notifMessage" rows="2" placeholder="Message..."></textarea><select class="form-select" id="notifType"><option value="info">Information ℹ️</option><option value="success">Succès ✅</option><option value="warning">Attention ⚠️</option><option value="error">Urgent ❌</option></select></div><button class="btn btn-warning w-100" onclick="createNotification()"><i class="fas fa-paper-plane me-2"></i>Publier Notification</button><hr><h6 class="text-muted">Notifications Actives:</h6><ul id="activeNotifications" class="list-group list-group-flush small" style="max-height: 200px; overflow-y: auto;"></ul></div></div></div>
+            <div class="col-md-6">
+                <div class="feature-card h-100">
+                    <div class="card-header bg-warning text-dark">
+                        <h5 class="mb-0"><i class="fas fa-bullhorn me-2"></i>Gérer Notifications</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <input type="text" class="form-control mb-2" id="notifTitle" placeholder="Titre (ex: Promo)">
+                            <textarea class="form-control mb-2" id="notifMessage" rows="2" placeholder="Message..."></textarea>
+                            <select class="form-select" id="notifType">
+                                <option value="info">Information ℹ️</option>
+                                <option value="success">Succès ✅</option>
+                                <option value="warning">Attention ⚠️</option>
+                                <option value="error">Urgent ❌</option>
+                            </select>
+                        </div>
+                        <button class="btn btn-warning w-100" onclick="createNotification()">
+                            <i class="fas fa-paper-plane me-2"></i>Publier Notification
+                        </button>
+
+                        <hr>
+                        <h6 class="text-muted">Notifications Actives:</h6>
+                        <ul id="activeNotifications" class="list-group list-group-flush small" style="max-height: 200px; overflow-y: auto;"></ul>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- Settings -->
         <div class="row m-4">
             <div class="col-12">
                 <div class="feature-card">
-                    <div class="card-header bg-dark text-white"><h5 class="mb-0"><i class="fas fa-cogs me-2"></i>Configuration</h5></div>
+                    <div class="card-header bg-dark text-white">
+                        <h5 class="mb-0"><i class="fas fa-cogs me-2"></i>Configuration</h5>
+                    </div>
                     <div class="card-body">
                         <div class="row align-items-end">
-                            <div class="col-md-8"><label class="form-label">Token GitHub (Personnel Access Token)</label><div class="input-group"><span class="input-group-text"><i class="fab fa-github"></i></span><input type="password" class="form-control" id="githubToken" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx"><button class="btn btn-outline-secondary" type="button" onclick="toggleToken()"><i class="fas fa-eye"></i></button></div><small class="text-muted">Nécessaire pour la synchronisation. Stocké localement.</small></div>
-                            <div class="col-md-4"><button class="btn btn-danger w-100" onclick="resetSync()"><i class="fas fa-trash-alt me-2"></i>Réinitialiser Sync</button></div>
-                        </div>
-                        <!-- Cloudinary Settings -->
-                        <div class="row align-items-end mt-3">
-                            <div class="col-md-8"><label class="form-label">معلومات Cloudinary API (لرفع الصور إلى السحاب)</label><div class="row g-2"><div class="col-6"><input type="text" class="form-control" id="cloudName" placeholder="Cloud Name (ex: mycloud)"></div><div class="col-6"><input type="text" class="form-control" id="uploadPreset" placeholder="Upload Preset (ex: my_preset)"></div></div><small class="text-muted">أدخل Cloud Name و Upload Preset الخاصين بحسابك في Cloudinary (يمكنك الحصول عليهما مجاناً).</small></div>
-                            <div class="col-md-4"><button class="btn btn-outline-info w-100" onclick="saveCloudinarySettings()"><i class="fas fa-save me-2"></i>حفظ الإعدادات</button></div>
+                            <div class="col-md-8">
+                                <label class="form-label">Token GitHub (Personnel Access Token)</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="fab fa-github"></i></span>
+                                    <input type="password" class="form-control" id="githubToken" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx">
+                                    <button class="btn btn-outline-secondary" type="button" onclick="toggleToken()">
+                                        <i class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                                <small class="text-muted">Nécessaire pour la synchronisation. Stocké localement.</small>
+                            </div>
+                            <div class="col-md-4">
+                                <button class="btn btn-danger w-100" onclick="resetSync()">
+                                    <i class="fas fa-trash-alt me-2"></i>Réinitialiser Sync
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -139,22 +555,165 @@
         <div class="row m-4">
             <div class="col-12">
                 <div class="feature-card">
-                    <div class="card-header bg-info text-white d-flex justify-content-between align-items-center"><h5 class="mb-0"><i class="fas fa-boxes me-2"></i>Gestion du Catalogue</h5><button class="btn btn-light btn-sm text-primary fw-bold" onclick="openBulkImageModal()"><i class="fas fa-magic me-2"></i>Générateur de Liens Image/Desc</button></div>
-                    <div class="card-body"><div class="table-responsive" style="max-height: 500px;"><table class="table table-hover align-middle"><thead class="table-light sticky-top"><tr><th>Ref</th><th>Désignation</th><th>Prix Détail</th><th>Prix Comparaison</th><th style="width: 25%;">Image URL</th><th style="width: 20%;">Description URL</th><th>Actions</th></tr></thead><tbody id="catalogTableBody"></tbody></table></div><div class="text-center mt-3"><small class="text-muted">Affichage limité aux 100 premiers produits pour la performance.</small></div></div>
+                    <div class="card-header bg-info text-white d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="fas fa-boxes me-2"></i>Gestion du Catalogue</h5>
+                        <button class="btn btn-light btn-sm text-primary fw-bold" onclick="openBulkImageModal()">
+                            <i class="fas fa-magic me-2"></i>Générateur de Liens Image/Desc
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive" style="max-height: 500px;">
+                            <table class="table table-hover align-middle">
+                                <thead class="table-light sticky-top">
+                                    <tr>
+                                        <th>Ref</th>
+                                        <th>Désignation</th>
+                                        <th>Prix Détail</th>
+                                        <th>Prix Comparaison</th>
+                                        <th style="width: 25%;">Image URL</th>
+                                        <th style="width: 20%;">Description URL</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="catalogTableBody"></tbody>
+                            </table>
+                        </div>
+                        <div class="text-center mt-3">
+                            <small class="text-muted">Affichage limité aux 100 premiers produits pour la performance.</small>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Modals (Bulk Image, Image Preview) -->
-    <div class="modal fade" id="bulkImageModal" tabindex="-1"><div class="modal-dialog modal-xl"><div class="modal-content"><div class="modal-header bg-primary text-white"><h5 class="modal-title"><i class="fas fa-magic me-2"></i>Générateur de Liens Image/Desc</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><ul class="nav nav-tabs mb-3" id="bulkTabs" role="tablist"><li class="nav-item"><button class="nav-link active" id="mode-hosted-tab" data-bs-toggle="tab" data-bs-target="#mode-hosted" type="button" role="tab">📂 Images Hébergées</button></li><li class="nav-item"><button class="nav-link" id="mode-magic-tab" data-bs-toggle="tab" data-bs-target="#mode-magic" type="button" role="tab">✨ Images Magiques</button></li><li class="nav-item"><button class="nav-link" id="mode-ai-tab" data-bs-toggle="tab" data-bs-target="#mode-ai" type="button" role="tab">🤖 IA Intelligente</button></li><li class="nav-item"><button class="nav-link" id="mode-desc-tab" data-bs-toggle="tab" data-bs-target="#mode-desc" type="button" role="tab">📝 Descriptions Auto</button></li></ul><div class="tab-content" id="bulkTabsContent"><div class="tab-pane fade show active" id="mode-hosted" role="tabpanel"><p class="small text-muted">Utilisez ce mode si vous avez vos propres images hébergées (ex: GitHub Pages, Imgur).</p><div class="mb-3"><label class="form-label">Base URL</label><input type="text" class="form-control" id="bulkBaseUrl" placeholder="ex: https://monsite.com/images/"></div><div class="row g-2 mb-3"><div class="col-6"><label class="form-label">Champ</label><select class="form-select" id="bulkField"><option value="ref">Référence</option><option value="designation">Désignation</option></select></div><div class="col-6"><label class="form-label">Extension</label><select class="form-select" id="bulkExt"><option value=".jpg">.jpg</option><option value=".png">.png</option><option value=".webp">.webp</option><option value="">(Aucune)</option></select></div></div></div><div class="tab-pane fade" id="mode-magic" role="tabpanel"><div class="alert alert-warning small"><i class="fas fa-exclamation-triangle me-2"></i><strong>Note:</strong> L'association <em>automatique</em> ne fonctionne qu'avec <strong>Bing</strong> pour des raisons techniques.</div><p class="small text-muted">Recherche automatique d'images sur Bing via la Désignation.</p></div><div class="tab-pane fade" id="mode-ai" role="tabpanel"><div class="alert alert-info small"><i class="fas fa-robot me-2"></i><strong>Recherche Intelligente:</strong> Utilise l'IA pour trouver les meilleures images depuis plusieurs sources.</div><div class="row mb-3"><div class="col-md-8"><label class="form-label">Recherche intelligente</label><input type="text" class="form-control" id="aiSearchQuery" placeholder="Entrez le nom du produit ou laissez vide pour utiliser la désignation"></div><div class="col-md-4"><label class="form-label">Sources</label><select class="form-select" id="aiSources"><option value="auto" selected>Auto (Bing + Unsplash)</option><option value="bing">Bing uniquement</option><option value="unsplash">Unsplash uniquement</option></select></div></div><button class="btn btn-primary w-100 mb-3" onclick="searchAIImages()"><i class="fas fa-search me-2"></i>Rechercher avec IA</button><div id="aiResults" class="row g-3"></div><div id="aiLoader" class="text-center" style="display: none;"><div class="loader"></div><p class="mt-2">Recherche intelligente en cours...</p></div></div><div class="tab-pane fade" id="mode-desc" role="tabpanel"><div class="alert alert-info small"><i class="fas fa-info-circle me-2"></i><strong>Info:</strong> Génère un lien de recherche.</div><p class="small text-muted">Crée un lien "Fiche Technique" vers Bing pour chaque produit.</p></div></div><div class="alert alert-info small mt-3"><strong>Aperçu:</strong> <span id="bulkPreview" class="text-break">...</span></div></div><div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button><button type="button" class="btn btn-primary" onclick="applyBulkActions()">Appliquer à tous</button></div></div></div></div>
+    <!-- Bulk Image Modal -->
+    <div class="modal fade" id="bulkImageModal" tabindex="-1">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title"><i class="fas fa-magic me-2"></i>Générateur de Liens Image/Desc</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <ul class="nav nav-tabs mb-3" id="bulkTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="mode-hosted-tab" data-bs-toggle="tab" data-bs-target="#mode-hosted" type="button" role="tab">📂 Images Hébergées</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="mode-magic-tab" data-bs-toggle="tab" data-bs-target="#mode-magic" type="button" role="tab">✨ Images Magiques</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="mode-ai-tab" data-bs-toggle="tab" data-bs-target="#mode-ai" type="button" role="tab">🤖 IA Intelligente</button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="mode-desc-tab" data-bs-toggle="tab" data-bs-target="#mode-desc" type="button" role="tab">📝 Descriptions Auto</button>
+                        </li>
+                    </ul>
 
-    <div class="modal fade image-preview-modal" id="imagePreviewModal" tabindex="-1"><div class="modal-dialog modal-lg"><div class="modal-content"><div class="modal-header bg-primary text-white"><h5 class="modal-title"><i class="fas fa-image me-2"></i>معاينة الصورة</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body text-center"><img id="previewImage" src="" alt="Preview" class="img-fluid rounded"></div><div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إغلاق</button><a id="downloadImage" class="btn btn-success" download><i class="fas fa-download me-2"></i>تحميل</a></div></div></div></div>
+                    <div class="tab-content" id="bulkTabsContent">
+                        <div class="tab-pane fade show active" id="mode-hosted" role="tabpanel">
+                            <p class="small text-muted">Utilisez ce mode si vous avez vos propres images hébergées (ex: GitHub Pages, Imgur).</p>
+                            <div class="mb-3">
+                                <label class="form-label">Base URL</label>
+                                <input type="text" class="form-control" id="bulkBaseUrl" placeholder="ex: https://monsite.com/images/">
+                            </div>
+                            <div class="row g-2 mb-3">
+                                <div class="col-6">
+                                    <label class="form-label">Champ</label>
+                                    <select class="form-select" id="bulkField">
+                                        <option value="ref">Référence</option>
+                                        <option value="designation">Désignation</option>
+                                    </select>
+                                </div>
+                                <div class="col-6">
+                                    <label class="form-label">Extension</label>
+                                    <select class="form-select" id="bulkExt">
+                                        <option value=".jpg">.jpg</option>
+                                        <option value=".png">.png</option>
+                                        <option value=".webp">.webp</option>
+                                        <option value="">(Aucune)</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="mode-magic" role="tabpanel">
+                            <div class="alert alert-warning small">
+                                <i class="fas fa-exclamation-triangle me-2"></i><strong>Note:</strong> L'association <em>automatique</em> ne fonctionne qu'avec <strong>Bing</strong> pour des raisons techniques.
+                            </div>
+                            <p class="small text-muted">Recherche automatique d'images sur Bing via la Désignation.</p>
+                        </div>
+                        <div class="tab-pane fade" id="mode-ai" role="tabpanel">
+                            <div class="alert alert-info small">
+                                <i class="fas fa-robot me-2"></i><strong>Recherche Intelligente:</strong> Utilise l'IA pour trouver les meilleures images depuis plusieurs sources.
+                            </div>
+                            <div class="row mb-3">
+                                <div class="col-md-8">
+                                    <label class="form-label">Recherche intelligente</label>
+                                    <input type="text" class="form-control" id="aiSearchQuery" placeholder="Entrez le nom du produit ou laissez vide pour utiliser la désignation">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">Sources</label>
+                                    <select class="form-select" id="aiSources">
+                                        <option value="auto" selected>Auto (Bing + Unsplash)</option>
+                                        <option value="bing">Bing uniquement</option>
+                                        <option value="unsplash">Unsplash uniquement</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <button class="btn btn-primary w-100 mb-3" onclick="searchAIImages()">
+                                <i class="fas fa-search me-2"></i>Rechercher avec IA
+                            </button>
+                            <div id="aiResults" class="row g-3"></div>
+                            <div id="aiLoader" class="text-center" style="display: none;">
+                                <div class="loader"></div>
+                                <p class="mt-2">Recherche intelligente en cours...</p>
+                            </div>
+                        </div>
+                        <div class="tab-pane fade" id="mode-desc" role="tabpanel">
+                            <div class="alert alert-info small">
+                                <i class="fas fa-info-circle me-2"></i><strong>Info:</strong> Génère un lien de recherche.
+                            </div>
+                            <p class="small text-muted">Crée un lien "Fiche Technique" vers Bing pour chaque produit.</p>
+                        </div>
+                    </div>
+                    <div class="alert alert-info small mt-3">
+                        <strong>Aperçu:</strong> <span id="bulkPreview" class="text-break">...</span>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <button type="button" class="btn btn-primary" onclick="applyBulkActions()">Appliquer à tous</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Image Preview Modal -->
+    <div class="modal fade image-preview-modal" id="imagePreviewModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title"><i class="fas fa-image me-2"></i>معاينة الصورة</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <img id="previewImage" src="" alt="Preview" class="img-fluid rounded">
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إغلاق</button>
+                    <a id="downloadImage" class="btn btn-success" download>
+                        <i class="fas fa-download me-2"></i>تحميل
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script>
-        // ==================== خوارزمية البحث المتقدمة (كما هي) ====================
+        // ==================== خوارزمية البحث المتقدمة ====================
         class AdvancedImageSearch {
-            constructor() { /* ... الكود الكامل للبحث ... */ 
+            constructor() {
                 this.sources = {
                     bing: { name: "Bing Images", priority: 1, requiresKey: false, search: async (query, count) => this.searchBing(query, count) },
                     unsplash: { name: "Unsplash", priority: 2, requiresKey: false, search: async (query, count) => this.searchUnsplash(query, count) },
@@ -163,228 +722,673 @@
                     google: { name: "Google Images", priority: 5, requiresKey: false, search: async (query, count) => this.searchGoogle(query, count) },
                     flickr: { name: "Flickr", priority: 6, requiresKey: false, search: async (query, count) => this.searchFlickr(query, count) }
                 };
-                this.improvementKeywords = { quality: ["professional","high quality","hd","4k","studio","product photography"], background: ["white background","isolated","clean background"], angle: ["front view","side view","top view"] };
-                this.categoryEnhancements = { "ordinateurs": { keywords: ["computer","laptop","pc"], preferredAspect: "16:9" }, "téléphones": { keywords: ["smartphone","mobile phone"], preferredAspect: "9:16" }, "accessoires": { keywords: ["accessory","gadget"], preferredAspect: "1:1" }, "général": { keywords: ["product"], preferredAspect: "any" } };
-                this.cache = new Map(); this.searchHistory = [];
+                this.improvementKeywords = {
+                    quality: ["professional", "high quality", "hd", "4k", "ultra hd", "studio", "commercial", "product photography"],
+                    background: ["white background", "isolated", "clean background", "transparent background", "plain background"],
+                    angle: ["front view", "side view", "top view", "angle view", "perspective", "closeup"]
+                };
+                this.categoryEnhancements = {
+                    "ordinateurs": { keywords: ["computer", "laptop", "pc", "desktop", "workstation"], preferredAspect: "16:9" },
+                    "téléphones": { keywords: ["smartphone", "mobile phone", "cell phone", "android", "iphone"], preferredAspect: "9:16" },
+                    "accessoires": { keywords: ["accessory", "gadget", "tech", "electronic"], preferredAspect: "1:1" },
+                    "général": { keywords: ["product", "item", "object"], preferredAspect: "any" }
+                };
+                this.cache = new Map();
+                this.searchHistory = [];
             }
-            enhanceQuery(query, category = "général") { let enhancedQuery = query.toLowerCase().trim(); const categoryInfo = this.categoryEnhancements[category.toLowerCase()] || this.categoryEnhancements["général"]; enhancedQuery += " " + categoryInfo.keywords.slice(0,2).join(" "); const randomQuality = this.improvementKeywords.quality[Math.floor(Math.random() * this.improvementKeywords.quality.length)]; enhancedQuery += " " + randomQuality; if (category.toLowerCase() !== "général") { const randomBg = this.improvementKeywords.background[Math.floor(Math.random() * this.improvementKeywords.background.length)]; enhancedQuery += " " + randomBg; } return enhancedQuery.trim(); }
-            evaluateImage(image, productName, category) { let score = 0; if (image.width >= 800 && image.height >= 600) score += 20; if (image.width >= 1200 && image.height >= 800) score += 30; const sourcePriority = { 'Unsplash':25, 'Pexels':20, 'Pixabay':15, 'Bing Images':10, 'Google Images':10, 'Flickr':5 }; score += sourcePriority[image.source] || 5; const productWords = productName.toLowerCase().split(/[\s\-_]+/); let relevance = 0; productWords.forEach(word => { if (word.length > 3 && (image.title+image.description).toLowerCase().includes(word)) relevance += 10; }); score += Math.min(relevance, 30); if (image.commercial_use) score += 15; const aspectRatio = image.width / image.height; const categoryInfo = this.categoryEnhancements[category] || this.categoryEnhancements["général"]; if (categoryInfo.preferredAspect !== "any") { const [w,h] = categoryInfo.preferredAspect.split(":").map(Number); if (Math.abs(aspectRatio - (w/h)) < 0.2) score += 10; } return Math.min(100, score); }
-            async searchBing(query, count=6) { try { const enhancedQuery = this.enhanceQuery(query); const encodedQuery = encodeURIComponent(enhancedQuery); const images = []; for (let i=0;i<count;i++) { const size = this.getOptimalSize(); images.push({ url: `https://tse2.mm.bing.net/th?q=${encodedQuery}&w=${size.w}&h=${size.h}&c=7&rs=1&p=0&dpr=2&t=${Date.now()+i}`, thumb: `https://tse2.mm.bing.net/th?q=${encodedQuery}&w=300&h=300&c=7&rs=1&p=0&t=${Date.now()+i}`, title: `Bing: ${query}`, description: `Image of ${query}`, source: 'Bing Images', width: size.w, height: size.h, commercial_use: true, quality_score: 80+Math.random()*15 }); } return images; } catch(e) { return []; } }
-            async searchUnsplash(query, count=6) { try { const enhancedQuery = this.enhanceQuery(query); const encodedQuery = encodeURIComponent(enhancedQuery); const images = []; const sizes = [{w:800,h:800},{w:1200,h:800},{w:800,h:1200},{w:1000,h:1000}]; for (let i=0;i<count;i++) { const size = sizes[i%sizes.length]; images.push({ url: `https://source.unsplash.com/featured/${size.w}x${size.h}/?${encodedQuery},product,white-background&sig=${Date.now()+i}`, thumb: `https://source.unsplash.com/featured/300x300/?${encodedQuery},product&sig=${Date.now()+i}`, title: `Unsplash: ${query}`, description: `Professional photo`, source: 'Unsplash', width: size.w, height: size.h, commercial_use: true, quality_score: 85+Math.random()*10 }); } return images; } catch(e) { return []; } }
-            async searchPexels(query, count=6) { try { const enhancedQuery = this.enhanceQuery(query); const images = []; const sizes = [{w:640,h:480},{w:800,h:600},{w:1024,h:768}]; for (let i=0;i<count;i++) { const size = sizes[i%sizes.length]; images.push({ url: `https://images.pexels.com/photos/photo-${Math.floor(Math.random()*1000000)}/pexels-photo-${Math.floor(Math.random()*1000000)}.jpeg?auto=compress&cs=tinysrgb&w=${size.w}&h=${size.h}&fit=crop`, thumb: `https://images.pexels.com/photos/photo-${Math.floor(Math.random()*1000000)}/pexels-photo-${Math.floor(Math.random()*1000000)}.jpeg?auto=compress&cs=tinysrgb&w=300&h=300&fit=crop`, title: `Pexels: ${query}`, description: `Free stock photo`, source: 'Pexels', width: size.w, height: size.h, commercial_use: true, quality_score: 80+Math.random()*15 }); } return images; } catch(e) { return []; } }
-            async searchPixabay(query, count=6) { try { const enhancedQuery = this.enhanceQuery(query); const images = []; for (let i=0;i<count;i++) { images.push({ url: `https://cdn.pixabay.com/photo/${this.getRandomDate()}/${Math.floor(Math.random()*1000000)}_${Math.floor(Math.random()*10000)}.jpg`, thumb: `https://cdn.pixabay.com/photo/${this.getRandomDate()}/${Math.floor(Math.random()*1000000)}_${Math.floor(Math.random()*10000)}_300x200.jpg`, title: `Pixabay: ${query}`, description: `Free image`, source: 'Pixabay', width: 800+Math.floor(Math.random()*400), height: 600+Math.floor(Math.random()*300), commercial_use: true, quality_score: 75+Math.random()*20 }); } return images; } catch(e) { return []; } }
-            async searchGoogle(query, count=6) { try { const enhancedQuery = this.enhanceQuery(query); const encodedQuery = encodeURIComponent(enhancedQuery); const images = []; for (let i=0;i<count;i++) { const size = this.getOptimalSize(); images.push({ url: `https://via.placeholder.com/${size.w}x${size.h}/4A90E2/FFFFFF?text=Google+${encodedQuery}`, thumb: `https://via.placeholder.com/300x200/4A90E2/FFFFFF?text=Google+${encodedQuery.substring(0,20)}`, title: `Google: ${query}`, description: `Search result`, source: 'Google Images', width: size.w, height: size.h, commercial_use: false, quality_score: 70+Math.random()*20 }); } return images; } catch(e) { return []; } }
-            async searchFlickr(query, count=6) { try { const enhancedQuery = this.enhanceQuery(query); const images = []; for (let i=0;i<count;i++) { const size = this.getOptimalSize(); images.push({ url: `https://live.staticflickr.com/${Math.floor(Math.random()*9000)+1000}/${Math.floor(Math.random()*100000000)}_${Math.random().toString(36).substr(2,10)}_b.jpg`, thumb: `https://live.staticflickr.com/${Math.floor(Math.random()*9000)+1000}/${Math.floor(Math.random()*100000000)}_${Math.random().toString(36).substr(2,10)}_m.jpg`, title: `Flickr: ${query}`, description: `Photo`, source: 'Flickr', width: size.w, height: size.h, commercial_use: false, quality_score: 65+Math.random()*25 }); } return images; } catch(e) { return []; } }
-            async searchAllSources(query, category="général", maxResults=12) { const cacheKey = `${query}_${category}_${maxResults}`; if (this.cache.has(cacheKey)) return this.cache.get(cacheKey); const results = []; const searchPromises = []; Object.values(this.sources).forEach(source => { searchPromises.push(source.search(query, Math.ceil(maxResults/Object.keys(this.sources).length)).then(images => { if (images && images.length) { const evaluated = images.map(img => ({ ...img, relevance_score: this.evaluateImage(img, query, category), final_score: (img.quality_score*0.4)+(this.evaluateImage(img, query, category)*0.6) })); results.push(...evaluated); } }).catch(e=>console.warn(source.name+" search failed"))); }); await Promise.allSettled(searchPromises); const sorted = results.sort((a,b)=>b.final_score - a.final_score).slice(0,maxResults); this.cache.set(cacheKey,sorted); this.searchHistory.push({query,category,results:sorted.length,timestamp:new Date().toISOString()}); return sorted; }
-            getOptimalSize() { const sizes = [{w:800,h:600},{w:1024,h:768},{w:1200,h:800},{w:800,h:1200}]; return sizes[Math.floor(Math.random()*sizes.length)]; }
-            getRandomDate() { const year = 2020+Math.floor(Math.random()*4); const month = String(Math.floor(Math.random()*12)+1).padStart(2,'0'); const day = String(Math.floor(Math.random()*28)+1).padStart(2,'0'); return `${year}/${month}/${day}`; }
+
+            enhanceQuery(query, category = "général") {
+                let enhancedQuery = query.toLowerCase().trim();
+                const categoryInfo = this.categoryEnhancements[category.toLowerCase()] || this.categoryEnhancements["général"];
+                enhancedQuery += " " + categoryInfo.keywords.slice(0, 2).join(" ");
+                const randomQuality = this.improvementKeywords.quality[Math.floor(Math.random() * this.improvementKeywords.quality.length)];
+                enhancedQuery += " " + randomQuality;
+                if (category.toLowerCase() !== "général") {
+                    const randomBg = this.improvementKeywords.background[Math.floor(Math.random() * this.improvementKeywords.background.length)];
+                    enhancedQuery += " " + randomBg;
+                }
+                return enhancedQuery.trim();
+            }
+
+            evaluateImage(image, productName, category) {
+                let score = 0;
+                if (image.width >= 800 && image.height >= 600) score += 20;
+                if (image.width >= 1200 && image.height >= 800) score += 30;
+                if (image.width >= 2000 && image.height >= 1500) score += 40;
+                const sourcePriority = { 'Unsplash': 25, 'Pexels': 20, 'Pixabay': 15, 'Bing Images': 10, 'Google Images': 10, 'Flickr': 5 };
+                score += sourcePriority[image.source] || 5;
+                const searchText = (image.title + " " + image.description).toLowerCase();
+                const productWords = productName.toLowerCase().split(/[\s\-_]+/);
+                let relevance = 0;
+                productWords.forEach(word => { if (word.length > 3 && searchText.includes(word)) relevance += 10; });
+                score += Math.min(relevance, 30);
+                if (image.commercial_use) score += 15;
+                const aspectRatio = image.width / image.height;
+                const categoryInfo = this.categoryEnhancements[category] || this.categoryEnhancements["général"];
+                if (categoryInfo.preferredAspect !== "any") {
+                    const [w, h] = categoryInfo.preferredAspect.split(":").map(Number);
+                    const preferredRatio = w / h;
+                    if (Math.abs(aspectRatio - preferredRatio) < 0.2) score += 10;
+                }
+                return Math.min(100, score);
+            }
+
+            async searchBing(query, count = 6) {
+                try {
+                    const enhancedQuery = this.enhanceQuery(query);
+                    const encodedQuery = encodeURIComponent(enhancedQuery);
+                    const images = [];
+                    for (let i = 0; i < count; i++) {
+                        const size = this.getOptimalSize();
+                        images.push({
+                            url: `https://tse2.mm.bing.net/th?q=${encodedQuery}&w=${size.w}&h=${size.h}&c=7&rs=1&p=0&dpr=2&t=${Date.now() + i}`,
+                            thumb: `https://tse2.mm.bing.net/th?q=${encodedQuery}&w=300&h=300&c=7&rs=1&p=0&t=${Date.now() + i}`,
+                            title: `Bing: ${query}`,
+                            description: `Image of ${query} from Bing`,
+                            source: 'Bing Images',
+                            width: size.w, height: size.h, commercial_use: true, quality_score: 80 + Math.random() * 15
+                        });
+                    }
+                    return images;
+                } catch (error) { console.error('Bing search error:', error); return []; }
+            }
+
+            async searchUnsplash(query, count = 6) {
+                try {
+                    const enhancedQuery = this.enhanceQuery(query);
+                    const encodedQuery = encodeURIComponent(enhancedQuery);
+                    const images = [];
+                    const sizes = [{ w: 800, h: 800 }, { w: 1200, h: 800 }, { w: 800, h: 1200 }, { w: 1000, h: 1000 }];
+                    for (let i = 0; i < count; i++) {
+                        const size = sizes[i % sizes.length];
+                        images.push({
+                            url: `https://source.unsplash.com/featured/${size.w}x${size.h}/?${encodedQuery},product,white-background&sig=${Date.now() + i}`,
+                            thumb: `https://source.unsplash.com/featured/300x300/?${encodedQuery},product&sig=${Date.now() + i}`,
+                            title: `Unsplash: ${query}`,
+                            description: `Professional photo of ${query}`,
+                            source: 'Unsplash',
+                            width: size.w, height: size.h, commercial_use: true, quality_score: 85 + Math.random() * 10
+                        });
+                    }
+                    return images;
+                } catch (error) { console.error('Unsplash search error:', error); return []; }
+            }
+
+            async searchPexels(query, count = 6) {
+                try {
+                    const enhancedQuery = this.enhanceQuery(query);
+                    const encodedQuery = encodeURIComponent(enhancedQuery);
+                    const images = [];
+                    const sizes = [{ w: 640, h: 480 }, { w: 800, h: 600 }, { w: 1024, h: 768 }];
+                    for (let i = 0; i < count; i++) {
+                        const size = sizes[i % sizes.length];
+                        images.push({
+                            url: `https://images.pexels.com/photos/photo-${Math.floor(Math.random() * 1000000)}/pexels-photo-${Math.floor(Math.random() * 1000000)}.jpeg?auto=compress&cs=tinysrgb&w=${size.w}&h=${size.h}&fit=crop`,
+                            thumb: `https://images.pexels.com/photos/photo-${Math.floor(Math.random() * 1000000)}/pexels-photo-${Math.floor(Math.random() * 1000000)}.jpeg?auto=compress&cs=tinysrgb&w=300&h=300&fit=crop`,
+                            title: `Pexels: ${query}`,
+                            description: `Free stock photo of ${query}`,
+                            source: 'Pexels',
+                            width: size.w, height: size.h, commercial_use: true, quality_score: 80 + Math.random() * 15
+                        });
+                    }
+                    return images;
+                } catch (error) { console.error('Pexels search error:', error); return []; }
+            }
+
+            async searchPixabay(query, count = 6) {
+                try {
+                    const enhancedQuery = this.enhanceQuery(query);
+                    const images = [];
+                    for (let i = 0; i < count; i++) {
+                        images.push({
+                            url: `https://cdn.pixabay.com/photo/${this.getRandomDate()}/${Math.floor(Math.random() * 1000000)}_${Math.floor(Math.random() * 10000)}.jpg`,
+                            thumb: `https://cdn.pixabay.com/photo/${this.getRandomDate()}/${Math.floor(Math.random() * 1000000)}_${Math.floor(Math.random() * 10000)}_300x200.jpg`,
+                            title: `Pixabay: ${query}`,
+                            description: `Free image of ${query}`,
+                            source: 'Pixabay',
+                            width: 800 + Math.floor(Math.random() * 400), height: 600 + Math.floor(Math.random() * 300),
+                            commercial_use: true, quality_score: 75 + Math.random() * 20
+                        });
+                    }
+                    return images;
+                } catch (error) { console.error('Pixabay search error:', error); return []; }
+            }
+
+            async searchGoogle(query, count = 6) {
+                try {
+                    const enhancedQuery = this.enhanceQuery(query);
+                    const encodedQuery = encodeURIComponent(enhancedQuery);
+                    const images = [];
+                    for (let i = 0; i < count; i++) {
+                        const size = this.getOptimalSize();
+                        images.push({
+                            url: `https://via.placeholder.com/${size.w}x${size.h}/4A90E2/FFFFFF?text=Google+${encodedQuery}`,
+                            thumb: `https://via.placeholder.com/300x200/4A90E2/FFFFFF?text=Google+${encodedQuery.substring(0,20)}`,
+                            title: `Google: ${query}`,
+                            description: `Image search result for ${query}`,
+                            source: 'Google Images',
+                            width: size.w, height: size.h, commercial_use: false, quality_score: 70 + Math.random() * 20
+                        });
+                    }
+                    return images;
+                } catch (error) { console.error('Google search error:', error); return []; }
+            }
+
+            async searchFlickr(query, count = 6) {
+                try {
+                    const enhancedQuery = this.enhanceQuery(query);
+                    const images = [];
+                    for (let i = 0; i < count; i++) {
+                        const size = this.getOptimalSize();
+                        images.push({
+                            url: `https://live.staticflickr.com/${Math.floor(Math.random() * 9000) + 1000}/${Math.floor(Math.random() * 100000000)}_${Math.random().toString(36).substr(2, 10)}_b.jpg`,
+                            thumb: `https://live.staticflickr.com/${Math.floor(Math.random() * 9000) + 1000}/${Math.floor(Math.random() * 100000000)}_${Math.random().toString(36).substr(2, 10)}_m.jpg`,
+                            title: `Flickr: ${query}`,
+                            description: `Photo of ${query} from Flickr`,
+                            source: 'Flickr',
+                            width: size.w, height: size.h, commercial_use: false, quality_score: 65 + Math.random() * 25
+                        });
+                    }
+                    return images;
+                } catch (error) { console.error('Flickr search error:', error); return []; }
+            }
+
+            async searchAllSources(query, category = "général", maxResults = 12) {
+                const cacheKey = `${query}_${category}_${maxResults}`;
+                if (this.cache.has(cacheKey)) return this.cache.get(cacheKey);
+                const results = [];
+                const searchPromises = [];
+                Object.values(this.sources).forEach(source => {
+                    searchPromises.push(
+                        source.search(query, Math.ceil(maxResults / Object.keys(this.sources).length))
+                            .then(images => {
+                                if (images && images.length > 0) {
+                                    const evaluatedImages = images.map(img => ({
+                                        ...img,
+                                        relevance_score: this.evaluateImage(img, query, category),
+                                        final_score: (img.quality_score * 0.4) + (this.evaluateImage(img, query, category) * 0.6)
+                                    }));
+                                    results.push(...evaluatedImages);
+                                }
+                            }).catch(error => console.warn(`${source.name} search failed:`, error))
+                    );
+                });
+                await Promise.allSettled(searchPromises);
+                const sortedResults = results.sort((a,b) => b.final_score - a.final_score).slice(0, maxResults);
+                this.cache.set(cacheKey, sortedResults);
+                this.searchHistory.push({ query, category, results: sortedResults.length, timestamp: new Date().toISOString() });
+                return sortedResults;
+            }
+
+            async batchSearch(products, progressCallback = null) {
+                const results = [];
+                let completed = 0;
+                for (const product of products) {
+                    try {
+                        const query = this.enhanceQuery(product.designation, product.famille);
+                        const images = await this.searchAllSources(query, product.famille, 3);
+                        if (images.length > 0) {
+                            results.push({ productId: product.id, productName: product.designation, category: product.famille, image: images[0], alternatives: images.slice(1,3) });
+                        }
+                        completed++;
+                        if (progressCallback) progressCallback({ completed, total: products.length, currentProduct: product.designation, success: true });
+                        await this.delay(800);
+                    } catch (error) {
+                        console.error(`Batch search failed for ${product.designation}:`, error);
+                        if (progressCallback) progressCallback({ completed: completed+1, total: products.length, currentProduct: product.designation, success: false, error: error.message });
+                    }
+                }
+                return results;
+            }
+
+            applyImagesToProducts(products, imageResults) {
+                const applied = [];
+                imageResults.forEach(result => {
+                    const product = products.find(p => p.id === result.productId);
+                    if (product && result.image) {
+                        if (!product.originalImage) product.originalImage = product.image;
+                        product.image = result.image.url;
+                        applied.push({ productId: product.id, productName: product.designation, imageUrl: result.image.url, source: result.image.source, score: result.image.final_score });
+                    }
+                });
+                return applied;
+            }
+
+            getStatistics() {
+                const today = new Date().toDateString();
+                const todaySearches = this.searchHistory.filter(s => new Date(s.timestamp).toDateString() === today);
+                return { totalSearches: this.searchHistory.length, todaySearches: todaySearches.length, cacheSize: this.cache.size, sources: Object.keys(this.sources).length };
+            }
+
+            getOptimalSize() {
+                const sizes = [{ w: 800, h: 600 }, { w: 1024, h: 768 }, { w: 1200, h: 800 }, { w: 800, h: 1200 }];
+                return sizes[Math.floor(Math.random() * sizes.length)];
+            }
+
+            getRandomDate() {
+                const year = 2020 + Math.floor(Math.random() * 4);
+                const month = String(Math.floor(Math.random() * 12) + 1).padStart(2, '0');
+                const day = String(Math.floor(Math.random() * 28) + 1).padStart(2, '0');
+                return `${year}/${month}/${day}`;
+            }
+
             delay(ms) { return new Promise(resolve => setTimeout(resolve, ms)); }
         }
 
         // ==================== الحالة والتخزين ====================
-        let state = { products: [], newProducts: [], notifications: [], gistId: localStorage.getItem('varicom_gist_id') || null, lastSync: localStorage.getItem('varicom_last_sync') || null, smartSearch: { currentProduct: null, selectedImage: null, searchResults: [], currentSearchQuery: '' }, autoSearch: { active: false, currentIndex: 0, totalProducts: 0 }, batchSearchResults: null };
+        let state = {
+            products: [],
+            newProducts: [],
+            notifications: [],
+            gistId: localStorage.getItem('varicom_gist_id') || null,
+            lastSync: localStorage.getItem('varicom_last_sync') || null,
+            smartSearch: { currentProduct: null, selectedImage: null, searchResults: [], currentSearchQuery: '' },
+            autoSearch: { active: false, currentIndex: 0, totalProducts: 0 },
+            batchSearchResults: null
+        };
+
         const intelligentSearch = new AdvancedImageSearch();
 
         // ==================== التهيئة ====================
         document.addEventListener('DOMContentLoaded', () => {
-            loadLocalData(); updateUI(); generateSmartSuggestions();
-            const tokenInput = document.getElementById('githubToken'); tokenInput.value = localStorage.getItem('varicom_github_token') || ''; tokenInput.addEventListener('input', (e) => { localStorage.setItem('varicom_github_token', e.target.value); });
-            loadCloudinarySettings(); // تحميل إعدادات Cloudinary
-            ['bulkBaseUrl','bulkField','bulkExt'].forEach(id => { const el = document.getElementById(id); if (el) el.addEventListener('input', updateBulkPreview); });
-            document.querySelectorAll('button[data-bs-toggle="tab"]').forEach(tab => { tab.addEventListener('shown.bs.tab', updateBulkPreview); });
+            loadLocalData();
+            updateUI();
+            generateSmartSuggestions();
+            const tokenInput = document.getElementById('githubToken');
+            tokenInput.value = localStorage.getItem('varicom_github_token') || '';
+            tokenInput.addEventListener('input', (e) => { localStorage.setItem('varicom_github_token', e.target.value); });
+            ['bulkBaseUrl', 'bulkField', 'bulkExt'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.addEventListener('input', updateBulkPreview);
+            });
+            const tabEls = document.querySelectorAll('button[data-bs-toggle="tab"]');
+            tabEls.forEach(tab => { tab.addEventListener('shown.bs.tab', updateBulkPreview); });
             document.getElementById('smartSearchInput').addEventListener('keypress', (e) => { if (e.key === 'Enter') smartImageSearch(); });
-            const savedBatchResults = localStorage.getItem('varicom_batch_results'); if (savedBatchResults) state.batchSearchResults = JSON.parse(savedBatchResults);
+            try {
+                const savedBatchResults = localStorage.getItem('varicom_batch_results');
+                if (savedBatchResults) state.batchSearchResults = JSON.parse(savedBatchResults);
+            } catch(e) { console.error('Error loading batch results:', e); }
         });
 
-        function loadLocalData() { try { const saved = localStorage.getItem('varicom_data'); if (saved) { const data = JSON.parse(saved); state.products = data.products || []; state.newProducts = data.newProducts || []; state.notifications = data.notifications || []; } } catch(e) { state.products = []; state.newProducts = []; state.notifications = []; } }
-        function saveData() { const data = { products: state.products, newProducts: state.newProducts, notifications: state.notifications }; localStorage.setItem('varicom_data', JSON.stringify(data)); updateUI(); }
-        function generateSmartSuggestions() { const suggestions = ['صور منتجات احترافية','خلفية بيضاء','صور عالية الجودة','أجهزة كمبيوتر','هواتف ذكية','إكسسوارات تقنية']; const container = document.getElementById('smartSuggestions'); if (container) container.innerHTML = suggestions.map(tag => `<span class="suggestion-tag" onclick="addSuggestion('${tag}')">${tag}</span>`).join(''); }
-        function addSuggestion(tag) { const input = document.getElementById('smartSearchInput'); if (input) { input.value = tag; smartImageSearch(); } }
-        async function smartImageSearch() { /* ... كما هو ... */ const query = document.getElementById('smartSearchInput')?.value; const source = document.getElementById('searchSource')?.value || 'auto'; if (!query) { showStatus('أدخل كلمة للبحث', 'warning'); return; } state.smartSearch.currentSearchQuery = query; state.smartSearch.selectedImage = null; const resultsDiv = document.getElementById('smartResults'); resultsDiv.innerHTML = `<div class="col-12 text-center py-5"><div class="spinner-border text-primary" style="width:3rem;height:3rem;"></div><div>جاري البحث...</div></div>`; document.getElementById('applyButtonContainer').style.display = 'none'; try { let images = []; const category = state.smartSearch.currentProduct ? state.products.find(p => p.id === state.smartSearch.currentProduct)?.famille : 'général'; if (source === 'auto') images = await intelligentSearch.searchAllSources(query, category, 12); else if (source === 'all') images = await intelligentSearch.searchAllSources(query, category, 24); else if (source in intelligentSearch.sources) { images = await intelligentSearch.sources[source].search(query, 12); images = images.map(img => ({ ...img, relevance_score: intelligentSearch.evaluateImage(img, query, category), final_score: (img.quality_score*0.4)+(intelligentSearch.evaluateImage(img, query, category)*0.6) })); } if (!images.length) images = await intelligentSearch.searchBing(query, 8); state.smartSearch.searchResults = images; displayAdvancedResults(images); if (state.smartSearch.currentProduct) { const product = state.products.find(p => p.id === state.smartSearch.currentProduct); if (product) { document.getElementById('currentProductInfo').innerHTML = `<strong>المنتج الحالي:</strong> ${product.designation}<br><small>${product.ref} | ${product.famille} | ${product.prix} DA</small>`; document.getElementById('applyButtonContainer').style.display = 'block'; } } showStatus(`تم العثور على ${images.length} صورة`, 'success'); } catch(error) { showStatus(`خطأ: ${error.message}`, 'error'); } }
-        function displayAdvancedResults(images) { /* ... */ const resultsDiv = document.getElementById('smartResults'); if (!images.length) { resultsDiv.innerHTML = '<div class="col-12 text-center">لا توجد صور</div>'; return; } let html = `<div class="col-12 mb-4"><div class="card border-success"><div class="card-header bg-success text-white">أفضل صورة</div><div class="card-body"><div class="row"><div class="col-md-3"><img src="${images[0].thumb}" class="img-fluid" onclick="previewImage('${images[0].url}','${images[0].title}')"></div><div class="col-md-9"><button class="btn btn-success" onclick="selectSmartImage(0);applySelectedImageToCurrentProduct()">تطبيق</button></div></div></div></div></div>`; html += `<div class="row">${images.slice(1,9).map((img,i)=>`<div class="col-md-3 col-sm-6 mb-3"><div class="card image-select-card" onclick="selectSmartImage(${i+1})"><img src="${img.thumb}" class="card-img-top"><div class="card-body p-2"><small>${img.source}</small><button class="btn btn-sm btn-primary w-100 mt-1" onclick="event.stopPropagation();previewImage('${img.url}','${img.title}')">معاينة</button></div></div></div>`).join('')}</div>`; resultsDiv.innerHTML = html; }
-        function selectSmartImage(index) { state.smartSearch.selectedImage = state.smartSearch.searchResults[index]; document.querySelectorAll('.image-select-card').forEach(card => card.classList.remove('border-primary')); const cards = document.querySelectorAll('.image-select-card'); if (cards[index]) cards[index].classList.add('border-primary'); document.getElementById('applyButtonContainer').style.display = 'block'; }
-        function applySelectedImageToCurrentProduct() { if (!state.smartSearch.currentProduct) { showStatus('اختر منتجاً أولاً', 'warning'); return; } if (!state.smartSearch.selectedImage) { showStatus('اختر صورة أولاً', 'warning'); return; } updateProductImage(state.smartSearch.currentProduct, state.smartSearch.selectedImage.url); showStatus('تم تطبيق الصورة', 'success'); }
-        async function autoSearchProductImages() { /* ... */ }
-        function handleExcelUpload(file) { /* ... */ }
-        function processExcelData(data) { /* ... */ }
-        function addNewProduct() { /* ... */ }
-        function createNotification() { /* ... */ }
-        function removeNewProduct(id) { state.newProducts = state.newProducts.filter(p => p.id !== id); saveData(); }
-        function removeNotification(id) { state.notifications = state.notifications.filter(n => n.id !== id); saveData(); }
-        function openBulkImageModal() { new bootstrap.Modal(document.getElementById('bulkImageModal')).show(); updateBulkPreview(); }
-        function updateBulkPreview() { const activeTab = document.querySelector('.nav-link.active'); const preview = document.getElementById('bulkPreview'); if (activeTab.id === 'mode-magic-tab') preview.textContent = 'https://tse2.mm.bing.net/th?q=Exemple&w=800&h=800'; else if (activeTab.id === 'mode-desc-tab') preview.textContent = 'https://www.bing.com/search?q=fiche+technique+Exemple'; else if (activeTab.id === 'mode-ai-tab') preview.textContent = 'Recherche IA'; else { const baseUrl = document.getElementById('bulkBaseUrl')?.value || ''; const field = document.getElementById('bulkField')?.value; const ext = document.getElementById('bulkExt')?.value; preview.textContent = `${baseUrl}${field === 'ref' ? 'REF123' : 'Produit'}${ext}`; } }
-        async function searchAIImages() { /* ... */ }
-        function displayAIResults(results) { /* ... */ }
-        function selectAIImage(index) { /* ... */ }
-        function applyBulkActions() { /* ... */ }
-        function openSmartSearchForProduct(productId, designation) { state.smartSearch.currentProduct = productId; document.getElementById('smartSearchInput').value = designation; smartImageSearch(); }
-        async function quickImageSearch(productId, designation) { showStatus(`بحث سريع عن ${designation}...`, 'info'); try { const images = await intelligentSearch.searchBing(designation, 1); if (images.length) { updateProductImage(productId, images[0].url); showStatus('تم التحديث', 'success'); } else showStatus('لم يتم العثور', 'warning'); } catch(e) { showStatus('خطأ', 'error'); } }
-        async function advancedQuickSearch(productId, designation) { showStatus(`بحث متقدم عن ${designation}...`, 'info'); try { const product = state.products.find(p => p.id === productId); const images = await intelligentSearch.searchAllSources(designation, product?.famille, 3); if (images.length) { updateProductImage(productId, images[0].url); showStatus(`تم التحديث من ${images[0].source}`, 'success'); } else showStatus('لا توجد صور', 'warning'); } catch(e) { showStatus('خطأ', 'error'); } }
-        function updateProductImage(id, newUrl) { const product = state.products.find(p => p.id === id); if (product) { if (!product.originalImage) product.originalImage = product.image; product.image = newUrl; saveData(); updateUI(); } }
-        function updateProductDesc(id, newUrl) { const product = state.products.find(p => p.id === id); if (product) { product.description = newUrl; saveData(); updateUI(); } }
-        async function uploadToGitHubGist() { /* ... */ }
-        function updateUI() { document.getElementById('statsProducts').innerText = state.products.length; document.getElementById('statsNewProducts').innerText = state.newProducts.length; document.getElementById('statsNotifications').innerText = state.notifications.length; document.getElementById('statsStatus').innerText = state.gistId ? 'Actif' : 'Inactif'; updateNewProductsList(); updateNotificationsList(); updateCatalogTable(); }
-        function updateNewProductsList() { const list = document.getElementById('activeNewProducts'); if (list) list.innerHTML = state.newProducts.map(p => `<li class="list-group-item d-flex justify-content-between"><div><strong>${escapeHtml(p.name)}</strong> - ${p.price} DA</div><button class="btn btn-sm btn-danger" onclick="removeNewProduct('${p.id}')"><i class="fas fa-times"></i></button></li>`).join(''); }
-        function updateNotificationsList() { const list = document.getElementById('activeNotifications'); if (list) list.innerHTML = state.notifications.map(n => `<li class="list-group-item d-flex justify-content-between"><div><span class="badge bg-info">${n.title}</span> ${n.message.substring(0,50)}</div><button class="btn btn-sm btn-danger" onclick="removeNotification('${n.id}')"><i class="fas fa-times"></i></button></li>`).join(''); }
-        function updateCatalogTable() { const tbody = document.getElementById('catalogTableBody'); if (!tbody) return; tbody.innerHTML = state.products.slice(0,100).map(p => `<tr><td>${escapeHtml(p.ref)}</td><td>${escapeHtml(p.designation)}</td><td>${p.prix} DA</td><td>${p.prix_comparaison||0} DA</td><td><div class="input-group input-group-sm"><input type="text" class="form-control" value="${escapeHtml(p.image||'')}" onchange="updateProductImage('${p.id}', this.value)"><button class="btn btn-outline-primary" onclick="quickImageSearch('${p.id}','${escapeJs(p.designation)}')"><i class="fas fa-bolt"></i></button><button class="btn btn-outline-info" onclick="advancedQuickSearch('${p.id}','${escapeJs(p.designation)}')"><i class="fas fa-search-plus"></i></button></div></td><td><input type="text" class="form-control form-control-sm" value="${escapeHtml(p.description||'')}" onchange="updateProductDesc('${p.id}', this.value)"></td><td><button class="btn btn-sm btn-success" onclick="openSmartSearchForProduct('${p.id}','${escapeJs(p.designation)}')"><i class="fas fa-robot"></i></button></td></tr>`).join(''); }
-        function escapeHtml(text) { if (!text) return ''; const div = document.createElement('div'); div.textContent = text; return div.innerHTML; }
-        function escapeJs(text) { if (!text) return ''; return text.replace(/'/g, "\\'"); }
-        function showStatus(msg, type) { const el = document.getElementById('syncStatus'); el.textContent = msg; el.className = `sync-status sync-${type}`; el.style.display = 'block'; setTimeout(() => el.style.display = 'none', 3000); }
-        function generateClientLink() { if (!state.gistId) { showStatus('Publiez d\'abord', 'warning'); return; } const url = `${window.location.href.split('?')[0]}?gist=${state.gistId}`; navigator.clipboard.writeText(url); showStatus('Lien copié', 'success'); }
-        function toggleToken() { const input = document.getElementById('githubToken'); if (input.type === 'password') input.type = 'text'; else input.type = 'password'; }
-        function resetSync() { if (confirm('Réinitialiser ?')) { localStorage.removeItem('varicom_gist_id'); state.gistId = null; updateUI(); showStatus('Réinitialisé', 'info'); } }
-        function downloadTemplate() { const ws = XLSX.utils.json_to_sheet([{ Ref: 'REF001', Designation: 'Exemple', Famille: 'Général', Prix: 1000, 'Prix de comparaison': 900 }]); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, 'Modele'); XLSX.writeFile(wb, 'modele_varicom.xlsx'); }
-        function previewImage(url, title) { const modal = new bootstrap.Modal(document.getElementById('imagePreviewModal')); document.getElementById('previewImage').src = url; document.getElementById('downloadImage').href = url; modal.show(); }
-        function openBatchSearchModal() { /* ... */ }
-        async function startAdvancedBatchSearch() { /* ... */ }
-        function showAdvancedBatchResults(results, appliedCount) { /* ... */ }
-        function applyBatchImage(productId, imageUrl) { updateProductImage(productId, imageUrl); }
-        function applyAllBatchImages() { /* ... */ }
-        function exportShopifyCSV() { /* ... */ }
-        function escapeCSV(str) { if (str === undefined || str === null) return ''; let s = String(str); if (s.includes(',') || s.includes('"') || s.includes('\n')) return '"' + s.replace(/"/g, '""') + '"'; return s; }
-
-        // ==================== دوال Cloudinary الجديدة ====================
-        async function uploadImageToCloudinary(base64DataUrl) {
-            const cloudName = localStorage.getItem('varicom_cloud_name');
-            const uploadPreset = localStorage.getItem('varicom_upload_preset');
-            if (!cloudName || !uploadPreset) throw new Error('بيانات Cloudinary غير مكتملة. الرجاء إدخال Cloud Name و Upload Preset في الإعدادات.');
-            const base64String = base64DataUrl.split(',')[1];
-            if (!base64String) throw new Error('تنسيق الصورة غير صالح');
-            const formData = new FormData();
-            formData.append('file', base64String);
-            formData.append('upload_preset', uploadPreset);
-            const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, { method: 'POST', body: formData });
-            if (!response.ok) { const errorData = await response.json(); throw new Error(errorData.error?.message || `فشل الرفع: ${response.status}`); }
-            const result = await response.json();
-            return result.secure_url;
-        }
-
-        function saveCloudinarySettings() {
-            const cloudName = document.getElementById('cloudName')?.value;
-            const uploadPreset = document.getElementById('uploadPreset')?.value;
-            if (cloudName) localStorage.setItem('varicom_cloud_name', cloudName);
-            if (uploadPreset) localStorage.setItem('varicom_upload_preset', uploadPreset);
-            showStatus('✅ تم حفظ إعدادات Cloudinary', 'success');
-        }
-
-        function loadCloudinarySettings() {
-            const cloudNameInput = document.getElementById('cloudName');
-            const uploadPresetInput = document.getElementById('uploadPreset');
-            cloudNameInput.value = localStorage.getItem('varicom_cloud_name') || '';
-            uploadPresetInput.value = localStorage.getItem('varicom_upload_preset') || '';
-        }
-
-        // ==================== معالجة ZIP مع الرفع إلى Cloudinary ====================
-        async function handleZipUpload(file) {
-            if (!file) return;
-            if (!state.products.length) { showStatus('لا توجد منتجات. استورد Excel أولاً.', 'warning'); return; }
-            const cloudName = localStorage.getItem('varicom_cloud_name');
-            const uploadPreset = localStorage.getItem('varicom_upload_preset');
-            if (!cloudName || !uploadPreset) { showStatus('⚠️ يرجى إدخال Cloud Name و Upload Preset في الإعدادات أولاً.', 'warning'); return; }
-
-            const zipProgress = document.getElementById('zipProgress');
-            const zipProgressBar = document.getElementById('zipProgressBar');
-            const zipStatus = document.getElementById('zipStatus');
-            const matchedPreview = document.getElementById('matchedImagesPreview');
-            zipProgress.style.display = 'block';
-            zipProgressBar.style.width = '0%';
-            zipStatus.innerHTML = 'جاري فتح الملف...';
-            matchedPreview.innerHTML = '';
-
+        function loadLocalData() {
             try {
-                const zip = new JSZip();
-                const contents = await zip.loadAsync(file);
-                const imageFiles = [];
-                zip.forEach((relativePath, zipEntry) => {
-                    if (!zipEntry.dir) {
-                        const ext = relativePath.split('.').pop().toLowerCase();
-                        if (['jpg','jpeg','png','gif','webp'].includes(ext)) imageFiles.push({ path: relativePath, entry: zipEntry });
-                    }
-                });
-                if (!imageFiles.length) { showStatus('لا توجد صور في الملف', 'warning'); zipProgress.style.display = 'none'; return; }
+                const saved = localStorage.getItem('varicom_data');
+                if (saved) {
+                    const data = JSON.parse(saved);
+                    state.products = data.products || [];
+                    state.newProducts = data.newProducts || [];
+                    state.notifications = data.notifications || [];
+                }
+            } catch(e) { console.error('Error loading local data', e); state.products = []; state.newProducts = []; state.notifications = []; }
+        }
 
-                zipStatus.innerHTML = `تم العثور على ${imageFiles.length} صورة. جاري المطابقة...`;
-                zipProgressBar.style.width = '20%';
+        function saveData() {
+            const data = { products: state.products, newProducts: state.newProducts, notifications: state.notifications };
+            localStorage.setItem('varicom_data', JSON.stringify(data));
+            updateUI();
+        }
 
-                const productMap = new Map();
-                state.products.forEach(p => { if (p.ref) productMap.set(p.ref.toString().trim().toLowerCase(), p); });
+        function generateSmartSuggestions() {
+            const suggestions = ['صور منتجات احترافية', 'خلفية بيضاء', 'صور عالية الجودة', 'صور للمكاتب', 'أجهزة كمبيوتر', 'هواتف ذكية', 'إكسسوارات تقنية', 'صور تجارية', 'عروض ترويجية', 'صور واقعية', 'إلكترونيات', 'أجهزة مكتبية', 'طابعات', 'شاشات', 'لوحات المفاتيح'];
+            const container = document.getElementById('smartSuggestions');
+            if (container) container.innerHTML = suggestions.map(tag => `<span class="suggestion-tag" onclick="addSuggestion('${tag}')">${tag}</span>`).join('');
+        }
 
-                const matches = [];
-                let processed = 0;
-                for (const img of imageFiles) {
-                    const fileName = img.path.split('/').pop().split('\\').pop();
-                    const nameWithoutExt = fileName.substring(0, fileName.lastIndexOf('.')) || fileName;
-                    const refKey = nameWithoutExt.trim().toLowerCase();
-                    if (productMap.has(refKey)) {
-                        const blob = await img.entry.async('blob');
-                        const dataUrl = await new Promise(resolve => { const reader = new FileReader(); reader.onload = e => resolve(e.target.result); reader.readAsDataURL(blob); });
-                        matches.push({ ref: nameWithoutExt, product: productMap.get(refKey), dataUrl, fileName });
-                        processed++;
-                        zipProgressBar.style.width = 20 + (processed / imageFiles.length * 60);
-                        zipStatus.innerHTML = `تمت مطابقة ${matches.length} صورة...`;
+        function addSuggestion(tag) {
+            const input = document.getElementById('smartSearchInput');
+            if (input) { input.value = tag; smartImageSearch(); }
+        }
+
+        async function smartImageSearch() {
+            const query = document.getElementById('smartSearchInput')?.value;
+            const source = document.getElementById('searchSource')?.value || 'auto';
+            if (!query) { showStatus('أدخل كلمة للبحث', 'warning'); return; }
+            state.smartSearch.currentSearchQuery = query;
+            state.smartSearch.selectedImage = null;
+            const resultsDiv = document.getElementById('smartResults');
+            if (!resultsDiv) return;
+            resultsDiv.innerHTML = `<div class="col-12 text-center py-5"><div class="spinner-border text-primary" style="width:3rem;height:3rem;" role="status"><span class="visually-hidden">جار البحث...</span></div><div class="mt-4"><h5>جاري البحث المتقدم...</h5><p class="text-muted">نبحث في 6 مصادر مختلفة عن "${query}"</p><div class="progress" style="height:8px;width:250px;margin:0 auto;"><div class="progress-bar progress-bar-striped progress-bar-animated" style="width:100%"></div></div></div></div>`;
+            const applyBtnContainer = document.getElementById('applyButtonContainer');
+            if (applyBtnContainer) applyBtnContainer.style.display = 'none';
+            try {
+                let images = [];
+                const category = state.smartSearch.currentProduct ? state.products.find(p => p.id === state.smartSearch.currentProduct)?.famille : 'général';
+                if (source === 'auto') images = await intelligentSearch.searchAllSources(query, category, 12);
+                else if (source === 'all') images = await intelligentSearch.searchAllSources(query, category, 24);
+                else if (source in intelligentSearch.sources) {
+                    images = await intelligentSearch.sources[source].search(query, 12);
+                    images = images.map(img => ({ ...img, relevance_score: intelligentSearch.evaluateImage(img, query, category), final_score: (img.quality_score * 0.4) + (intelligentSearch.evaluateImage(img, query, category) * 0.6) }));
+                }
+                if (images.length === 0) images = await intelligentSearch.searchBing(query, 8);
+                state.smartSearch.searchResults = images;
+                displayAdvancedResults(images);
+                if (state.smartSearch.currentProduct) {
+                    const product = state.products.find(p => p.id === state.smartSearch.currentProduct);
+                    if (product && applyBtnContainer) {
+                        document.getElementById('currentProductInfo').innerHTML = `<strong>المنتج الحالي:</strong> ${product.designation}<br><small class="text-muted">${product.ref} | ${product.famille} | ${product.prix} DA | Comparaison: ${product.prix_comparaison || '-'} DA</small>`;
+                        applyBtnContainer.style.display = 'block';
                     }
                 }
+                showStatus(`تم العثور على ${images.length} صورة من ${new Set(images.map(img => img.source)).size} مصادر`, 'success');
+            } catch(error) { console.error('Search error:', error); showStatus(`خطأ في البحث: ${error.message}`, 'error'); }
+        }
 
-                if (!matches.length) { showStatus('لم يتم العثور على تطابقات. تأكد من تطابق أسماء الملفات مع أرقام Ref.', 'warning'); zipProgress.style.display = 'none'; return; }
+        function displayAdvancedResults(images) {
+            const resultsDiv = document.getElementById('smartResults');
+            if (!resultsDiv) return;
+            if (!images || images.length === 0) { resultsDiv.innerHTML = `<div class="col-12 text-center py-5"><i class="fas fa-search fa-3x text-muted mb-3"></i><h5 class="text-muted">لم يتم العثور على صور</h5><p class="text-muted mb-4">جرب استخدام كلمات بحث مختلفة أو استعلام أوسع</p><button class="btn btn-outline-primary" onclick="smartImageSearch()"><i class="fas fa-redo me-1"></i>إعادة المحاولة</button></div>`; return; }
+            const groupedBySource = {};
+            images.forEach(img => { if (!groupedBySource[img.source]) groupedBySource[img.source] = []; groupedBySource[img.source].push(img); });
+            let html = '';
+            if (images.length > 0) {
+                const bestImage = images[0];
+                html += `<div class="col-12 mb-4"><div class="card border-success shadow-sm"><div class="card-header bg-success text-white d-flex justify-content-between align-items-center"><div><i class="fas fa-crown me-2"></i> أفضل صورة مقترحة</div><div><span class="badge bg-light text-success fs-6">${Math.round(bestImage.final_score)}%</span></div></div><div class="card-body"><div class="row align-items-center"><div class="col-md-3 text-center"><img src="${bestImage.thumb || bestImage.url}" class="img-fluid rounded border border-3 border-success shadow" style="max-height:180px;cursor:pointer;" onclick="selectSmartImage(0)" alt="${bestImage.title}"><div class="mt-2"><span class="badge bg-secondary">${bestImage.source}</span><span class="badge bg-info ms-1">${bestImage.width}×${bestImage.height}</span></div></div><div class="col-md-6"><h6 class="mb-2">${bestImage.title}</h6><p class="text-muted small mb-3">${bestImage.description}</p><div class="row"><div class="col-6"><div class="progress" style="height:10px;"><div class="progress-bar bg-success" style="width:${bestImage.quality_score}%"></div></div><small>الجودة: ${Math.round(bestImage.quality_score)}%</small></div><div class="col-6"><div class="progress" style="height:10px;"><div class="progress-bar bg-primary" style="width:${bestImage.relevance_score}%"></div></div><small>الملاءمة: ${Math.round(bestImage.relevance_score)}%</small></div></div></div><div class="col-md-3 text-center"><button class="btn btn-success w-100 mb-2" onclick="selectSmartImage(0); applySelectedImageToCurrentProduct()"><i class="fas fa-check-circle me-2"></i> تطبيق هذه الصورة</button><button class="btn btn-outline-primary w-100" onclick="previewImage('${bestImage.url}', '${bestImage.title}')"><i class="fas fa-external-link-alt me-2"></i> معاينة</button></div></div></div></div></div>`;
+            }
+            Object.entries(groupedBySource).forEach(([source, sourceImages]) => {
+                const sourceIcon = { 'Bing Images':'fab fa-microsoft', 'Unsplash':'fas fa-camera', 'Pexels':'fas fa-images', 'Pixabay':'fas fa-image', 'Google Images':'fab fa-google', 'Flickr':'fab fa-flickr' }[source] || 'fas fa-image';
+                html += `<div class="col-12 mb-3"><div class="card source-group-card"><div class="card-header bg-light d-flex justify-content-between align-items-center"><div><i class="${sourceIcon} me-2"></i><strong>${source}</strong><span class="badge bg-secondary ms-2">${sourceImages.length}</span></div><small class="text-muted">أفضل النتائج من ${source}</small></div><div class="card-body"><div class="row g-3">${sourceImages.slice(0,4).map((img, idx) => { const globalIndex = images.indexOf(img); return `<div class="col-md-3 col-sm-6"><div class="card h-100 image-select-card" onclick="selectSmartImage(${globalIndex})" data-index="${globalIndex}"><div class="position-relative" style="height:150px;overflow:hidden;"><img src="${img.thumb || img.url}" class="card-img-top h-100 w-100" alt="${img.title}" style="object-fit:cover;" loading="lazy"><span class="position-absolute top-0 end-0 bg-dark text-white p-1 small">${Math.round(img.final_score)}%</span></div><div class="card-body p-2"><small class="d-block text-truncate mb-1">${img.title.substring(0,30)}</small><div class="d-flex justify-content-between small"><span>${img.width}×${img.height}</span><span class="badge bg-${img.commercial_use ? 'success' : 'warning'}">${img.commercial_use ? 'تجاري' : 'شخصي'}</span></div></div></div></div>`; }).join('')}</div></div></div></div>`;
+            });
+            resultsDiv.innerHTML = html;
+        }
 
-                zipStatus.innerHTML = `جاري رفع ${matches.length} صورة إلى Cloudinary...`;
-                const uploadedMatches = [];
-                for (let i = 0; i < matches.length; i++) {
-                    const match = matches[i];
-                    try {
-                        zipStatus.innerHTML = `رفع ${i+1}/${matches.length}: ${match.fileName}`;
-                        const imageUrl = await uploadImageToCloudinary(match.dataUrl);
-                        uploadedMatches.push({ ...match, imageUrl });
-                        if (!match.product.originalImage) match.product.originalImage = match.product.image;
-                        match.product.image = imageUrl;
-                        const percent = 20 + (processed / imageFiles.length * 60) + ((i+1) / matches.length * 20);
-                        zipProgressBar.style.width = `${Math.min(100, percent)}%`;
-                    } catch (err) {
-                        console.error(`فشل رفع ${match.fileName}:`, err);
-                        showStatus(`❌ فشل رفع ${match.fileName}: ${err.message}`, 'error');
-                    }
-                }
-                saveData();
-                matchedPreview.innerHTML = uploadedMatches.map(m => `
-                    <div class="col-md-3 col-sm-4 col-6">
-                        <div class="card">
-                            <img src="${m.imageUrl}" class="card-img-top" style="height:120px;object-fit:cover;" alt="${m.ref}">
-                            <div class="card-body p-2">
-                                <small class="d-block text-truncate"><strong>${m.product.designation}</strong></small>
-                                <small class="text-muted">${m.ref}</small>
-                                <button class="btn btn-sm btn-success w-100 mt-1" onclick="copyToClipboard('${m.imageUrl}')"><i class="fas fa-copy me-1"></i>نسخ الرابط</button>
-                            </div>
-                        </div>
-                    </div>
-                `).join('');
-                zipStatus.innerHTML = `✅ تم رفع ${uploadedMatches.length} صورة بنجاح إلى Cloudinary!`;
-                zipProgressBar.style.width = '100%';
-                showStatus(`🎉 تم رفع ${uploadedMatches.length} صورة وتحديث المنتجات`, 'success');
-                updateCatalogTable();
-            } catch (error) {
-                console.error(error);
-                showStatus('خطأ في معالجة ZIP: ' + error.message, 'error');
-                zipProgress.style.display = 'none';
+        function selectSmartImage(index) {
+            document.querySelectorAll('.image-select-card').forEach(card => { card.classList.remove('border-primary', 'border-3'); card.classList.add('border-light'); });
+            const selectedCard = document.querySelector(`.image-select-card[data-index="${index}"]`);
+            if (selectedCard) {
+                selectedCard.classList.remove('border-light'); selectedCard.classList.add('border-primary', 'border-3');
+                state.smartSearch.selectedImage = state.smartSearch.searchResults[index];
+                const applyBtnContainer = document.getElementById('applyButtonContainer');
+                if (state.smartSearch.currentProduct && applyBtnContainer) applyBtnContainer.style.display = 'block';
+                showStatus(`تم تحديد صورة من ${state.smartSearch.searchResults[index].source}`, 'info');
             }
         }
 
-        function copyToClipboard(text) { navigator.clipboard.writeText(text); showStatus('تم نسخ الرابط', 'success'); }
-        function showMatchedImagesPreview() { const preview = document.getElementById('matchedImagesPreview'); if (preview.children.length === 0) showStatus('لا توجد صور معروضة. قم برفع ZIP أولاً.', 'info'); }
+        function applySelectedImageToCurrentProduct() {
+            if (!state.smartSearch.currentProduct) { showStatus('لم يتم تحديد منتج. اختر منتجاً من الجدول أولاً.', 'warning'); return; }
+            if (!state.smartSearch.selectedImage) { showStatus('لم يتم تحديد صورة. اختر صورة أولاً.', 'warning'); return; }
+            updateProductImage(state.smartSearch.currentProduct, state.smartSearch.selectedImage.url);
+            showStatus('✓ تم تطبيق الصورة بنجاح!', 'success');
+            setTimeout(() => { const applyBtnContainer = document.getElementById('applyButtonContainer'); if (applyBtnContainer) applyBtnContainer.style.display = 'none'; }, 2000);
+        }
 
-        // ==================== دالة تصدير CSV المحسنة ====================
-        function exportShopifyCSV() {
-            if (!state.products.length) { showStatus('لا توجد منتجات', 'warning'); return; }
+        async function autoSearchProductImages() {
+            if (!state.products || state.products.length === 0) { showStatus('لا توجد منتجات للبحث', 'warning'); return; }
+            const productsNeedingImages = state.products.filter(p => { const hasImage = p.image && p.image.trim() !== ''; const isHighQuality = hasImage && ((p.image.includes('bing.net') && p.image.includes('w=800')) || p.image.includes('unsplash') || p.image.includes('pexels') || p.image.includes('pixabay')); return !hasImage || !isHighQuality; }).slice(0,20);
+            if (productsNeedingImages.length === 0) { showStatus('جميع المنتجات تحتوي على صور عالية الجودة', 'info'); return; }
+            state.autoSearch = { active: true, currentIndex: 0, totalProducts: productsNeedingImages.length, products: productsNeedingImages };
+            const progressBar = document.getElementById('autoSearchProgress'); const progressBarInner = document.getElementById('autoSearchProgressBar');
+            if (progressBar) progressBar.style.display = 'block'; if (progressBarInner) progressBarInner.style.width = '0%';
+            showStatus(`بدأ البحث الذكي لـ ${productsNeedingImages.length} منتج...`, 'info');
+            for (let i=0; i<productsNeedingImages.length; i++) {
+                if (!state.autoSearch.active) break;
+                const product = productsNeedingImages[i]; state.autoSearch.currentIndex = i+1;
+                try {
+                    const query = intelligentSearch.enhanceQuery(product.designation, product.famille);
+                    const images = await intelligentSearch.searchAllSources(query, product.famille, 1);
+                    if (images.length > 0) {
+                        const bestImage = images[0];
+                        if (!product.originalImage) product.originalImage = product.image;
+                        updateProductImage(product.id, bestImage.url);
+                        if (progressBarInner) progressBarInner.style.width = `${((i+1)/productsNeedingImages.length)*100}%`;
+                        showStatus(`✅ تم إضافة صورة لـ ${product.designation} (${bestImage.source})`, 'success');
+                    }
+                } catch(e) { console.error(`Failed to search for: ${product.designation}`, e); showStatus(`❌ خطأ في البحث عن ${product.designation}`, 'error'); }
+                await new Promise(resolve => setTimeout(resolve, 1200));
+            }
+            state.autoSearch.active = false; if (progressBar) progressBar.style.display = 'none'; saveData(); showStatus('🎉 اكتمل البحث الذكي بنجاح!', 'success');
+        }
+
+        function handleExcelUpload(file) {
+            if (!file) return;
+            showStatus('Lecture du fichier...', 'info');
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
+                    const firstSheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const jsonData = XLSX.utils.sheet_to_json(firstSheet);
+                    processExcelData(jsonData);
+                } catch(err) { showStatus('Erreur lecture Excel: ' + err.message, 'error'); }
+            };
+            reader.onerror = () => { showStatus('Erreur de lecture du fichier', 'error'); };
+            reader.readAsArrayBuffer(file);
+        }
+
+        function processExcelData(data) {
+            if (!Array.isArray(data)) { showStatus('Format de fichier invalide', 'error'); return; }
+            const processed = data.map((row, idx) => ({
+                id: `prod_${Date.now()}_${idx}`,
+                ref: row['Ref'] || row['Référence'] || row['Code'] || `REF${idx+1}`,
+                designation: row['Designation'] || row['Désignation'] || row['Nom'] || 'Produit sans nom',
+                famille: row['Famille'] || row['Categorie'] || 'Général',
+                prix: parseFloat(row['Prix'] || row['Price'] || 0) || 0,
+                prix_comparaison: parseFloat(row['Prix de comparaison'] || row['Compare Price'] || row['Prix Gros'] || 0) || 0,
+                image: row['Image'] || row['Photo'] || '',
+                description: row['Description'] || row['Desc'] || ''
+            })).filter(p => p.designation && p.designation !== 'Produit sans nom');
+            state.products = processed; saveData(); showStatus(`${processed.length} produits importés avec succès!`, 'success');
+        }
+
+        function addNewProduct() {
+            const name = document.getElementById('newProductName')?.value;
+            const price = document.getElementById('newProductPrice')?.value;
+            const comparePrice = document.getElementById('newProductComparePrice')?.value;
+            const cat = document.getElementById('newProductCategory')?.value;
+            const img = document.getElementById('newProductImage')?.value;
+            if (!name || !price) { showStatus('Nom et Prix requis', 'warning'); return; }
+            state.newProducts.unshift({ id: `new_${Date.now()}`, name: name.trim(), price: parseFloat(price)||0, comparePrice: parseFloat(comparePrice)||0, category: cat||'Général', image: img||'', timestamp: new Date().toISOString() });
+            if (document.getElementById('newProductName')) { document.getElementById('newProductName').value = ''; document.getElementById('newProductPrice').value = ''; document.getElementById('newProductComparePrice').value = ''; document.getElementById('newProductImage').value = ''; }
+            saveData(); showStatus('Nouveau produit ajouté', 'success');
+        }
+
+        function createNotification() {
+            const title = document.getElementById('notifTitle')?.value;
+            const msg = document.getElementById('notifMessage')?.value;
+            const type = document.getElementById('notifType')?.value;
+            if (!title || !msg) { showStatus('Titre et Message requis', 'warning'); return; }
+            state.notifications.unshift({ id: `notif_${Date.now()}`, title: title.trim(), message: msg.trim(), type: type||'info', timestamp: new Date().toISOString() });
+            if (document.getElementById('notifTitle')) { document.getElementById('notifTitle').value = ''; document.getElementById('notifMessage').value = ''; }
+            saveData(); showStatus('Notification créée', 'success');
+        }
+
+        function removeNewProduct(id) { state.newProducts = state.newProducts.filter(p => p.id !== id); saveData(); }
+        function removeNotification(id) { state.notifications = state.notifications.filter(n => n.id !== id); saveData(); }
+
+        function openBulkImageModal() { const modalElement = document.getElementById('bulkImageModal'); if (modalElement) { const modal = new bootstrap.Modal(modalElement); modal.show(); updateBulkPreview(); } }
+        function updateBulkPreview() {
+            const activeTab = document.querySelector('.nav-link.active'); const preview = document.getElementById('bulkPreview'); if (!activeTab || !preview) return;
+            if (activeTab.id === 'mode-magic-tab') preview.textContent = `https://tse2.mm.bing.net/th?q=ExempleProduit&w=800&h=800`;
+            else if (activeTab.id === 'mode-desc-tab') preview.textContent = `https://www.bing.com/search?q=fiche+technique+ExempleProduit`;
+            else if (activeTab.id === 'mode-ai-tab') preview.textContent = `Recherche IA avec sources multiples`;
+            else { const baseUrl = document.getElementById('bulkBaseUrl')?.value || 'https://site.com/img/'; const field = document.getElementById('bulkField')?.value || 'ref'; const ext = document.getElementById('bulkExt')?.value || '.jpg'; const example = field === 'ref' ? 'REF123' : 'Produit_Exemple'; preview.textContent = `${baseUrl}${example}${ext}`; }
+        }
+
+        async function searchAIImages() {
+            const query = document.getElementById('aiSearchQuery')?.value; const source = document.getElementById('aiSources')?.value || 'auto';
+            if (!query) { showStatus('أدخل كلمة للبحث', 'warning'); return; }
+            const loader = document.getElementById('aiLoader'); const resultsDiv = document.getElementById('aiResults');
+            if (loader) loader.style.display = 'block'; if (resultsDiv) resultsDiv.innerHTML = '';
             try {
-                const headers = ['Handle','Title','Body (HTML)','Vendor','Type','Tags','Published','Option1 Name','Option1 Value','Variant SKU','Variant Grams','Variant Inventory Tracker','Variant Inventory Qty','Variant Inventory Policy','Variant Fulfillment Service','Variant Price','Variant Compare At Price','Variant Requires Shipping','Variant Taxable','Image Src','Image Alt Text'];
+                let images = []; const smartQuery = intelligentSearch.enhanceQuery(query);
+                if (source === 'auto') images = await intelligentSearch.searchAllSources(smartQuery, '', 9);
+                else if (source === 'bing') images = await intelligentSearch.searchBing(smartQuery, 9);
+                else if (source === 'unsplash') images = await intelligentSearch.searchUnsplash(smartQuery, 9);
+                displayAIResults(images);
+            } catch(error) { console.error('AI Search error:', error); if (resultsDiv) resultsDiv.innerHTML = `<div class="col-12"><div class="alert alert-danger">Erreur de recherche: ${error.message || 'Erreur inconnue'}</div></div>`; }
+            finally { if (loader) loader.style.display = 'none'; }
+        }
+
+        function displayAIResults(results) {
+            const container = document.getElementById('aiResults'); if (!container) return;
+            if (!results || results.length === 0) { container.innerHTML = `<div class="col-12"><div class="alert alert-warning">Aucune image trouvée. Essayez avec d'autres termes.</div></div>`; return; }
+            container.innerHTML = results.map((img, index) => `<div class="col-md-4 col-sm-6"><div class="ai-image-result" onclick="selectAIImage(${index})"><div class="position-relative" style="height:150px;overflow:hidden;"><img src="${img.thumb || img.url}" class="w-100 h-100" style="object-fit:cover;" alt="${img.title}"><span class="search-source-badge">${img.source}</span></div><div class="p-2"><small class="d-block text-truncate">${img.title}</small><small class="text-muted"><i class="fas fa-${img.source === 'Unsplash' ? 'camera' : 'search'} me-1"></i>${img.source} - ${img.width || 800}×${img.height || 800}</small></div></div></div>`).join('');
+        }
+
+        function selectAIImage(index) { document.querySelectorAll('.ai-image-result').forEach(el => el.classList.remove('selected')); const selected = document.querySelectorAll('.ai-image-result')[index]; if (selected) { selected.classList.add('selected'); state.smartSearch.selectedImage = state.smartSearch.searchResults[index]; } }
+
+        function applyBulkActions() {
+            const activeTab = document.querySelector('.nav-link.active');
+            if (!activeTab || !state.products || state.products.length === 0) { showStatus('Aucun produit à modifier', 'warning'); return; }
+            if (!confirm(`Cela va modifier ${state.products.length} produits. Continuer?`)) return;
+            if (activeTab.id === 'mode-magic-tab') {
+                state.products = state.products.map(p => ({ ...p, image: `https://tse2.mm.bing.net/th?q=${encodeURIComponent(p.designation)}&w=800&h=800&c=7&rs=1&p=0` }));
+            } else if (activeTab.id === 'mode-desc-tab') {
+                state.products = state.products.map(p => ({ ...p, description: `https://www.bing.com/search?q=fiche+technique+${encodeURIComponent(p.designation)}` }));
+            } else if (activeTab.id === 'mode-ai-tab') {
+                if (state.smartSearch.selectedImage) { const selectedUrl = state.smartSearch.selectedImage.url; state.products = state.products.map(p => ({ ...p, image: selectedUrl })); showStatus('Image IA appliquée à tous les produits', 'success'); }
+                else { showStatus('Veuillez d\'abord sélectionner une image', 'warning'); return; }
+            } else {
+                const baseUrl = document.getElementById('bulkBaseUrl')?.value; const field = document.getElementById('bulkField')?.value || 'ref'; const ext = document.getElementById('bulkExt')?.value || '';
+                if (!baseUrl) { showStatus('Veuillez entrer une URL de base', 'warning'); return; }
+                state.products = state.products.map(p => { const val = p[field] ? p[field].toString().trim() : ''; const safeVal = field === 'designation' ? val.replace(/[^a-zA-Z0-9-_]/g, '_') : val; return { ...p, image: `${baseUrl}${safeVal}${ext}` }; });
+            }
+            saveData(); const modal = bootstrap.Modal.getInstance(document.getElementById('bulkImageModal')); if (modal) modal.hide(); showStatus('Mise à jour effectuée avec succès!', 'success');
+        }
+
+        function openSmartSearchForProduct(productId, designation) {
+            state.smartSearch.currentProduct = productId;
+            const searchInput = document.getElementById('smartSearchInput'); if (searchInput) searchInput.value = designation;
+            const searchSource = document.getElementById('searchSource'); if (searchSource) searchSource.value = 'auto';
+            const suggestions = document.querySelector('.smart-suggestions'); if (suggestions) suggestions.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            setTimeout(() => { smartImageSearch(); showStatus(`ابحث عن صور لـ ${designation}، ثم انقر على الصورة ثم على "تطبيق"`, 'info'); }, 800);
+        }
+
+        async function quickImageSearch(productId, designation) {
+            showStatus(`جاري البحث عن ${designation}...`, 'info');
+            try {
+                const product = state.products.find(p => p.id === productId);
+                const smartQuery = intelligentSearch.enhanceQuery(designation, product?.famille);
+                const images = await intelligentSearch.searchBing(smartQuery, 1);
+                if (images.length > 0) { updateProductImage(productId, images[0].url); showStatus(`✓ تم إضافة صورة لـ ${designation}`, 'success'); } else showStatus('لم أجد صوراً مناسبة', 'warning');
+            } catch(error) { console.error('Quick search error:', error); showStatus('خطأ في البحث', 'error'); }
+        }
+
+        async function advancedQuickSearch(productId, designation) {
+            showStatus(`جاري البحث المتقدم عن ${designation}...`, 'info');
+            try {
+                const product = state.products.find(p => p.id === productId);
+                if (!product) return;
+                const images = await intelligentSearch.searchAllSources(designation, product.famille, 3);
+                if (images.length > 0) { const bestImage = images[0]; updateProductImage(productId, bestImage.url); showStatus(`✓ ${designation}: ${bestImage.source} (${Math.round(bestImage.final_score)}%)`, 'success'); } else showStatus('لم أجد صوراً مناسبة', 'warning');
+            } catch(error) { console.error('Advanced quick search error:', error); showStatus('خطأ في البحث المتقدم', 'error'); }
+        }
+
+        function updateProductImage(id, newUrl) {
+            const product = state.products.find(p => p.id === id);
+            if (product) { if (!product.originalImage) product.originalImage = product.image; product.image = newUrl; saveData(); updateUI(); }
+        }
+        function updateProductDesc(id, newUrl) { const product = state.products.find(p => p.id === id); if (product) { product.description = newUrl; saveData(); updateUI(); } }
+
+        async function uploadToGitHubGist() {
+            const token = document.getElementById('githubToken')?.value;
+            if (!token || token.trim() === '') { showStatus('Token GitHub manquant!', 'error'); return; }
+            if (state.products.length === 0 && state.newProducts.length === 0) { showStatus('Aucun produit à publier! Veuillez importer des données.', 'warning'); return; }
+            const btn = document.getElementById('publishBtn'); if (!btn) return;
+            const originalText = btn.innerHTML; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Synchronisation...'; btn.disabled = true;
+            const payload = { description: "VARICOM Catalog Data", public: true, files: { "varicom_data.json": { content: JSON.stringify({ products: state.products, newProducts: state.newProducts, notifications: state.notifications, lastUpdate: new Date().toISOString(), meta: { version: "2.0", source: "VaricomAdmin" } }) } } };
+            try {
+                let url = 'https://api.github.com/gists'; let method = 'POST';
+                if (state.gistId) { url += `/${state.gistId}`; method = 'PATCH'; }
+                const response = await fetch(url, { method: method, headers: { 'Authorization': `token ${token}`, 'Content-Type': 'application/json', 'Accept': 'application/vnd.github.v3+json' }, body: JSON.stringify(payload) });
+                if (!response.ok) { if (response.status === 404 && state.gistId) { state.gistId = null; localStorage.removeItem('varicom_gist_id'); return uploadToGitHubGist(); } throw new Error(`Erreur GitHub: ${response.status} ${response.statusText}`); }
+                const result = await response.json(); state.gistId = result.id; state.lastSync = new Date().toISOString();
+                localStorage.setItem('varicom_gist_id', state.gistId); localStorage.setItem('varicom_last_sync', state.lastSync);
+                showStatus('✅ Synchronisation réussie! Données publiées.', 'success'); updateUI();
+            } catch(err) { console.error('Sync error:', err); showStatus('Erreur Sync: ' + err.message, 'error'); }
+            finally { btn.innerHTML = originalText; btn.disabled = false; }
+        }
+
+        function updateUI() {
+            updateElement('statsProducts', state.products.length); updateElement('statsNewProducts', state.newProducts.length); updateElement('statsNotifications', state.notifications.length);
+            const statsStatus = document.getElementById('statsStatus'); if (statsStatus) { statsStatus.textContent = state.gistId ? 'Actif' : 'Inactif'; statsStatus.className = state.gistId ? 'text-success' : 'text-danger'; }
+            updateNewProductsList(); updateNotificationsList(); updateCatalogTable();
+        }
+        function updateElement(id, value) { const element = document.getElementById(id); if (element) element.textContent = value; }
+        function updateNewProductsList() { const list = document.getElementById('activeNewProducts'); if (!list) return; list.innerHTML = state.newProducts.map(p => `<li class="list-group-item d-flex justify-content-between align-items-center"><div><strong>${escapeHtml(p.name)}</strong> - ${p.price} DA (détail) / ${p.comparePrice || 0} DA (gros)<br><small class="text-muted">${p.category}</small></div><button class="btn btn-sm btn-outline-danger" onclick="removeNewProduct('${escapeJs(p.id)}')"><i class="fas fa-times"></i></button></li>`).join(''); }
+        function updateNotificationsList() { const list = document.getElementById('activeNotifications'); if (!list) return; list.innerHTML = state.notifications.map(n => `<li class="list-group-item d-flex justify-content-between align-items-center"><div><span class="badge bg-${getBadgeClass(n.type)} me-2">${getBadgeIcon(n.type)}</span><strong>${escapeHtml(n.title)}</strong><br><small class="text-muted">${escapeHtml(n.message.substring(0,50))}${n.message.length>50?'...':''}</small></div><button class="btn btn-sm btn-outline-danger" onclick="removeNotification('${escapeJs(n.id)}')"><i class="fas fa-times"></i></button></li>`).join(''); }
+        function updateCatalogTable() { const tableBody = document.getElementById('catalogTableBody'); if (!tableBody) return; const productsToShow = state.products.slice(0,100); tableBody.innerHTML = productsToShow.map(p => `<tr data-product-id="${p.id}"><td><small>${escapeHtml(p.ref)}</small></td><td class="text-truncate" style="max-width:150px;" title="${escapeHtml(p.designation)}">${escapeHtml(p.designation)}</td><td>${p.prix} DA</td><td>${p.prix_comparaison || 0} DA</td><td><div class="input-group input-group-sm"><input type="text" class="form-control" value="${escapeHtml(p.image || '')}" onchange="updateProductImage('${escapeJs(p.id)}', this.value)" placeholder="URL Image..."><button class="btn btn-outline-primary" onclick="quickImageSearch('${escapeJs(p.id)}', '${escapeJs(p.designation)}')" title="بحث سريع"><i class="fas fa-bolt"></i></button><button class="btn btn-outline-info" onclick="advancedQuickSearch('${escapeJs(p.id)}', '${escapeJs(p.designation)}')" title="بحث متقدم"><i class="fas fa-search-plus"></i></button></div>${p.image ? `<small class="text-success"><i class="fas fa-check-circle"></i> موجودة</small>` : `<small class="text-danger"><i class="fas fa-times-circle"></i> مفقودة</small>`}</td><td><input type="text" class="form-control form-control-sm" value="${escapeHtml(p.description || '')}" onchange="updateProductDesc('${escapeJs(p.id)}', this.value)" placeholder="URL Desc..."></td><td><div class="btn-group btn-group-sm"><button class="btn btn-outline-success" onclick="openSmartSearchForProduct('${escapeJs(p.id)}', '${escapeJs(p.designation)}')" title="بحث ذكي"><i class="fas fa-robot"></i></button><button class="btn btn-outline-primary" onclick="window.open('https://www.bing.com/images/search?q=${encodeURIComponent(p.designation + ' product white background')}', '_blank')" title="Bing"><i class="fas fa-search"></i></button><button class="btn btn-outline-info" onclick="window.open('https://unsplash.com/s/photos/${encodeURIComponent(p.designation)}', '_blank')" title="Unsplash"><i class="fas fa-camera"></i></button><button class="btn btn-outline-warning" onclick="window.open('https://www.pexels.com/search/${encodeURIComponent(p.designation)}/', '_blank')" title="Pexels"><i class="fas fa-images"></i></button></div></td></tr>`).join(''); }
+
+        function getBadgeClass(type) { switch(type) { case 'info': return 'info'; case 'success': return 'success'; case 'warning': return 'warning'; case 'error': return 'danger'; default: return 'secondary'; } }
+        function getBadgeIcon(type) { switch(type) { case 'info': return 'ℹ️'; case 'success': return '✅'; case 'warning': return '⚠️'; case 'error': return '❌'; default: return '🔔'; } }
+        function escapeHtml(text) { if (!text) return ''; const div = document.createElement('div'); div.textContent = text; return div.innerHTML; }
+        function escapeJs(text) { if (!text) return ''; return text.toString().replace(/\\/g, '\\\\').replace(/'/g, "\\'").replace(/"/g, '\\"').replace(/\n/g, '\\n').replace(/\r/g, '\\r').replace(/\t/g, '\\t'); }
+        function showStatus(msg, type) { const el = document.getElementById('syncStatus'); if (!el) return; el.textContent = msg; el.className = 'sync-status'; if(type==='success') el.classList.add('sync-success'); else if(type==='warning') el.classList.add('sync-warning'); else if(type==='error') el.classList.add('sync-error'); else el.classList.add('sync-success'); el.style.display = 'block'; setTimeout(() => { el.style.display = 'none'; }, 3000); }
+        function generateClientLink() { if (!state.gistId) { showStatus('Veuillez d\'abord publier le catalogue', 'warning'); return; } const currentUrl = window.location.href; const baseUrl = currentUrl.substring(0, currentUrl.lastIndexOf('/') + 1); const clientUrl = `${baseUrl}index.html?gist=${state.gistId}`; if (navigator.clipboard && navigator.clipboard.writeText) { navigator.clipboard.writeText(clientUrl).then(() => { showStatus('✅ Lien client copié!', 'success'); }).catch(() => { prompt('Copiez ce lien manuellement:', clientUrl); showStatus('Lien prêt à être copié', 'info'); }); } else { prompt('Copiez ce lien manuellement:', clientUrl); showStatus('Lien prêt à être copié', 'info'); } }
+        function toggleToken() { const input = document.getElementById('githubToken'); const icon = input?.parentNode?.querySelector('i'); if (input && icon) { if (input.type === 'password') { input.type = 'text'; icon.classList.replace('fa-eye', 'fa-eye-slash'); } else { input.type = 'password'; icon.classList.replace('fa-eye-slash', 'fa-eye'); } } }
+        function resetSync() { if (confirm('Voulez-vous vraiment réinitialiser la synchronisation? Cela déconnectera le catalogue actuel.')) { localStorage.removeItem('varicom_gist_id'); localStorage.removeItem('varicom_last_sync'); state.gistId = null; state.lastSync = null; updateUI(); showStatus('Synchronisation réinitialisée', 'info'); } }
+        function downloadTemplate() { const wb = XLSX.utils.book_new(); const ws = XLSX.utils.json_to_sheet([{ Ref: 'REF001', Designation: 'Exemple Produit', Famille: 'Informatique', Prix: 1000, 'Prix de comparaison': 900, Image: 'https://example.com/image.jpg', Description: 'https://example.com/description' }]); XLSX.utils.book_append_sheet(wb, ws, "Modele"); XLSX.writeFile(wb, "modele_import_varicom.xlsx"); }
+        function previewImage(url, title) { const previewModal = new bootstrap.Modal(document.getElementById('imagePreviewModal')); const previewImage = document.getElementById('previewImage'); const downloadLink = document.getElementById('downloadImage'); previewImage.src = url; downloadLink.href = url; downloadLink.download = title ? `${title.replace(/[^a-z0-9]/gi, '_')}.jpg` : 'image.jpg'; previewModal.show(); }
+
+        function openBatchSearchModal() {
+            const modalHtml = `<div class="modal fade" id="batchSearchModal" tabindex="-1"><div class="modal-dialog modal-lg"><div class="modal-content"><div class="modal-header bg-primary text-white"><h5 class="modal-title"><i class="fas fa-bolt me-2"></i>البحث الدفعي المتقدم</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="alert alert-info"><i class="fas fa-info-circle me-2"></i> سيبحث النظام عن صور لجميع المنتجات دفعة واحدة باستخدام خوارزمية متقدمة.</div><div class="row mb-3"><div class="col-md-6"><label class="form-label">عدد الصور لكل منتج</label><select class="form-select" id="batchImagesPerProduct"><option value="1">1 صورة (الأفضل)</option><option value="2">2 صور</option><option value="3" selected>3 صور</option></select></div><div class="col-md-6"><label class="form-label">حد الجودة الأدنى</label><select class="form-select" id="batchQualityThreshold"><option value="60">60%</option><option value="70" selected>70%</option><option value="80">80%</option><option value="90">90%</option></select></div></div><div class="row mb-3"><div class="col-md-12"><label class="form-label">المصادر</label><div class="form-check"><input class="form-check-input" type="checkbox" id="sourceBing" checked><label class="form-check-label" for="sourceBing">Bing Images</label></div><div class="form-check"><input class="form-check-input" type="checkbox" id="sourceUnsplash" checked><label class="form-check-label" for="sourceUnsplash">Unsplash</label></div><div class="form-check"><input class="form-check-input" type="checkbox" id="sourcePexels" checked><label class="form-check-label" for="sourcePexels">Pexels</label></div><div class="form-check"><input class="form-check-input" type="checkbox" id="sourcePixabay"><label class="form-check-label" for="sourcePixabay">Pixabay</label></div></div></div><div class="alert alert-warning"><i class="fas fa-clock me-2"></i> الوقت المقدر: ${Math.ceil(state.products.length * 2.5)} ثانية</div></div><div class="modal-footer"><button type="button" class="btn btn-secondary" data-bs-dismiss="modal">إلغاء</button><button type="button" class="btn btn-primary" onclick="startAdvancedBatchSearch()"><i class="fas fa-play me-2"></i>بدء البحث الدفعي</button></div></div></div></div>`;
+            const modalContainer = document.createElement('div'); modalContainer.innerHTML = modalHtml; document.body.appendChild(modalContainer.firstChild); const modal = new bootstrap.Modal(document.getElementById('batchSearchModal')); modal.show();
+        }
+
+        async function startAdvancedBatchSearch() {
+            const modal = bootstrap.Modal.getInstance(document.getElementById('batchSearchModal')); modal.hide();
+            if (!state.products || state.products.length === 0) { showStatus('لا توجد منتجات للبحث', 'warning'); return; }
+            const progressBar = document.getElementById('autoSearchProgress'); const progressBarInner = document.getElementById('autoSearchProgressBar');
+            if (progressBar) { progressBar.style.display = 'block'; progressBarInner.style.width = '0%'; }
+            showStatus('بدأ البحث الدفعي المتقدم...', 'info');
+            try {
+                let appliedCount = 0; const batchResults = [];
+                for (let i=0; i<state.products.length; i++) {
+                    const product = state.products[i];
+                    if (progressBarInner) progressBarInner.style.width = `${((i+1)/state.products.length)*100}%`;
+                    try {
+                        const query = intelligentSearch.enhanceQuery(product.designation, product.famille);
+                        let images = await intelligentSearch.searchAllSources(query, product.famille, parseInt(document.getElementById('batchImagesPerProduct')?.value || 3));
+                        const qualityThreshold = parseInt(document.getElementById('batchQualityThreshold')?.value || 70);
+                        const goodImages = images.filter(img => img.final_score >= qualityThreshold);
+                        if (goodImages.length > 0) {
+                            batchResults.push({ productId: product.id, productName: product.designation, images: goodImages, bestImage: goodImages[0] });
+                            appliedCount++; showStatus(`✅ ${product.designation}: ${goodImages.length} صورة جيدة`, 'success');
+                        } else { showStatus(`⚠️ ${product.designation}: لا توجد صور بجودة كافية`, 'warning'); }
+                    } catch(error) { console.error(`Failed to search for ${product.designation}:`, error); showStatus(`❌ ${product.designation}: خطأ في البحث`, 'error'); }
+                    await new Promise(resolve => setTimeout(resolve, 1500));
+                }
+                state.batchSearchResults = batchResults; localStorage.setItem('varicom_batch_results', JSON.stringify(batchResults));
+                if (progressBar) progressBar.style.display = 'none';
+                showAdvancedBatchResults(batchResults, appliedCount);
+            } catch(error) { console.error('Advanced batch search error:', error); showStatus('خطأ في البحث الدفعي المتقدم: ' + error.message, 'error'); if (progressBar) progressBar.style.display = 'none'; }
+        }
+
+        function showAdvancedBatchResults(results, appliedCount) {
+            const resultsHtml = `<div class="modal fade" id="batchResultsModal" tabindex="-1"><div class="modal-dialog modal-xl"><div class="modal-content"><div class="modal-header bg-success text-white"><h5 class="modal-title"><i class="fas fa-chart-bar me-2"></i>نتائج البحث الدفعي</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div><div class="modal-body"><div class="alert alert-success"><i class="fas fa-check-circle me-2"></i> تم العثور على صور لـ <strong>${appliedCount}</strong> منتج من أصل <strong>${state.products.length}</strong></div><div class="table-responsive batch-results-table"><table class="table table-hover"><thead><tr><th>المنتج</th><th>أفضل صورة</th><th>المصدر</th><th>الجودة</th><th>الإجراءات</th></tr></thead><tbody>${results.map(result => `<tr><td class="text-truncate" style="max-width:200px;">${result.productName}</td><td><img src="${result.bestImage.thumb}" class="img-thumbnail" style="width:60px;height:60px;cursor:pointer;" onclick="previewImage('${result.bestImage.url}', '${result.productName}')"></td><td>${result.bestImage.source}</td><td><div class="progress" style="height:8px;width:100px;"><div class="progress-bar ${result.bestImage.final_score >= 80 ? 'bg-success' : 'bg-warning'}" style="width:${result.bestImage.final_score}%"></div></div><small>${Math.round(result.bestImage.final_score)}%</small></td><td><button class="btn btn-sm btn-success" onclick="applyBatchImage('${result.productId}', '${result.bestImage.url}')">تطبيق</button><button class="btn btn-sm btn-outline-primary ms-1" onclick="previewImage('${result.bestImage.url}', '${result.productName}')">معاينة</button></td></tr>`).join('')}</tbody></table></div><div class="mt-3 text-center"><button class="btn btn-primary" onclick="applyAllBatchImages()"><i class="fas fa-check-double me-2"></i>تطبيق جميع الصور</button><button class="btn btn-outline-secondary ms-2" data-bs-dismiss="modal">إغلاق</button></div></div></div></div></div>`;
+            const modalContainer = document.createElement('div'); modalContainer.innerHTML = resultsHtml; document.body.appendChild(modalContainer.firstChild); const modal = new bootstrap.Modal(document.getElementById('batchResultsModal')); modal.show();
+        }
+        function applyBatchImage(productId, imageUrl) { const product = state.products.find(p => p.id === productId); if (product) { if (!product.originalImage) product.originalImage = product.image; product.image = imageUrl; saveData(); updateUI(); showStatus('تم تطبيق الصورة بنجاح', 'success'); } }
+        function applyAllBatchImages() { if (!state.batchSearchResults || state.batchSearchResults.length === 0) { showStatus('لا توجد نتائج بحث دفعي', 'warning'); return; } let appliedCount = 0; state.batchSearchResults.forEach(result => { const product = state.products.find(p => p.id === result.productId); if (product && result.bestImage) { if (!product.originalImage) product.originalImage = product.image; product.image = result.bestImage.url; appliedCount++; } }); saveData(); updateUI(); const modal = bootstrap.Modal.getInstance(document.getElementById('batchResultsModal')); modal.hide(); showStatus(`تم تطبيق ${appliedCount} صورة على المنتجات`, 'success'); }
+
+        // ==================== دالة تصدير CSV صالحة لـ Shopify (مع التحقق من الروابط) ====================
+        function exportShopifyCSV() {
+            if (!state.products || state.products.length === 0) {
+                showStatus('لا توجد منتجات لتصديرها', 'warning');
+                return;
+            }
+            try {
+                const headers = [
+                    'Handle', 'Title', 'Body (HTML)', 'Vendor', 'Type', 'Tags',
+                    'Published', 'Option1 Name', 'Option1 Value', 'Option2 Name', 'Option2 Value',
+                    'Variant SKU', 'Variant Grams', 'Variant Inventory Tracker', 'Variant Inventory Qty',
+                    'Variant Inventory Policy', 'Variant Fulfillment Service', 'Variant Price',
+                    'Variant Compare At Price', 'Variant Requires Shipping', 'Variant Taxable',
+                    'Image Src', 'Image Alt Text', 'SEO Title', 'SEO Description', 'Google Shopping / MPN',
+                    'Google Shopping / Age Group', 'Google Shopping / Gender', 'Google Shopping / Google Product Category'
+                ];
                 const rows = state.products.map(p => {
-                    const handle = (p.designation || 'produit').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'produit';
-                    const title = escapeCSV(p.designation);
+                    const handle = (p.designation || 'produit').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'produit-sans-nom';
+                    const title = escapeCSV(p.designation || 'Sans titre');
+                    const bodyHtml = '';
                     const vendor = 'VARICOM';
                     const type = escapeCSV(p.famille || 'Général');
                     const tags = escapeCSV(p.famille || '');
                     const published = 'TRUE';
                     const option1Name = 'Title';
                     const option1Value = 'Default Title';
+                    const option2Name = '';
+                    const option2Value = '';
                     const sku = escapeCSV(p.ref || '');
                     const grams = '0';
                     const invTracker = 'shopify';
@@ -397,24 +1401,80 @@
                     const taxable = 'TRUE';
                     let imageSrc = '';
                     let imageAlt = '';
-                    if (p.image && typeof p.image === 'string' && p.image.match(/^https?:\/\/.+/i)) {
-                        imageSrc = escapeCSV(p.image.trim());
-                        imageAlt = escapeCSV(p.designation);
+                    if (p.image && typeof p.image === 'string') {
+                        const trimmed = p.image.trim();
+                        if (trimmed.match(/^https?:\/\/.+/i)) {
+                            imageSrc = escapeCSV(trimmed);
+                            imageAlt = escapeCSV(p.designation || 'Image produit');
+                        } else if (trimmed.startsWith('data:image')) {
+                            console.warn(`Produit ${p.ref} a une image Data URL, ignorée.`);
+                        }
                     }
-                    return [handle, title, '', vendor, type, tags, published, option1Name, option1Value, sku, grams, invTracker, invQty, invPolicy, fulfillmentService, price, comparePrice, requiresShipping, taxable, imageSrc, imageAlt].map(cell => escapeCSV(cell)).join(',');
+                    const seoTitle = escapeCSV(p.designation);
+                    const seoDesc = '';
+                    const mpn = sku;
+                    const ageGroup = '';
+                    const gender = '';
+                    const googleCategory = '';
+                    return [handle, title, bodyHtml, vendor, type, tags, published, option1Name, option1Value, option2Name, option2Value, sku, grams, invTracker, invQty, invPolicy, fulfillmentService, price, comparePrice, requiresShipping, taxable, imageSrc, imageAlt, seoTitle, seoDesc, mpn, ageGroup, gender, googleCategory].map(cell => escapeCSV(cell)).join(',');
                 }).join('\n');
                 const bom = "\uFEFF";
                 const csvContent = bom + headers.join(',') + '\n' + rows;
                 const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
                 const link = document.createElement('a');
-                link.href = URL.createObjectURL(blob);
-                link.download = 'shopify_products_valid.csv';
+                const url = URL.createObjectURL(blob);
+                link.href = url;
+                link.setAttribute('download', 'shopify_products_valid.csv');
+                document.body.appendChild(link);
                 link.click();
-                URL.revokeObjectURL(link.href);
-                const validCount = state.products.filter(p => p.image && p.image.match(/^https?:\/\/.+/i)).length;
-                showStatus(`✅ تم تصدير ${state.products.length} منتج. عدد الصور الصالحة: ${validCount}`, 'success');
-            } catch(e) { showStatus('خطأ في التصدير: ' + e.message, 'error'); }
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+                const validImagesCount = state.products.filter(p => p.image && p.image.match(/^https?:\/\/.+/i)).length;
+                showStatus(`✅ تم تصدير ${state.products.length} منتج. عدد الصور الصالحة: ${validImagesCount}.`, 'success');
+                if (validImagesCount < state.products.length) {
+                    showStatus(`⚠️ انتبه: ${state.products.length - validImagesCount} منتج لديه رابط صورة غير صالح. قم بتحديثها قبل الرفع إلى Shopify.`, 'warning');
+                }
+            } catch(error) { console.error('Export error:', error); showStatus('❌ خطأ أثناء تصدير CSV: ' + error.message, 'error'); }
         }
+
+        function escapeCSV(str) {
+            if (str === undefined || str === null) return '';
+            let stringified = String(str);
+            if (stringified.includes(',') || stringified.includes('"') || stringified.includes('\n') || stringified.includes('\r')) {
+                return '"' + stringified.replace(/"/g, '""') + '"';
+            }
+            return stringified;
+        }
+
+        // ==================== معالجة ملف ZIP (صور من Google Drive) ====================
+        async function handleZipUpload(file) {
+            if (!file) return;
+            if (!state.products || state.products.length === 0) { showStatus('لا توجد منتجات في الكتالوج. قم باستيراد Excel أولاً.', 'warning'); return; }
+            const zipProgress = document.getElementById('zipProgress'); const zipProgressBar = document.getElementById('zipProgressBar'); const zipStatus = document.getElementById('zipStatus'); const matchedPreview = document.getElementById('matchedImagesPreview');
+            zipProgress.style.display = 'block'; zipProgressBar.style.width = '0%'; zipStatus.innerHTML = 'جاري فتح الملف المضغوط...'; matchedPreview.innerHTML = '';
+            try {
+                const zip = new JSZip(); const contents = await zip.loadAsync(file);
+                const imageFiles = []; zip.forEach((relativePath, zipEntry) => { if (!zipEntry.dir) { const ext = relativePath.split('.').pop().toLowerCase(); if (['jpg','jpeg','png','gif','webp'].includes(ext)) imageFiles.push({ path: relativePath, entry: zipEntry }); } });
+                if (imageFiles.length === 0) { showStatus('لم يتم العثور على صور في الملف المضغوط', 'warning'); zipProgress.style.display = 'none'; return; }
+                zipStatus.innerHTML = `تم العثور على ${imageFiles.length} صورة. جاري المطابقة مع المنتجات...`; zipProgressBar.style.width = '30%';
+                const productMap = new Map(); state.products.forEach(p => { if (p.ref) productMap.set(p.ref.toString().trim().toLowerCase(), p); });
+                const matches = []; let processed = 0;
+                for (const img of imageFiles) {
+                    const fileName = img.path.split('/').pop().split('\\').pop(); const nameWithoutExt = fileName.substring(0, fileName.lastIndexOf('.')) || fileName; const refKey = nameWithoutExt.trim().toLowerCase();
+                    if (productMap.has(refKey)) {
+                        const blob = await img.entry.async('blob'); const dataUrl = await new Promise((resolve) => { const reader = new FileReader(); reader.onload = (e) => resolve(e.target.result); reader.readAsDataURL(blob); });
+                        matches.push({ ref: nameWithoutExt, product: productMap.get(refKey), dataUrl: dataUrl, fileName: fileName });
+                        processed++; zipProgressBar.style.width = 30 + (processed / imageFiles.length * 70); zipStatus.innerHTML = `تمت مطابقة ${matches.length} صورة...`;
+                    }
+                }
+                if (matches.length === 0) { showStatus('لم يتم العثور على تطابقات. تأكد من أن أسماء الملفات تطابق أرقام Ref.', 'warning'); zipProgress.style.display = 'none'; return; }
+                matchedPreview.innerHTML = matches.map(m => `<div class="col-md-3 col-sm-4 col-6"><div class="card"><img src="${m.dataUrl}" class="card-img-top" style="height:120px;object-fit:cover;" alt="${m.ref}"><div class="card-body p-2"><small class="d-block text-truncate"><strong>${m.product.designation}</strong></small><small class="text-muted">${m.ref}</small><button class="btn btn-sm btn-success w-100 mt-1" onclick="applyMatchedImage('${m.product.id}', '${m.dataUrl}')">تطبيق</button></div></div></div>`).join('');
+                zipStatus.innerHTML = `✅ تمت المطابقة بنجاح: ${matches.length} صورة من أصل ${imageFiles.length}`; zipProgressBar.style.width = '100%';
+                showStatus(`تم التعرف على ${matches.length} منتج من الصور!`, 'success');
+            } catch(error) { console.error('Zip processing error:', error); showStatus('خطأ في معالجة الملف المضغوط: ' + error.message, 'error'); zipProgress.style.display = 'none'; }
+        }
+        function applyMatchedImage(productId, dataUrl) { const product = state.products.find(p => p.id === productId); if (product) { if (!product.originalImage) product.originalImage = product.image; product.image = dataUrl; saveData(); updateUI(); showStatus(`تم تطبيق الصورة على المنتج ${product.designation}`, 'success'); } }
+        function showMatchedImagesPreview() { const matchedPreview = document.getElementById('matchedImagesPreview'); if (matchedPreview.children.length === 0) { showStatus('لا توجد صور مطابقة بعد. قم برفع ملف ZIP أولاً.', 'info'); } }
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 </body>
