@@ -3,14 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VARICOM - Administration Pro (ImgBB)</title>
+    <title>VARICOM - Administration Pro</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
     <style>
-        /* نفس الـ CSS السابق - اختصاراً للطول */
-        :root { --primary-color: #1a3a6c; --secondary-color: #e63946; --accent-color: #2a9d8f; --dark-color: #2c3e50; --light-color: #ecf0f1; }
+        :root { --primary-color: #1a3a6c; --secondary-color: #e63946; --accent-color: #2a9d8f; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; }
         .admin-container { background: white; border-radius: 15px; box-shadow: 0 15px 35px rgba(0,0,0,0.1); margin: 0 auto; max-width: 1400px; overflow: hidden; }
         .admin-header { background: linear-gradient(135deg, var(--primary-color), #2a4d7a); color: white; padding: 25px; text-align: center; }
@@ -45,14 +44,13 @@
 <body>
     <div id="syncStatus" class="sync-status"></div>
     <div class="admin-container">
-        <div class="admin-header"><h1><i class="fas fa-user-shield me-3"></i>PANEL ADMINISTRATEUR VARICOM</h1><p class="lead mb-0">Solution Professionnelle - Synchronisation Temps Réel</p></div>
+        <div class="admin-header"><h1><i class="fas fa-user-shield me-3"></i>PANEL ADMINISTRATEUR VARICOM</h1><p class="lead mb-0">Import & Export produits - Images automatiques</p></div>
 
         <!-- Quick Actions -->
         <div class="p-4 bg-light border-bottom">
             <div class="row align-items-center">
                 <div class="col-md-6"><h4 class="mb-0 text-primary"><i class="fas fa-bolt me-2"></i>Tableau de Bord</h4></div>
                 <div class="col-md-6 text-end">
-                    <button class="btn btn-warning btn-lg me-2" onclick="autoSearchProductImages()"><i class="fas fa-robot me-2"></i>بحث تلقائي</button>
                     <button class="btn btn-success btn-lg me-2" onclick="uploadToGitHubGist()" id="publishBtn"><i class="fab fa-github me-2"></i>Publier / Synchroniser</button>
                     <button class="btn btn-info btn-lg me-2" onclick="exportShopifyCSV()"><i class="fas fa-file-csv me-2"></i>📥 Exporter CSV Shopify (Valide)</button>
                     <button class="btn btn-primary btn-lg" onclick="generateClientLink()"><i class="fas fa-link me-2"></i>Lien Client</button>
@@ -62,94 +60,160 @@
 
         <!-- Stats -->
         <div class="row m-4">
-            <div class="col-md-3"><div class="stats-card"><i class="fas fa-box fa-2x text-primary mb-2"></i><h3 id="statsProducts">0</h3><p class="text-muted mb-0">Produits Totaux</p></div></div>
-            <div class="col-md-3"><div class="stats-card"><i class="fas fa-star fa-2x text-warning mb-2"></i><h3 id="statsNewProducts">0</h3><p class="text-muted mb-0">Nouveautés</p></div></div>
-            <div class="col-md-3"><div class="stats-card"><i class="fas fa-bell fa-2x text-info mb-2"></i><h3 id="statsNotifications">0</h3><p class="text-muted mb-0">Notifications</p></div></div>
-            <div class="col-md-3"><div class="stats-card"><i class="fas fa-sync fa-2x text-success mb-2"></i><h3 id="statsStatus">Inactif</h3><p class="text-muted mb-0">Statut Sync</p></div></div>
+            <div class="col-md-4"><div class="stats-card"><i class="fas fa-box fa-2x text-primary mb-2"></i><h3 id="statsProducts">0</h3><p class="text-muted mb-0">Produits Totaux</p></div></div>
+            <div class="col-md-4"><div class="stats-card"><i class="fas fa-sync fa-2x text-success mb-2"></i><h3 id="statsStatus">Inactif</h3><p class="text-muted mb-0">Statut Sync</p></div></div>
+            <div class="col-md-4"><div class="stats-card"><i class="fas fa-image fa-2x text-info mb-2"></i><h3 id="statsImages">0</h3><p class="text-muted mb-0">Images hébergées</p></div></div>
         </div>
 
-        <!-- Smart Search Section (اختصاراً) -->
-        <div class="row m-4"><div class="col-12"><div class="feature-card"><div class="card-header bg-success text-white"><h5 class="mb-0"><i class="fas fa-search-plus me-2"></i>بحث ذكي متقدم بالصور</h5><button class="btn btn-warning btn-sm ms-2" onclick="openBatchSearchModal()"><i class="fas fa-bolt me-1"></i> بحث دفعي متقدم</button></div><div class="card-body"><div class="smart-suggestions"><h6><i class="fas fa-lightbulb me-2"></i>اقتراحات ذكية:</h6><div id="smartSuggestions"></div></div><div class="row mb-3"><div class="col-md-8"><div class="input-group"><input type="text" class="form-control" id="smartSearchInput" placeholder="ابحث عن صور للمنتج..."><button class="btn btn-primary" onclick="smartImageSearch()"><i class="fas fa-search"></i> بحث ذكي</button></div></div><div class="col-md-4"><select class="form-select" id="searchSource"><option value="auto">تلقائي</option><option value="bing">Bing</option><option value="unsplash">Unsplash</option></select></div></div><div id="autoSearchProgress" class="auto-search-progress" style="display:none"><div id="autoSearchProgressBar" class="auto-search-progress-bar"></div></div><div class="row g-3" id="smartResults"></div><div class="mt-3 text-center" id="applyButtonContainer" style="display:none"><button class="btn btn-success btn-lg" onclick="applySelectedImageToCurrentProduct()">تطبيق الصورة</button><p class="text-muted mt-2 small" id="currentProductInfo"></p></div></div></div></div></div>
+        <!-- Smart Search Section simplifié -->
+        <div class="row m-4">
+            <div class="col-12">
+                <div class="feature-card">
+                    <div class="card-header bg-success text-white"><h5 class="mb-0"><i class="fas fa-search-plus me-2"></i>بحث ذكي بالصور (Bing / Unsplash)</h5></div>
+                    <div class="card-body">
+                        <div class="smart-suggestions"><h6><i class="fas fa-lightbulb me-2"></i>اقتراحات:</h6><div id="smartSuggestions"></div></div>
+                        <div class="row mb-3">
+                            <div class="col-md-8"><div class="input-group"><input type="text" class="form-control" id="smartSearchInput" placeholder="ابحث عن صور للمنتج..."><button class="btn btn-primary" onclick="smartImageSearch()"><i class="fas fa-search"></i> بحث ذكي</button></div></div>
+                            <div class="col-md-4"><select class="form-select" id="searchSource"><option value="bing">Bing Images</option><option value="unsplash">Unsplash</option></select></div>
+                        </div>
+                        <div class="row g-3" id="smartResults"></div>
+                        <div class="mt-3 text-center" id="applyButtonContainer" style="display:none"><button class="btn btn-success btn-lg" onclick="applySelectedImageToCurrentProduct()"><i class="fas fa-check-circle me-2"></i>تطبيق الصورة على المنتج</button><p class="text-muted mt-2 small" id="currentProductInfo"></p></div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <!-- Excel Upload -->
-        <div class="upload-section"><h4><i class="fas fa-file-excel me-2"></i>Importation Produits Excel</h4><div class="upload-area" onclick="document.getElementById('excelFile').click()"><i class="fas fa-cloud-upload-alt fa-3x mb-3"></i><h5>Cliquez ou glissez votre fichier Excel ici</h5><input type="file" id="excelFile" accept=".xlsx, .xls, .csv" style="display:none" onchange="handleExcelUpload(this.files[0])"></div><div class="mt-3 text-center"><button class="btn btn-outline-light btn-sm" onclick="downloadTemplate()">Télécharger Modèle</button></div></div>
+        <div class="upload-section">
+            <h4><i class="fas fa-file-excel me-2"></i>Importation Produits Excel</h4>
+            <div class="upload-area" onclick="document.getElementById('excelFile').click()"><i class="fas fa-cloud-upload-alt fa-3x mb-3"></i><h5>Cliquez ou glissez votre fichier Excel ici</h5><p class="small opacity-75">Supporte .xlsx, .xls, .csv</p><input type="file" id="excelFile" accept=".xlsx, .xls, .csv" style="display:none" onchange="handleExcelUpload(this.files[0])"></div>
+            <div class="mt-3 text-center"><button class="btn btn-outline-light btn-sm" onclick="downloadTemplate()"><i class="fas fa-download me-1"></i>Télécharger Modèle</button></div>
+        </div>
 
-        <!-- ZIP Upload with ImgBB -->
-        <div class="row m-4"><div class="col-12"><div class="feature-card"><div class="card-header bg-purple text-white" style="background: linear-gradient(135deg, #6f42c1, #6610f2);"><h5 class="mb-0"><i class="fas fa-brain me-2"></i>رفع الصور عبر ZIP (تحويل تلقائي إلى روابط)</h5></div><div class="card-body"><div class="alert alert-info"><i class="fas fa-info-circle me-2"></i><strong>شرح مبسط:</strong> اختر ملف ZIP يحتوي على صور المنتجات (أسماء الملفات تطابق Ref). سيتم رفع الصور إلى ImgBB وتحويلها إلى روابط صالحة لـ Shopify.</div><div class="row"><div class="col-md-8"><div class="input-group"><input type="file" id="zipFile" accept=".zip" class="form-control" onchange="handleZipUpload(this.files[0])"><button class="btn btn-primary" onclick="document.getElementById('zipFile').click()"><i class="fas fa-cloud-upload-alt me-2"></i>اختيار ملف ZIP</button></div><small class="text-muted">أسماء الملفات يجب أن تطابق Ref بالضبط (مثال: REF001.jpg)</small></div><div class="col-md-4"><button class="btn btn-outline-info w-100" onclick="showMatchedImagesPreview()">معاينة التطابقات</button></div></div><div id="zipProgress" class="mt-3" style="display:none"><div class="progress"><div id="zipProgressBar" class="progress-bar progress-bar-striped progress-bar-animated"></div></div><p id="zipStatus" class="mt-2 small"></p></div><div id="matchedImagesPreview" class="row mt-3 g-2"></div></div></div></div></div>
-
-        <!-- New Products & Notifications (اختصار) -->
-        <div class="row m-4"><div class="col-md-6"><div class="feature-card"><div class="card-header bg-primary text-white">Ajouter Produit</div><div class="card-body"><input type="text" class="form-control mb-2" id="newProductName" placeholder="Nom"><div class="row g-2"><div class="col-6"><input type="number" class="form-control" id="newProductPrice" placeholder="Prix"></div><div class="col-6"><input type="number" class="form-control" id="newProductComparePrice" placeholder="Prix comparaison"></div></div><button class="btn btn-primary w-100 mt-2" onclick="addNewProduct()">Ajouter</button><hr><ul id="activeNewProducts" class="list-group"></ul></div></div></div><div class="col-md-6"><div class="feature-card"><div class="card-header bg-warning">Gérer Notifications</div><div class="card-body"><input type="text" class="form-control mb-2" id="notifTitle" placeholder="Titre"><textarea class="form-control mb-2" id="notifMessage" rows="2" placeholder="Message"></textarea><button class="btn btn-warning w-100" onclick="createNotification()">Publier</button><hr><ul id="activeNotifications" class="list-group"></ul></div></div></div></div>
+        <!-- ZIP Upload avec ImgBB (remplit automatiquement Image URL) -->
+        <div class="row m-4">
+            <div class="col-12">
+                <div class="feature-card">
+                    <div class="card-header bg-purple text-white" style="background: linear-gradient(135deg, #6f42c1, #6610f2);"><h5 class="mb-0"><i class="fas fa-brain me-2"></i>رفع الصور عبر ZIP (تحويل تلقائي إلى روابط ImgBB)</h5></div>
+                    <div class="card-body">
+                        <div class="alert alert-info"><i class="fas fa-info-circle me-2"></i><strong>شرح:</strong> اختر ملف ZIP يحتوي على صور المنتجات (أسماء الملفات تطابق Ref). سيتم رفع كل صورة إلى ImgBB وسيتم تعبئة رابط الصورة تلقائياً في خانة Image URL لكل منتج.</div>
+                        <div class="row">
+                            <div class="col-md-8"><div class="input-group"><input type="file" id="zipFile" accept=".zip" class="form-control" onchange="handleZipUpload(this.files[0])"><button class="btn btn-primary" onclick="document.getElementById('zipFile').click()"><i class="fas fa-cloud-upload-alt me-2"></i>اختيار ملف ZIP</button></div><small class="text-muted">أسماء الملفات يجب أن تطابق Ref بالضبط (مثال: REF001.jpg)</small></div>
+                            <div class="col-md-4"><button class="btn btn-outline-info w-100" onclick="showMatchedImagesPreview()"><i class="fas fa-eye me-2"></i>معاينة التطابقات</button></div>
+                        </div>
+                        <div id="zipProgress" class="mt-3" style="display:none"><div class="progress"><div id="zipProgressBar" class="progress-bar progress-bar-striped progress-bar-animated"></div></div><p id="zipStatus" class="mt-2 small"></p></div>
+                        <div id="matchedImagesPreview" class="row mt-3 g-2"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <!-- Settings -->
-        <div class="row m-4"><div class="col-12"><div class="feature-card"><div class="card-header bg-dark text-white">Configuration</div><div class="card-body"><div class="row align-items-end"><div class="col-md-8"><label>Token GitHub</label><input type="password" class="form-control" id="githubToken" placeholder="ghp_..."><small class="text-muted">Pour synchronisation.</small></div><div class="col-md-4"><button class="btn btn-danger w-100" onclick="resetSync()">Réinitialiser Sync</button></div></div><div class="row align-items-end mt-3"><div class="col-md-8"><label>ImgBB API Key (لرفع الصور)</label><input type="text" class="form-control" id="imgbbApiKey" placeholder="أدخل API Key من ImgBB"><small class="text-muted">احصل عليه من https://api.imgbb.com/ بعد تسجيل حساب مجاني.</small></div><div class="col-md-4"><button class="btn btn-outline-info w-100" onclick="saveImgbbSettings()">حفظ المفتاح</button></div></div></div></div></div></div>
+        <div class="row m-4">
+            <div class="col-12">
+                <div class="feature-card">
+                    <div class="card-header bg-dark text-white"><h5 class="mb-0"><i class="fas fa-cogs me-2"></i>Configuration</h5></div>
+                    <div class="card-body">
+                        <div class="row align-items-end">
+                            <div class="col-md-8"><label class="form-label">Token GitHub (optionnel)</label><input type="password" class="form-control" id="githubToken" placeholder="ghp_..."></div>
+                            <div class="col-md-4"><button class="btn btn-danger w-100" onclick="resetSync()">Réinitialiser Sync</button></div>
+                        </div>
+                        <div class="row align-items-end mt-3">
+                            <div class="col-md-8"><label class="form-label">🔑 ImgBB API Key (مطلوب لرفع الصور)</label><input type="text" class="form-control" id="imgbbApiKey" placeholder="أدخل API Key من ImgBB"><small class="text-muted">احصل عليه مجاناً من https://api.imgbb.com/ بعد تسجيل حساب.</small></div>
+                            <div class="col-md-4"><button class="btn btn-outline-info w-100" onclick="saveImgbbSettings()"><i class="fas fa-save me-2"></i>حفظ المفتاح</button></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-        <!-- Catalog Table -->
-        <div class="row m-4"><div class="col-12"><div class="feature-card"><div class="card-header bg-info text-white d-flex justify-content-between"><h5 class="mb-0">Gestion du Catalogue</h5><button class="btn btn-light btn-sm" onclick="openBulkImageModal()">Générateur de Liens</button></div><div class="card-body"><div class="table-responsive"><table class="table table-hover"><thead class="table-light"><tr><th>Ref</th><th>Désignation</th><th>Prix</th><th>Prix Comp</th><th style="width:30%">Image URL</th><th>Actions</th></tr></thead><tbody id="catalogTableBody"></tbody></table></div></div></div></div></div>
+        <!-- Catalog Management -->
+        <div class="row m-4">
+            <div class="col-12">
+                <div class="feature-card">
+                    <div class="card-header bg-info text-white d-flex justify-content-between"><h5 class="mb-0"><i class="fas fa-boxes me-2"></i>Gestion du Catalogue</h5><button class="btn btn-light btn-sm text-primary fw-bold" onclick="openBulkImageModal()"><i class="fas fa-magic me-2"></i>Générateur de Liens (Bulk)</button></div>
+                    <div class="card-body">
+                        <div class="table-responsive" style="max-height: 500px;">
+                            <table class="table table-hover align-middle">
+                                <thead class="table-light sticky-top">
+                                    <tr><th>Ref</th><th>Désignation</th><th>Prix Détail</th><th>Prix Comparaison</th><th style="width: 40%;">Image URL (lien direct)</th><th>Actions</th></tr>
+                                </thead>
+                                <tbody id="catalogTableBody"></tbody>
+                            </table>
+                        </div>
+                        <div class="text-center mt-3"><small class="text-muted">يمكنك تعديل الروابط يدوياً أو استخدام زر البحث الذكي.</small></div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
-    <!-- Modals (اختصار) -->
-    <div class="modal fade" id="bulkImageModal" tabindex="-1">...</div>
-    <div class="modal fade image-preview-modal" id="imagePreviewModal" tabindex="-1">...</div>
+    <!-- Bulk Image Modal (simplifié) -->
+    <div class="modal fade" id="bulkImageModal" tabindex="-1"><div class="modal-dialog"><div class="modal-content"><div class="modal-header bg-primary text-white"><h5 class="modal-title">Générer des liens images</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body"><label>Base URL</label><input type="text" class="form-control" id="bulkBaseUrl" placeholder="https://mon-site.com/images/"><label class="mt-2">Extension</label><select class="form-select" id="bulkExt"><option value=".jpg">.jpg</option><option value=".png">.png</option></select><div class="alert alert-info mt-3"><strong>Aperçu:</strong> <span id="bulkPreview">https://mon-site.com/images/REF123.jpg</span></div></div><div class="modal-footer"><button class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button><button class="btn btn-primary" onclick="applyBulkActions()">Appliquer à tous</button></div></div></div></div>
+
+    <!-- Image Preview Modal -->
+    <div class="modal fade image-preview-modal" id="imagePreviewModal" tabindex="-1"><div class="modal-dialog modal-lg"><div class="modal-content"><div class="modal-header bg-primary text-white"><h5 class="modal-title">معاينة الصورة</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><div class="modal-body text-center"><img id="previewImage" src="" class="img-fluid rounded"></div></div></div></div>
 
     <script>
         // ==================== الحالة والتخزين ====================
-        let state = { products: [], newProducts: [], notifications: [], gistId: localStorage.getItem('varicom_gist_id') || null, smartSearch: { currentProduct: null, selectedImage: null, searchResults: [] }, autoSearch: { active: false }, batchSearchResults: null };
-
-        // ==================== دوال مساعدة ====================
+        let state = { products: [], gistId: localStorage.getItem('varicom_gist_id') || null, smartSearch: { currentProduct: null, selectedImage: null, searchResults: [] } };
+        
+        // دوال مساعدة عامة
         function showStatus(msg, type) { const el = document.getElementById('syncStatus'); el.textContent = msg; el.className = `sync-status sync-${type}`; el.style.display = 'block'; setTimeout(() => el.style.display = 'none', 3000); }
         function escapeHtml(text) { if (!text) return ''; const div = document.createElement('div'); div.textContent = text; return div.innerHTML; }
         function escapeJs(text) { return text ? text.replace(/'/g, "\\'") : ''; }
-        function saveData() { localStorage.setItem('varicom_data', JSON.stringify({ products: state.products, newProducts: state.newProducts, notifications: state.notifications })); updateUI(); }
-        function loadLocalData() { const saved = localStorage.getItem('varicom_data'); if (saved) { const data = JSON.parse(saved); state.products = data.products || []; state.newProducts = data.newProducts || []; state.notifications = data.notifications || []; } }
-        function updateUI() { document.getElementById('statsProducts').innerText = state.products.length; document.getElementById('statsNewProducts').innerText = state.newProducts.length; document.getElementById('statsNotifications').innerText = state.notifications.length; updateNewProductsList(); updateNotificationsList(); updateCatalogTable(); }
-        function updateNewProductsList() { const list = document.getElementById('activeNewProducts'); if (list) list.innerHTML = state.newProducts.map(p => `<li class="list-group-item d-flex justify-content-between"><div><strong>${escapeHtml(p.name)}</strong> - ${p.price} DA</div><button class="btn btn-sm btn-danger" onclick="removeNewProduct('${p.id}')"><i class="fas fa-times"></i></button></li>`).join(''); }
-        function updateNotificationsList() { const list = document.getElementById('activeNotifications'); if (list) list.innerHTML = state.notifications.map(n => `<li class="list-group-item d-flex justify-content-between"><div><span class="badge bg-info">${n.title}</span> ${n.message.substring(0,50)}</div><button class="btn btn-sm btn-danger" onclick="removeNotification('${n.id}')"><i class="fas fa-times"></i></button></li>`).join(''); }
-        function updateCatalogTable() { const tbody = document.getElementById('catalogTableBody'); if (!tbody) return; tbody.innerHTML = state.products.slice(0,100).map(p => `<tr><td><small>${escapeHtml(p.ref)}</small></td><td>${escapeHtml(p.designation)}</td><td>${p.prix} DA</td><td>${p.prix_comparaison||0} DA</td><td><div class="input-group input-group-sm"><input type="text" class="form-control" value="${escapeHtml(p.image||'')}" onchange="updateProductImage('${p.id}', this.value)"><button class="btn btn-outline-primary" onclick="quickImageSearch('${p.id}','${escapeJs(p.designation)}')"><i class="fas fa-bolt"></i></button></div></td><td><button class="btn btn-sm btn-success" onclick="openSmartSearchForProduct('${p.id}','${escapeJs(p.designation)}')"><i class="fas fa-robot"></i></button></td></tr>`).join(''); }
+        function saveData() { localStorage.setItem('varicom_data', JSON.stringify({ products: state.products })); updateUI(); }
+        function loadLocalData() { const saved = localStorage.getItem('varicom_data'); if (saved) { const data = JSON.parse(saved); state.products = data.products || []; } else state.products = []; }
+        function updateUI() { 
+            document.getElementById('statsProducts').innerText = state.products.length; 
+            document.getElementById('statsStatus').innerText = state.gistId ? 'Actif' : 'Inactif';
+            const imgCount = state.products.filter(p => p.image && p.image.match(/^https?:\/\//i)).length;
+            document.getElementById('statsImages').innerText = imgCount;
+            updateCatalogTable();
+        }
+        function updateCatalogTable() { 
+            const tbody = document.getElementById('catalogTableBody'); if (!tbody) return;
+            tbody.innerHTML = state.products.slice(0,100).map(p => `
+                <tr>
+                    <td><small>${escapeHtml(p.ref)}</small></td>
+                    <td>${escapeHtml(p.designation)}</td>
+                    <td>${p.prix} DA</td>
+                    <td>${p.prix_comparaison||0} DA</td>
+                    <td><div class="input-group input-group-sm"><input type="text" class="form-control" value="${escapeHtml(p.image||'')}" onchange="updateProductImage('${p.id}', this.value)" placeholder="لصق رابط الصورة هنا"><button class="btn btn-outline-primary" onclick="quickImageSearch('${p.id}','${escapeJs(p.designation)}')" title="بحث سريع Bing"><i class="fas fa-bolt"></i></button></div><small class="text-${p.image && p.image.match(/^https?:\/\//i) ? 'success' : 'danger'}">${p.image && p.image.match(/^https?:\/\//i) ? '✓ رابط صالح' : '✗ رابط غير صالح'}</small></td>
+                    <td><button class="btn btn-sm btn-success" onclick="openSmartSearchForProduct('${p.id}','${escapeJs(p.designation)}')"><i class="fas fa-robot"></i> بحث ذكي</button></td>
+                </tr>
+            `).join('');
+        }
         function updateProductImage(id, newUrl) { const p = state.products.find(p => p.id === id); if (p) { p.image = newUrl; saveData(); } }
-        function addNewProduct() { const name = document.getElementById('newProductName')?.value; const price = document.getElementById('newProductPrice')?.value; if (!name || !price) { showStatus('Nom et Prix requis', 'warning'); return; } state.newProducts.unshift({ id: `new_${Date.now()}`, name: name.trim(), price: parseFloat(price)||0, comparePrice: parseFloat(document.getElementById('newProductComparePrice')?.value)||0, category: 'Général', image: '', timestamp: new Date().toISOString() }); document.getElementById('newProductName').value = ''; document.getElementById('newProductPrice').value = ''; saveData(); showStatus('Produit ajouté', 'success'); }
-        function createNotification() { const title = document.getElementById('notifTitle')?.value; const msg = document.getElementById('notifMessage')?.value; if (!title || !msg) { showStatus('Titre et Message requis', 'warning'); return; } state.notifications.unshift({ id: `notif_${Date.now()}`, title: title.trim(), message: msg.trim(), type: 'info', timestamp: new Date().toISOString() }); document.getElementById('notifTitle').value = ''; document.getElementById('notifMessage').value = ''; saveData(); showStatus('Notification créée', 'success'); }
-        function removeNewProduct(id) { state.newProducts = state.newProducts.filter(p => p.id !== id); saveData(); }
-        function removeNotification(id) { state.notifications = state.notifications.filter(n => n.id !== id); saveData(); }
-        function downloadTemplate() { const ws = XLSX.utils.json_to_sheet([{ Ref: 'REF001', Designation: 'Exemple', Famille: 'Général', Prix: 1000, 'Prix de comparaison': 900 }]); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, 'Modele'); XLSX.writeFile(wb, 'modele_varicom.xlsx'); }
         function handleExcelUpload(file) { if (!file) return; const reader = new FileReader(); reader.onload = (e) => { const data = new Uint8Array(e.target.result); const workbook = XLSX.read(data, { type: 'array' }); const json = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]); state.products = json.map((row, idx) => ({ id: `prod_${Date.now()}_${idx}`, ref: row['Ref'] || row['Référence'] || `REF${idx+1}`, designation: row['Designation'] || row['Désignation'] || 'Sans nom', famille: row['Famille'] || 'Général', prix: parseFloat(row['Prix']||0)||0, prix_comparaison: parseFloat(row['Prix de comparaison']||0)||0, image: row['Image'] || '', description: row['Description'] || '' })); saveData(); showStatus(`${state.products.length} produits importés`, 'success'); }; reader.readAsArrayBuffer(file); }
+        function downloadTemplate() { const ws = XLSX.utils.json_to_sheet([{ Ref: 'REF001', Designation: 'Exemple', Famille: 'Général', Prix: 1000, 'Prix de comparaison': 900, Image: '' }]); const wb = XLSX.utils.book_new(); XLSX.utils.book_append_sheet(wb, ws, 'Modele'); XLSX.writeFile(wb, 'modele_varicom.xlsx'); }
         
-        // ==================== دوال البحث الذكي (مختصرة) ====================
-        class AdvancedImageSearch { /* اختصار: نفس الكود السابق مع دوال بحث بسيطة */ constructor() { this.sources = { bing: { search: async (q) => [{ url: `https://tse2.mm.bing.net/th?q=${encodeURIComponent(q)}&w=800&h=800`, thumb: `https://tse2.mm.bing.net/th?q=${encodeURIComponent(q)}&w=300&h=300`, source: 'Bing' }] }, unsplash: { search: async (q) => [{ url: `https://source.unsplash.com/featured/800x800/?${encodeURIComponent(q)}`, thumb: `https://source.unsplash.com/featured/300x300/?${encodeURIComponent(q)}`, source: 'Unsplash' }] } }; } async searchAllSources(query) { return this.sources.bing.search(query); } }
-        const intelligentSearch = new AdvancedImageSearch();
-        async function smartImageSearch() { const query = document.getElementById('smartSearchInput')?.value; if (!query) return; const results = await intelligentSearch.searchAllSources(query); document.getElementById('smartResults').innerHTML = results.map((img,i) => `<div class="col-md-3"><div class="card image-select-card" onclick="selectSmartImage(${i})"><img src="${img.thumb}" class="card-img-top"><div class="card-body"><button class="btn btn-sm btn-primary" onclick="previewImage('${img.url}','')">معاينة</button></div></div></div>`).join(''); }
-        function selectSmartImage(index) { state.smartSearch.selectedImage = { url: 'https://tse2.mm.bing.net/th?q=test&w=800' }; document.getElementById('applyButtonContainer').style.display = 'block'; }
-        function applySelectedImageToCurrentProduct() { if (state.smartSearch.currentProduct && state.smartSearch.selectedImage) updateProductImage(state.smartSearch.currentProduct, state.smartSearch.selectedImage.url); }
+        // ==================== البحث الذكي المبسط (Bing/Unsplash) ====================
+        async function searchBing(query) { return { url: `https://tse2.mm.bing.net/th?q=${encodeURIComponent(query)}&w=800&h=800&c=7`, thumb: `https://tse2.mm.bing.net/th?q=${encodeURIComponent(query)}&w=300&h=300`, source: 'Bing' }; }
+        async function searchUnsplash(query) { return { url: `https://source.unsplash.com/featured/800x800/?${encodeURIComponent(query)}`, thumb: `https://source.unsplash.com/featured/300x300/?${encodeURIComponent(query)}`, source: 'Unsplash' }; }
+        async function smartImageSearch() { const query = document.getElementById('smartSearchInput')?.value; const source = document.getElementById('searchSource')?.value; if (!query) { showStatus('أدخل كلمة للبحث', 'warning'); return; } let img; if (source === 'bing') img = await searchBing(query); else img = await searchUnsplash(query); state.smartSearch.searchResults = [img]; document.getElementById('smartResults').innerHTML = `<div class="col-md-4"><div class="card"><img src="${img.thumb}" class="card-img-top"><div class="card-body"><button class="btn btn-primary" onclick="selectSmartImage(0)">اختيار</button> <button class="btn btn-outline-secondary" onclick="previewImage('${img.url}','')">معاينة</button></div></div></div>`; }
+        function selectSmartImage(index) { state.smartSearch.selectedImage = state.smartSearch.searchResults[index]; document.getElementById('applyButtonContainer').style.display = 'block'; }
+        function applySelectedImageToCurrentProduct() { if (state.smartSearch.currentProduct && state.smartSearch.selectedImage) { updateProductImage(state.smartSearch.currentProduct, state.smartSearch.selectedImage.url); showStatus('تم تطبيق الصورة', 'success'); document.getElementById('applyButtonContainer').style.display = 'none'; } }
         function openSmartSearchForProduct(id, name) { state.smartSearch.currentProduct = id; document.getElementById('smartSearchInput').value = name; smartImageSearch(); }
-        async function quickImageSearch(id, name) { updateProductImage(id, `https://tse2.mm.bing.net/th?q=${encodeURIComponent(name)}&w=800`); showStatus('Image ajoutée (Bing)', 'success'); }
-        function openBulkImageModal() { new bootstrap.Modal(document.getElementById('bulkImageModal')).show(); }
-        function applyBulkActions() { showStatus('Mode bulk non détaillé', 'info'); }
+        async function quickImageSearch(id, name) { const img = await searchBing(name); updateProductImage(id, img.url); showStatus('تم إضافة صورة من Bing', 'success'); }
+        function generateSmartSuggestions() { const suggestions = ['ordinateur portable','smartphone','accessoire gaming','écran','clavier']; const container = document.getElementById('smartSuggestions'); if (container) container.innerHTML = suggestions.map(tag => `<span class="suggestion-tag" onclick="addSuggestion('${tag}')">${tag}</span>`).join(''); }
+        function addSuggestion(tag) { document.getElementById('smartSearchInput').value = tag; smartImageSearch(); }
         
-        // ==================== دالة رفع الصور إلى ImgBB ====================
-        async function uploadImageToImgBB(base64DataUrl) {
-            const apiKey = localStorage.getItem('varicom_imgbb_api_key');
-            if (!apiKey) throw new Error('ImgBB API Key manquant. Veuillez l\'ajouter dans Configuration.');
+        // ==================== ImgBB upload ====================
+        async function uploadImageToImgBB(base64DataUrl, apiKey) {
             const formData = new FormData();
             formData.append('key', apiKey);
-            formData.append('image', base64DataUrl.split(',')[1]); // نرسل الجزء المشفر فقط
+            formData.append('image', base64DataUrl.split(',')[1]);
             const response = await fetch('https://api.imgbb.com/1/upload', { method: 'POST', body: formData });
-            if (!response.ok) throw new Error('Erreur upload ImgBB');
+            if (!response.ok) throw new Error('HTTP error '+response.status);
             const result = await response.json();
             if (!result.success) throw new Error(result.error?.message || 'Upload failed');
-            return result.data.url; // الرابط المباشر للصورة
+            return result.data.url;
         }
-
-        function saveImgbbSettings() {
-            const apiKey = document.getElementById('imgbbApiKey')?.value;
-            if (apiKey) { localStorage.setItem('varicom_imgbb_api_key', apiKey); showStatus('✅ API Key ImgBB sauvegardé', 'success'); }
-            else showStatus('Veuillez entrer une clé valide', 'warning');
-        }
-
-        function loadImgbbSettings() {
-            const saved = localStorage.getItem('varicom_imgbb_api_key');
-            if (saved) document.getElementById('imgbbApiKey').value = saved;
-        }
-
-        // ==================== معالجة ZIP مع رفع إلى ImgBB ====================
+        function saveImgbbSettings() { const key = document.getElementById('imgbbApiKey')?.value; if (key) { localStorage.setItem('varicom_imgbb_api_key', key); showStatus('✅ API Key ImgBB sauvegardé', 'success'); } else showStatus('Veuillez entrer une clé valide', 'warning'); }
+        function loadImgbbSettings() { const saved = localStorage.getItem('varicom_imgbb_api_key'); if (saved) document.getElementById('imgbbApiKey').value = saved; }
+        
+        // ==================== معالجة ZIP مع الرفع إلى ImgBB وملء الروابط تلقائياً ====================
         async function handleZipUpload(file) {
             if (!file) return;
             if (!state.products.length) { showStatus('Importez un Excel d\'abord', 'warning'); return; }
@@ -169,9 +233,7 @@
                 const zip = new JSZip();
                 const contents = await zip.loadAsync(file);
                 const imageFiles = [];
-                zip.forEach((path, entry) => {
-                    if (!entry.dir && /\.(jpg|jpeg|png|gif|webp)$/i.test(path)) imageFiles.push({ path, entry });
-                });
+                zip.forEach((path, entry) => { if (!entry.dir && /\.(jpg|jpeg|png|gif|webp)$/i.test(path)) imageFiles.push({ path, entry }); });
                 if (!imageFiles.length) throw new Error('Aucune image trouvée');
 
                 zipStatus.innerHTML = `Trouvé ${imageFiles.length} images. Matching...`;
@@ -202,18 +264,18 @@
                     const m = matches[i];
                     try {
                         zipStatus.innerHTML = `Upload ${i+1}/${matches.length}: ${m.fileName}`;
-                        const url = await uploadImageToImgBB(m.dataUrl);
+                        const url = await uploadImageToImgBB(m.dataUrl, apiKey);
                         uploaded.push({ ...m, url });
-                        m.product.image = url;  // تحديث المنتج بالرابط الجديد
+                        // ✅ remplir automatiquement l'image URL dans le produit
+                        m.product.image = url;
                         const percent = 20 + (processed / imageFiles.length * 60) + ((i+1)/matches.length * 20);
                         zipProgressBar.style.width = `${Math.min(100, percent)}%`;
                     } catch (err) {
                         showStatus(`Erreur upload ${m.fileName}: ${err.message}`, 'error');
                     }
                 }
-                saveData();  // حفظ جميع التغييرات
+                saveData(); // sauvegarde des liens dans les produits
 
-                // عرض معاينة الصور المرفوعة
                 matchedPreview.innerHTML = uploaded.map(m => `
                     <div class="col-md-3 col-sm-4 col-6">
                         <div class="card">
@@ -227,7 +289,7 @@
                     </div>
                 `).join('');
 
-                zipStatus.innerHTML = `✅ ${uploaded.length} images uploadées vers ImgBB !`;
+                zipStatus.innerHTML = `✅ ${uploaded.length} images uploadées vers ImgBB et liens mis à jour !`;
                 zipProgressBar.style.width = '100%';
                 showStatus(`Upload terminé (${uploaded.length} images)`, 'success');
                 updateCatalogTable();
@@ -236,48 +298,51 @@
                 zipProgress.style.display = 'none';
             }
         }
-
         function copyToClipboard(text) { navigator.clipboard.writeText(text); showStatus('Lien copié', 'success'); }
         function showMatchedImagesPreview() { const preview = document.getElementById('matchedImagesPreview'); if (!preview.children.length) showStatus('Aucune image, uploadez un ZIP d\'abord', 'info'); }
-        function previewImage(url, title) { const modal = new bootstrap.Modal(document.getElementById('imagePreviewModal')); document.getElementById('previewImage').src = url; modal.show(); }
+        function previewImage(url) { const modal = new bootstrap.Modal(document.getElementById('imagePreviewModal')); document.getElementById('previewImage').src = url; modal.show(); }
 
-        // ==================== تصدير CSV لـ Shopify ====================
+        // ==================== Bulk Image Link Generator ====================
+        function openBulkImageModal() { new bootstrap.Modal(document.getElementById('bulkImageModal')).show(); updateBulkPreview(); }
+        function updateBulkPreview() { const base = document.getElementById('bulkBaseUrl').value || 'https://site.com/img/'; const ext = document.getElementById('bulkExt').value || '.jpg'; document.getElementById('bulkPreview').innerText = base + 'REF123' + ext; }
+        function applyBulkActions() { const baseUrl = document.getElementById('bulkBaseUrl')?.value; const ext = document.getElementById('bulkExt')?.value || ''; if (!baseUrl) { showStatus('Base URL requise', 'warning'); return; } state.products.forEach(p => { p.image = baseUrl + (p.ref || '') + ext; }); saveData(); bootstrap.Modal.getInstance(document.getElementById('bulkImageModal')).hide(); showStatus('Liens générés en masse', 'success'); }
+        
+        // ==================== Export CSV parfait pour Shopify ====================
         function exportShopifyCSV() {
-            if (!state.products.length) { showStatus('Aucun produit', 'warning'); return; }
+            if (!state.products.length) { showStatus('Aucun produit à exporter', 'warning'); return; }
             const headers = ['Handle','Title','Body (HTML)','Vendor','Type','Tags','Published','Option1 Name','Option1 Value','Variant SKU','Variant Grams','Variant Inventory Tracker','Variant Inventory Qty','Variant Inventory Policy','Variant Fulfillment Service','Variant Price','Variant Compare At Price','Variant Requires Shipping','Variant Taxable','Image Src','Image Alt Text'];
             const rows = state.products.map(p => {
                 const handle = (p.designation || 'produit').toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'produit';
-                const title = escapeCSV(p.designation);
+                const title = escapeCSV(p.designation || 'Sans titre');
                 const sku = escapeCSV(p.ref || '');
                 const price = (p.prix && !isNaN(p.prix)) ? parseFloat(p.prix).toFixed(2) : '0.00';
                 const comparePrice = (p.prix_comparaison && !isNaN(p.prix_comparaison)) ? parseFloat(p.prix_comparaison).toFixed(2) : '';
                 let imageSrc = '';
-                if (p.image && p.image.match(/^https?:\/\//i)) imageSrc = escapeCSV(p.image.trim());
+                if (p.image && typeof p.image === 'string' && p.image.match(/^https?:\/\//i)) {
+                    imageSrc = escapeCSV(p.image.trim());
+                }
                 return [handle, title, '', 'VARICOM', escapeCSV(p.famille||'Général'), escapeCSV(p.famille||''), 'TRUE', 'Title', 'Default Title', sku, '0', 'shopify', '1', 'deny', 'manual', price, comparePrice, 'TRUE', 'TRUE', imageSrc, escapeCSV(p.designation)].map(cell => escapeCSV(cell)).join(',');
             }).join('\n');
             const csvContent = "\uFEFF" + headers.join(',') + '\n' + rows;
             const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = 'shopify_products_valid.csv'; link.click(); URL.revokeObjectURL(link.href);
+            const link = document.createElement('a'); link.href = URL.createObjectURL(blob); link.download = 'shopify_products_ready.csv'; link.click(); URL.revokeObjectURL(link.href);
             const validCount = state.products.filter(p => p.image && p.image.match(/^https?:\/\//i)).length;
-            showStatus(`✅ Exporté ${state.products.length} produits. Images valides: ${validCount}`, 'success');
+            showStatus(`✅ Exporté ${state.products.length} produits. Images valides: ${validCount} sur ${state.products.length}. Fichier prêt pour Shopify.`, 'success');
         }
         function escapeCSV(str) { if (!str) return ''; let s = String(str); if (s.includes(',') || s.includes('"') || s.includes('\n')) return '"' + s.replace(/"/g, '""') + '"'; return s; }
-
-        // ==================== دوال أخرى (GitHub, reset, etc) ====================
-        async function uploadToGitHubGist() { showStatus('GitHub sync non configuré ici', 'info'); }
-        function generateClientLink() { showStatus('Lien client non configuré', 'info'); }
-        function toggleToken() { const inp = document.getElementById('githubToken'); if (inp.type === 'password') inp.type = 'text'; else inp.type = 'password'; }
-        function resetSync() { if (confirm('Réinitialiser ?')) { localStorage.removeItem('varicom_gist_id'); showStatus('Réinitialisé', 'info'); } }
-        function openBatchSearchModal() { showStatus('Batch search non détaillé', 'info'); }
-        function autoSearchProductImages() { showStatus('Auto search simplifié', 'info'); }
-
+        
+        // ==================== GitHub Gist simplifié ====================
+        async function uploadToGitHubGist() { const token = document.getElementById('githubToken')?.value; if (!token) { showStatus('Token GitHub manquant', 'error'); return; } const btn = document.getElementById('publishBtn'); btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Synchro...'; btn.disabled = true; try { let url = 'https://api.github.com/gists'; let method = 'POST'; if (state.gistId) { url += `/${state.gistId}`; method = 'PATCH'; } const payload = { description: "VARICOM Catalog", public: true, files: { "varicom_data.json": { content: JSON.stringify({ products: state.products, lastUpdate: new Date().toISOString() }) } } }; const res = await fetch(url, { method, headers: { 'Authorization': `token ${token}`, 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }); if (!res.ok) throw new Error(`GitHub: ${res.status}`); const result = await res.json(); state.gistId = result.id; localStorage.setItem('varicom_gist_id', state.gistId); showStatus('✅ Synchronisé', 'success'); updateUI(); } catch(e) { showStatus('Erreur sync: '+e.message, 'error'); } finally { btn.innerHTML = '<i class="fab fa-github me-2"></i>Publier / Synchroniser'; btn.disabled = false; } }
+        function generateClientLink() { if (!state.gistId) { showStatus('Publiez d\'abord', 'warning'); return; } const url = `${window.location.href.split('?')[0]}?gist=${state.gistId}`; navigator.clipboard.writeText(url); showStatus('Lien client copié', 'success'); }
+        function resetSync() { if (confirm('Réinitialiser la synchronisation ?')) { localStorage.removeItem('varicom_gist_id'); state.gistId = null; updateUI(); showStatus('Réinitialisé', 'info'); } }
+        
         // Initialisation
         document.addEventListener('DOMContentLoaded', () => {
             loadLocalData(); updateUI(); generateSmartSuggestions(); loadImgbbSettings();
             document.getElementById('smartSearchInput')?.addEventListener('keypress', (e) => { if (e.key === 'Enter') smartImageSearch(); });
+            document.getElementById('bulkBaseUrl')?.addEventListener('input', updateBulkPreview);
+            document.getElementById('bulkExt')?.addEventListener('change', updateBulkPreview);
         });
-        function generateSmartSuggestions() { const suggestions = ['ordinateur','téléphone','accessoire']; const container = document.getElementById('smartSuggestions'); if (container) container.innerHTML = suggestions.map(tag => `<span class="suggestion-tag" onclick="addSuggestion('${tag}')">${tag}</span>`).join(''); }
-        function addSuggestion(tag) { document.getElementById('smartSearchInput').value = tag; smartImageSearch(); }
     </script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 </body>
